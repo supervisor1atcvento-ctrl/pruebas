@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Garantías Vento — Control Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-black: #111111;
+            --color-white: #FFFFFF;
+            --color-orange: #FF5722;
+            --color-orange-hover: #E64A19;
+            --color-gray-dark: #1E1E1E;
+            --color-gray-light: #F5F5F5;
+            --color-border: #E0E0E0;
+            --font-main: 'Outfit', system-ui, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-main); background-color: var(--color-gray-light); color: var(--color-black); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar de Filtros y Búsqueda */
+        aside.sidebar { width: 320px; background-color: var(--color-black); color: var(--color-white); padding: 30px 24px; display: flex; flex-direction: column; gap: 24px; border-right: 1px solid rgba(255,255,255,0.1); }
+        .brand { font-size: 24px; font-weight: 800; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .brand span { color: var(--color-orange); }
+        
+        .search-box { display: flex; flex-direction: column; gap: 8px; }
+        .search-box label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 600; }
+        .input-text { width: 100%; padding: 14px; background: var(--color-gray-dark); border: 1px solid #333; border-radius: 8px; color: var(--color-white); font-size: 15px; outline: none; transition: border 0.2s; }
+        .input-text:focus { border-color: var(--color-orange); }
+        
+        .btn-primary { background: var(--color-orange); color: var(--color-white); border: none; padding: 14px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 15px; }
+        .btn-primary:hover { background: var(--color-orange-hover); }
+        .btn-secondary { background: transparent; color: #AAA; border: 1px solid #333; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; }
+        .btn-secondary:hover { color: var(--color-white); border-color: #555; }
+
+        /* Pestañas de estado (Reemplazo del panel de pendientes viejo) */
+        .status-filters { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .filter-tab { width: 100%; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; color: #AAA; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+        .filter-tab:hover, .filter-tab.active { background: var(--color-gray-dark); color: var(--color-white); }
+        .filter-tab.active { border-left: 4px solid var(--color-orange); padding-left: 12px; }
+        .badge { background: #333; padding: 2px 8px; border-radius: 20px; font-size: 11px; color: #FFF; }
+        .filter-tab.active .badge { background: var(--color-orange); }
+
+        /* Contenedor Principal */
+        main.content-wrapper { flex: 1; display: flex; flex-direction: column; background: var(--color-white); overflow: hidden; }
+        header.top-bar { padding: 20px 40px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; }
+        header.top-bar h1 { font-size: 20px; font-weight: 800; }
+
+        .table-container { flex: 1; overflow: auto; padding: 0 40px 40px 40px; }
+        table.main-table { width: 100%; border-collapse: collapse; text-align: left; }
+        table.main-table th { position: sticky; top: 0; background: var(--color-white); padding: 16px 12px; font-size: 12px; text-transform: uppercase; color: #666; border-bottom: 2px solid var(--color-black); letter-spacing: 0.5px; }
+        table.main-table td { padding: 16px 12px; font-size: 14px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+        table.main-table tbody tr:hover { background-color: rgba(0,0,0,0.02); cursor: pointer; }
+
+        /* Badges de Estatus Nuevos */
+        .status-pill { display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-pill.pendiente { background: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; }
+        .status-pill.autorizado { background: #E8F5E9; color: #1B5E20; border: 1px solid #C8E6C9; }
+        .status-pill.rechazado { background: #FFEBEE; color: #B71C1C; border: 1px solid #FFCDD2; }
+
+        /* Modal Vista Partida (Split View) */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 30px; }
+        .modal-card { background: var(--color-white); width: 100%; max-width: 1400px; height: 90vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+        .modal-header { padding: 20px 30px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: var(--color-black); color: var(--color-white); }
+        
+        .modal-body { flex: 1; display: flex; overflow: hidden; }
+        .panel-left { width: 45%; border-right: 1px solid var(--color-border); overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px; background: var(--color-gray-light); }
+        .panel-right { flex: 1; display: flex; flex-direction: column; padding: 24px; gap: 16px; }
+
+        .data-field { background: var(--color-white); padding: 12px 16px; border-radius: 6px; border: 1px solid var(--color-border); display: flex; flex-direction: column; gap: 4px; }
+        .data-field strong { font-size: 11px; text-transform: uppercase; color: #777; letter-spacing: 0.5px; }
+        .data-field span { font-size: 14px; font-weight: 600; color: var(--color-black); word-break: break-all; }
+
+        /* Selector de Previews del PDF derecho */
+        .preview-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--color-border); padding-bottom: 10px; }
+        .tab-btn { padding: 10px 16px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-gray-light); font-size: 13px; font-weight: 600; cursor: pointer; }
+        .tab-btn.active { background: var(--color-black); color: var(--color-white); border-color: var(--color-black); }
+
+        .iframe-container { flex: 1; background: #EEE; border-radius: 8px; overflow: hidden; border: 1px solid var(--color-border); }
+        .iframe-container iframe { width: 100%; height: 100%; border: none; }
+
+        .modal-footer { padding: 20px 30px; border-top: 1px solid var(--color-border); display: flex; justify-content: flex-end; align-items: center; gap: 12px; background: var(--color-gray-light); }
+        
+        .select-autoriza { padding: 12px; border-radius: 8px; border: 1px solid var(--color-border); font-size: 14px; font-weight: 600; outline: none; margin-right: 12px; }
+        .btn-approve { background: #2e7d32; color: white; }
+        .btn-approve:hover { background: #1b5e20; }
+        .btn-reject { background: #c62828; color: white; }
+        .btn-reject:hover { background: #b71c1c; }
+        
+        .empty-state { text-align: center; padding: 40px; color: #888; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">VENTO <span>•</span></div>
+        
+        <div class="search-box">
+            <label for="serial">Número de Serie (VIN)</label>
+            <input id="serial" type="text" class="input-text" placeholder="Ej: 12345-ABC" />
+            <button id="btnSearch" class="btn-primary" style="margin-top: 6px;">Buscar</button>
+            <button id="btnClear" class="btn-secondary">Limpiar Filtros</button>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #333; margin: 10px 0;">
+
+        <div>
+            <p style="font-size: 11px; text-transform: uppercase; color: #666; font-weight: 700; margin-bottom: 10px; letter-spacing: 1px;">Filtrar por estatus</p>
+            <div class="status-filters">
+                <button class="filter-tab active" data-status="TODOS">🔑 Mostrar Todos <span class="badge" id="badge-todos">0</span></button>
+                <button class="filter-tab" data-status="PENDIENTE">⏳ Pendientes <span class="badge" id="badge-pendientes" style="background: #E65100;">0</span></button>
+                <button class="filter-tab" data-status="AUTORIZADO">✅ Autorizados <span class="badge" id="badge-autorizados">0</span></button>
+                <button class="filter-tab" data-status="RECHAZADO">❌ Rechazados <span class="badge" id="badge-rechazados">0</span></button>
+            </div>
+        </div>
+        
+        <div style="margin-top: auto;">
+            <label style="font-size: 11px; color: #666; display: block; margin-bottom: 6px;">CONTRASEÑA SUPERVISOR</label>
+            <input id="superPassInline" type="password" class="input-text" placeholder="••••••••" style="padding: 10px;" />
+        </div>
+    </aside>
+
+    <main class="content-wrapper">
+        <header class="top-bar">
+            <h1 id="view-title">Todas las Solicitudes</h1>
+            <button id="btnRefresh" class="btn-secondary" style="padding: 10px 20px;">🔄 Sincronizar Base de Datos</button>
+        </header>
+
+        <div class="table-container">
+            <table class="main-table" id="recordsTable">
+                <thead>
+                    <tr>
+                        <th>Serie / VIN</th>
+                        <th>Cliente</th>
+                        <th>Fecha Solicitud</th>
+                        <th>Modelo</th>
+                        <th>Estatus</th>
+                        <th>Evidencias</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    </tbody>
+            </table>
+            <div id="emptyState" class="empty-state" style="display: none;">No se encontraron registros para mostrar.</div>
+        </div>
+    </main>
+
+    <div id="detailModal" class="modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modalSerialTitle">Detalle de Garantía</h3>
+                <button id="detailClose" class="btn-secondary" style="color: white; border-color: #444;">Cerrar Vista</button>
+            </div>
+            <div class="modal-body">
+                <div class="panel-left" id="panelLeftFields"></div>
+                
+                <div class="panel-right">
+                    <div class="preview-tabs" id="previewTabsContainer"></div>
+                    <div class="iframe-container">
+                        <iframe id="detailPdfFrame" src=""></iframe>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <label style="font-size: 13px; font-weight: 600;">Autorizar como:</label>
+                <select id="detailAutoriza" class="select-autoriza">
+                    <option value="IVAN">IVAN</option>
+                    <option value="CESAR">CESAR</option>
+                    <option value="ANGEL">ANGEL</option>
+                    <option value="CECILIA">CECILIA</option>
+                </select>
+                <button id="btnAuthorize" class="btn-primary btn-approve">AUTORIZAR GARANTÍA</button>
+                <button id="btnPrimary btn-reject" id="btnReject" class="btn-primary btn-reject">RECHAZAR SOLICITUD</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ============================
+           CONFIGURACIÓN DIRECTA E INTEGRADA
+           ============================ */
+        const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbz-kBTZySqCBfqzMSfhBo9pZ-bkuCtdhenb2B58zhjLVReWrJbOWa09oG7toE8zjSVF/exec';
+        
+        const COL_INDEX = {
+            fecha:0, emailRemitente:1, tipoSolicitud:2, facturaCompra:3, cliente:4, correoCliente:5, telefonoCliente:6, modelo:7,
+            serial:8, fechaFactura:9, fechaEntrega:10, ticketAYA:11, evidenciaEntrega:12, ticketReparacion:13, evidenciaTaller:14,
+            fechaIngresoTaller:15, fechaSalidaTaller:16, folio:17, fechaLimiteServicio:18, estatus:19, fechaDecision:20, autorizadoPor:21, comentarios:22, pdf:23
+        };
+
+        const LABELS_A_X = ['Marca temporal','Dirección de correo electrónico','Tipo de Solicitud','Factura de compra de la unidad','Nombre del cliente','Correo del cliente','Numero celular del cliente','Modelo de la Unidad','Número de Serie (VIN)','Fecha de Factura','Fecha de entrega de la unidad','Ticket de AYA','Evidencia de entrega','Número de Ticket de Reparación','Evidencia de que la moto estuvo en taller','Fecha de ingreso al taller','Fecha de salida del taller','FOLIO','Fecha Límite Servicio','ESTATUS','Fecha de aprobación','AUTORIZADO POR','Comentarios','Link_PDF'];
+
+        let allRecords = [];
+        let currentFilter = 'TODOS';
+        let currentDetailRecord = null;
+
+        /* DOM Elements */
+        const tableBody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+        const serialInput = document.getElementById('serial');
+        const superPassInline = document.getElementById('superPassInline');
+        const detailModal = document.getElementById('detailModal');
+        const detailPdfFrame = document.getElementById('detailPdfFrame');
+
+        /* Inicialización */
+        window.addEventListener('load', fetchAllData);
+        document.getElementById('btnRefresh').addEventListener('click', fetchAllData);
+        document.getElementById('btnSearch').addEventListener('click', () => renderTable(allRecords));
+        document.getElementById('btnClear').addEventListener('click', () => { serialInput.value = ''; renderTable(allRecords); });
+        document.getElementById('detailClose').addEventListener('click', () => { detailModal.style.display = 'none'; detailPdfFrame.src = ''; });
+
+        /* Manejo de Filtros de Estado */
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                const target = e.currentTarget;
+                target.classList.add('active');
+                currentFilter = target.dataset.status;
+                document.getElementById('view-title').textContent = target.textContent.split(' ')[0] === 'Mostrar' ? 'Todas las Solicitudes' : 'Solicitudes ' + currentFilter + 'S';
+                renderTable(allRecords);
+            });
+        });
+
+        /* Descarga de datos inicial (Carga unificada) */
+        async function fetchAllData() {
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 40px;">🔄 Cargando base de datos de garantías de Vento...</td></tr>';
+            try {
+                const url = new URL(WEBAPP_URL);
+                url.searchParams.set('action', 'pending'); // Pide registros pendientes iniciales
+                const res = await fetch(url.toString());
+                if(res.ok) {
+                    allRecords = await res.json();
+                    updateBadges(allRecords);
+                    renderTable(allRecords);
+                }
+            } catch (e) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red; padding:40px;">⚠️ Error de conexión con Google Sheets. Revisa los permisos de tu WebApp URL.</td></tr>';
+            }
+        }
+
+        function updateBadges(list) {
+            document.getElementById('badge-todos').textContent = list.length;
+            document.getElementById('badge-pendientes').textContent = list.filter(r => (r.estatus || r[COL_INDEX.estatus] || '').toString().toUpperCase() === 'PENDIENTE').length;
+            document.getElementById('badge-autorizados').textContent = list.filter(r => (r.estatus || r[COL_INDEX.estatus] || '').toString().toUpperCase() === 'AUTORIZADO').length;
+            document.getElementById('badge-rechazados').textContent = list.filter(r => (r.estatus || r[COL_INDEX.estatus] || '').toString().toUpperCase() === 'RECHAZADO').length;
+        }
+
+        function transformToPreviewUrl(raw){
+            if(!raw) return '';
+            try{
+                const u = new URL(raw);
+                if(u.hostname.includes('drive.google.com')){
+                    const m = raw.match(/\/file\/d\/([^\/]+)\/?/);
+                    if(m && m[1]) return `https://drive.google.com/file/d/${m[1]}/preview`;
+                }
+                return raw;
+            }catch(e){ return raw; }
+        }
+
+        /* Renderizar Tabla Unificada */
+        function renderTable(list) {
+            const searchTerm = serialInput.value.trim().toLowerCase();
+            
+            // Filtrado dinámico doble (Por Estatus + Por Buscador VIN)
+            let filtered = list.filter(r => {
+                const statusValue = (r.estatus || r[COL_INDEX.estatus] || 'PENDIENTE').toString().toUpperCase();
+                const matchStatus = (currentFilter === 'TODOS' || statusValue === currentFilter);
+                const matchSerial = !searchTerm || (r.serial || '').toString().toLowerCase().includes(searchTerm);
+                return matchStatus && matchSerial;
+            });
+
+            if (filtered.length === 0) {
+                tableBody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            emptyState.style.display = 'none';
+
+            tableBody.innerHTML = filtered.map(r => {
+                const est = (r.estatus || r[COL_INDEX.estatus] || 'PENDIENTE').toString().toUpperCase();
+                const badgeClass = est === 'AUTORIZADO' ? 'autorizado' : (est === 'RECHAZADO' ? 'rechazado' : 'pendiente');
+                
+                // Marcador de presencia de documentos
+                const checkDoc = (idx) => r[idx] || Object.values(r)[idx] ? '🔸' : '—';
+                const evs = `D:${checkDoc(3)} M:${checkDoc(12)} O:${checkDoc(14)} X:${checkDoc(23)}`;
+
+                return `<tr onclick="openDetailModal(${JSON.stringify(r).replace(/"/g, '&quot;')})">
+                    <td style="font-weight:800; color:var(--color-orange);">${r.serial || '—'}</td>
+                    <td style="font-weight:600;">${r.cliente || r[COL_INDEX.cliente] || '—'}</td>
+                    <td style="color:#666;">${r.fecha ? new Date(r.fecha).toLocaleDateString() : '—'}</td>
+                    <td>${r.modelo || '—'}</td>
+                    <td><span class="status-pill ${badgeClass}">${est}</span></td>
+                    <td style="font-size:12px; font-family:monospace; color:#555;">${evs}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        /* Apertura y Generación de Vista Partida (Split View) */
+        function openDetailModal(record) {
+            currentDetailRecord = record;
+            document.getElementById('modalSerialTitle').textContent = `Garantía VIN: ${record.serial || 'Sin Serie'}`;
+            
+            // Render panel Izquierdo A..X
+            let leftHtml = '';
+            for(let i=0; i<24; i++) {
+                const letter = String.fromCharCode(65+i);
+                let val = record[Object.keys(COL_INDEX).find(k=>COL_INDEX[k]===i)] || record[letter] || record[i] || '—';
+                if(typeof val === 'object' && val !== null) val = val.url || 'Ver PDF';
+                leftHtml += `<div class="data-field"><strong>${letter} • ${LABELS_A_X[i]}</strong><span>${val}</span></div>`;
+            }
+            document.getElementById('panelLeftFields').innerHTML = leftHtml;
+
+            // Render pestañas PDF derechas si existen enlaces
+            const docsIndices = [3, 12, 14, 23];
+            const tabsContainer = document.getElementById('previewTabsContainer');
+            tabsContainer.innerHTML = '';
+            let firstUrl = '';
+
+            docsIndices.forEach(idx => {
+                const letter = String.fromCharCode(65+idx);
+                let rawUrl = record[Object.keys(COL_INDEX).find(k=>COL_INDEX[k]===idx)] || record[letter] || record[idx];
+                if (rawUrl && typeof rawUrl === 'string' && rawUrl.startsWith('http')) {
+                    const btn = document.createElement('button');
+                    btn.className = 'tab-btn';
+                    btn.textContent = `${letter} • ${LABELS_A_X[idx].substring(0,15)}...`;
+                    const previewUrl = transformToPreviewUrl(rawUrl);
+                    if(!firstUrl) firstUrl = previewUrl;
+
+                    btn.onclick = () => {
+                        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        detailPdfFrame.src = previewUrl;
+                    };
+                    tabsContainer.appendChild(btn);
+                }
+            });
+
+            if(firstUrl) {
+                detailPdfFrame.src = firstUrl;
+                if(tabsContainer.firstChild) tabsContainer.firstChild.classList.add('active');
+            } else {
+                detailPdfFrame.src = '';
+                tabsContainer.innerHTML = '<span style="font-size:13px; color:#888;">Ningún campo contiene un enlace a PDF previsualizable.</span>';
+            }
+
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        /* Acciones de Validación */
+        document.getElementById('btnAuthorize').addEventListener('click', () => processAction('AUTORIZADO'));
+        document.getElementById('btnReject').addEventListener('click', () => processAction('RECHAZADO'));
+
+        async function processAction(statusAction) {
+            let pass = superPassInline.value.trim();
+            if(!pass) {
+                pass = prompt(`Por seguridad introduce la contraseña del supervisor para marcar como ${statusAction}:`);
+                if(!pass) return;
+            }
+
+            const autorizador = document.getElementById('detailAutoriza').value;
+            
+            try {
+                const url = new URL(WEBAPP_URL);
+                url.searchParams.set('action', 'update');
+                url.searchParams.set('serial', currentDetailRecord.serial);
+                url.searchParams.set('newStatus', statusAction);
+                url.searchParams.set('autorizador', autorizador);
+                url.searchParams.set('pass', pass);
+
+                const res = await fetch(url.toString());
+                const data = await res.json();
+                
+                if(data && data.ok) {
+                    alert(`Éxito: Garantía dictaminada como ${statusAction} por ${autorizador}.`);
+                    document.getElementById('detailModal').style.display = 'none';
+                    fetchAllData();
+                } else {
+                    alert('Error en validación: ' + (data.error || 'Verifica la contraseña del supervisor.'));
+                }
+            } catch(e) {
+                alert('Ocurrió un error al procesar la actualización remota.');
+            }
+        }
+    </script>
+</body>
+</html>
