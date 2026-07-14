@@ -35,7 +35,7 @@
         .btn-secondary { background: transparent; color: #AAA; border: 1px solid #333; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; }
         .btn-secondary:hover { color: var(--color-white); border-color: #555; }
 
-        /* Pestañas de estado */
+        /* Pestañas de estado (Reemplazo del panel de pendientes viejo) */
         .status-filters { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
         .filter-tab { width: 100%; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; color: #AAA; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
         .filter-tab:hover, .filter-tab.active { background: var(--color-gray-dark); color: var(--color-white); }
@@ -54,12 +54,13 @@
         table.main-table td { padding: 16px 12px; font-size: 14px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
         table.main-table tbody tr:hover { background-color: rgba(0,0,0,0.02); cursor: pointer; }
 
+        /* Badges de Estatus Nuevos */
         .status-pill { display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .status-pill.pendiente { background: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; }
         .status-pill.autorizado { background: #E8F5E9; color: #1B5E20; border: 1px solid #C8E6C9; }
         .status-pill.rechazado { background: #FFEBEE; color: #B71C1C; border: 1px solid #FFCDD2; }
 
-        /* Modal Vista Partida */
+        /* Modal Vista Partida (Split View) */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 30px; }
         .modal-card { background: var(--color-white); width: 100%; max-width: 1400px; height: 90vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
         .modal-header { padding: 20px 30px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: var(--color-black); color: var(--color-white); }
@@ -72,6 +73,7 @@
         .data-field strong { font-size: 11px; text-transform: uppercase; color: #777; letter-spacing: 0.5px; }
         .data-field span { font-size: 14px; font-weight: 600; color: var(--color-black); word-break: break-all; }
 
+        /* Selector de Previews del PDF derecho */
         .preview-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--color-border); padding-bottom: 10px; }
         .tab-btn { padding: 10px 16px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-gray-light); font-size: 13px; font-weight: 600; cursor: pointer; }
         .tab-btn.active { background: var(--color-black); color: var(--color-white); border-color: var(--color-black); }
@@ -153,6 +155,7 @@
             </div>
             <div class="modal-body">
                 <div class="panel-left" id="panelLeftFields"></div>
+                
                 <div class="panel-right">
                     <div class="preview-tabs" id="previewTabsContainer"></div>
                     <div class="iframe-container">
@@ -169,12 +172,15 @@
                     <option value="CECILIA">CECILIA</option>
                 </select>
                 <button id="btnAuthorize" class="btn-primary btn-approve">AUTORIZAR GARANTÍA</button>
-                <button id="btnReject" class="btn-primary btn-reject">RECHAZAR SOLICITUD</button>
+                <button id="btnPrimary btn-reject" id="btnReject" class="btn-primary btn-reject">RECHAZAR SOLICITUD</button>
             </div>
         </div>
     </div>
 
     <script>
+        /* ============================
+           CONFIGURACIÓN DIRECTA E INTEGRADA
+           ============================ */
         const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbz-kBTZySqCBfqzMSfhBo9pZ-bkuCtdhenb2B58zhjLVReWrJbOWa09oG7toE8zjSVF/exec';
         
         const COL_INDEX = {
@@ -189,6 +195,7 @@
         let currentFilter = 'TODOS';
         let currentDetailRecord = null;
 
+        /* DOM Elements */
         const tableBody = document.getElementById('tableBody');
         const emptyState = document.getElementById('emptyState');
         const serialInput = document.getElementById('serial');
@@ -196,12 +203,14 @@
         const detailModal = document.getElementById('detailModal');
         const detailPdfFrame = document.getElementById('detailPdfFrame');
 
+        /* Inicialización */
         window.addEventListener('load', fetchAllData);
         document.getElementById('btnRefresh').addEventListener('click', fetchAllData);
         document.getElementById('btnSearch').addEventListener('click', () => renderTable(allRecords));
         document.getElementById('btnClear').addEventListener('click', () => { serialInput.value = ''; renderTable(allRecords); });
         document.getElementById('detailClose').addEventListener('click', () => { detailModal.style.display = 'none'; detailPdfFrame.src = ''; });
 
+        /* Manejo de Filtros de Estado */
         document.querySelectorAll('.filter-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
@@ -213,28 +222,20 @@
             });
         });
 
-        /* CAMBIO AQUÍ: Petición optimizada para evitar bloqueos locales mediante redirección silenciosa */
+        /* Descarga de datos inicial (Carga unificada) */
         async function fetchAllData() {
             tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 40px;">🔄 Cargando base de datos de garantías de Vento...</td></tr>';
             try {
-                const url = `${WEBAPP_URL}?action=pending`;
-                
-                // Se fuerza al navegador a usar el flujo de redirecciones nativo de Google Scripts
-                const res = await fetch(url, {
-                    method: 'GET',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
+                const url = new URL(WEBAPP_URL);
+                url.searchParams.set('action', 'pending'); // Pide registros pendientes iniciales
+                const res = await fetch(url.toString());
                 if(res.ok) {
                     allRecords = await res.json();
                     updateBadges(allRecords);
                     renderTable(allRecords);
-                } else {
-                    throw new Error();
                 }
             } catch (e) {
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red; padding:40px;">⚠️ Error de comunicación. Si ejecutas el archivo directamente desde tu PC, intenta abrirlo usando la extensión "Live Server" de VS Code o súbelo a un servidor local para omitir el bloqueo de políticas del navegador.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red; padding:40px;">⚠️ Error de conexión con Google Sheets. Revisa los permisos de tu WebApp URL.</td></tr>';
             }
         }
 
@@ -257,9 +258,11 @@
             }catch(e){ return raw; }
         }
 
+        /* Renderizar Tabla Unificada */
         function renderTable(list) {
             const searchTerm = serialInput.value.trim().toLowerCase();
             
+            // Filtrado dinámico doble (Por Estatus + Por Buscador VIN)
             let filtered = list.filter(r => {
                 const statusValue = (r.estatus || r[COL_INDEX.estatus] || 'PENDIENTE').toString().toUpperCase();
                 const matchStatus = (currentFilter === 'TODOS' || statusValue === currentFilter);
@@ -278,6 +281,7 @@
                 const est = (r.estatus || r[COL_INDEX.estatus] || 'PENDIENTE').toString().toUpperCase();
                 const badgeClass = est === 'AUTORIZADO' ? 'autorizado' : (est === 'RECHAZADO' ? 'rechazado' : 'pendiente');
                 
+                // Marcador de presencia de documentos
                 const checkDoc = (idx) => r[idx] || Object.values(r)[idx] ? '🔸' : '—';
                 const evs = `D:${checkDoc(3)} M:${checkDoc(12)} O:${checkDoc(14)} X:${checkDoc(23)}`;
 
@@ -292,10 +296,12 @@
             }).join('');
         }
 
+        /* Apertura y Generación de Vista Partida (Split View) */
         function openDetailModal(record) {
             currentDetailRecord = record;
             document.getElementById('modalSerialTitle').textContent = `Garantía VIN: ${record.serial || 'Sin Serie'}`;
             
+            // Render panel Izquierdo A..X
             let leftHtml = '';
             for(let i=0; i<24; i++) {
                 const letter = String.fromCharCode(65+i);
@@ -305,6 +311,7 @@
             }
             document.getElementById('panelLeftFields').innerHTML = leftHtml;
 
+            // Render pestañas PDF derechas si existen enlaces
             const docsIndices = [3, 12, 14, 23];
             const tabsContainer = document.getElementById('previewTabsContainer');
             tabsContainer.innerHTML = '';
@@ -340,6 +347,7 @@
             document.getElementById('detailModal').style.display = 'flex';
         }
 
+        /* Acciones de Validación */
         document.getElementById('btnAuthorize').addEventListener('click', () => processAction('AUTORIZADO'));
         document.getElementById('btnReject').addEventListener('click', () => processAction('RECHAZADO'));
 
@@ -353,9 +361,14 @@
             const autorizador = document.getElementById('detailAutoriza').value;
             
             try {
-                const url = `${WEBAPP_URL}?action=update&serial=${encodeURIComponent(currentDetailRecord.serial)}&newStatus=${statusAction}&autorizador=${encodeURIComponent(autorizador)}&pass=${encodeURIComponent(pass)}`;
+                const url = new URL(WEBAPP_URL);
+                url.searchParams.set('action', 'update');
+                url.searchParams.set('serial', currentDetailRecord.serial);
+                url.searchParams.set('newStatus', statusAction);
+                url.searchParams.set('autorizador', autorizador);
+                url.searchParams.set('pass', pass);
 
-                const res = await fetch(url, { method: 'GET', mode: 'cors' });
+                const res = await fetch(url.toString());
                 const data = await res.json();
                 
                 if(data && data.ok) {
