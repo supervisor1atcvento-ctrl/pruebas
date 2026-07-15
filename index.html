@@ -3,147 +3,65 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Dashboard Asesores — Rendimiento y Metas (Versión Visual Mejorada)</title>
+<title>Dashboard Asesores — Rendimiento y Metas (Barras por Rubro)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
-  /* Nueva paleta: neutros suaves + acentos motivacionales */
-  --bg: #F7FAFC;
-  --card: #FFFFFF;
-  --muted: #6B7280; /* gris suave */
-  --text: #0F172A;  /* azul muy oscuro en lugar de negro puro */
-  --accent: #0EA5A4; /* teal vibrante */
-  --accent-2: #F59E0B; /* naranja para énfasis */
-  --success: #10B981; /* verde */
-  --warning: #F59E0B; /* amarillo */
-  --danger: #EF4444;  /* rojo */
-  --border: rgba(15,23,42,0.06);
-  --radius: 12px;
-  --shadow-sm: 0 6px 18px rgba(15,23,42,0.06);
-  --shadow-lg: 0 18px 40px rgba(15,23,42,0.08);
-
-  /* Top 3 gradients */
-  --gold: linear-gradient(90deg,#FFD54A,#FFC107);
-  --silver: linear-gradient(90deg,#E6EEF8,#C7D2E8);
-  --bronze: linear-gradient(90deg,#FFD8B5,#F59E0B);
+  --bg:#F7FAFC; --card:#FFFFFF; --muted:#6B7280; --text:#0F172A;
+  --accent:#0EA5A4; --accent-2:#F59E0B; --success:#10B981; --warning:#F59E0B; --danger:#EF4444;
+  --border:rgba(15,23,42,0.06); --radius:12px; --shadow-sm:0 6px 18px rgba(15,23,42,0.06);
+  --gold:linear-gradient(90deg,#FFD54A,#FFC107); --silver:linear-gradient(90deg,#E6EEF8,#C7D2E8); --bronze:linear-gradient(90deg,#FFD8B5,#F59E0B);
 }
-
-/* Reset y tipografía */
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
-
-/* Contenedor principal */
-.container{
-  max-width:1200px;
-  margin:28px auto;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-}
-
-/* Header */
-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  background:var(--card);
-  padding:16px 24px;
-  border-radius:var(--radius);
-  box-shadow:var(--shadow-sm);
-}
+body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+.container{max-width:1200px;margin:28px auto;padding:20px;display:flex;flex-direction:column;gap:20px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--card);padding:16px 24px;border-radius:var(--radius);box-shadow:var(--shadow-sm)}
 .brand{display:flex;align-items:center;gap:16px}
-.logo{
-  width:56px;height:56px;border-radius:12px;
-  background:linear-gradient(135deg,#0EA5A4,#06B6D4);
-  color:#fff;display:flex;align-items:center;justify-content:center;
-  font-weight:900;font-size:20px;border:2px solid rgba(255,255,255,0.12);
-  box-shadow:0 6px 18px rgba(14,165,164,0.12);
-}
+.logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#0EA5A4,#06B6D4);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;border:2px solid rgba(255,255,255,0.12);box-shadow:0 6px 18px rgba(14,165,164,0.12)}
 h1{font-size:20px;margin:0;font-weight:800}
 .subtitle{font-size:13px;color:var(--muted);margin-top:4px;font-weight:600}
-
-/* Controls */
-.controls{
-  display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;
-  background:var(--card);padding:16px 24px;border-radius:var(--radius);
-  box-shadow:var(--shadow-sm);
-}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;background:var(--card);padding:16px 24px;border-radius:var(--radius);box-shadow:var(--shadow-sm)}
 .control{flex:1;min-width:180px}
 .control label{display:block;font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
-select,input[type="date"]{
-  width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);
-  font-size:14px;background:#FBFDFF;transition:all .15s ease;
-}
+select,input[type="date"]{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);font-size:14px;background:#FBFDFF;transition:all .15s ease}
 select:focus,input[type="date"]:focus{outline:none;border-color:var(--accent);box-shadow:0 6px 18px rgba(14,165,164,0.08)}
-
-/* Buttons */
 .actions{display:flex;gap:12px;align-items:center}
 button{transition:all .15s ease;font-family:inherit}
-button.primary{
-  background:var(--accent);border:none;color:#fff;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;
-  box-shadow:0 8px 24px rgba(14,165,164,0.12);
-}
-button.primary:hover{transform:translateY(-2px)}
+button.primary{background:var(--accent);border:none;color:#fff;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(14,165,164,0.12)}
 button.ghost{background:transparent;border:2px solid var(--text);color:var(--text);padding:8px 16px;border-radius:8px;font-weight:700}
 .small-btn{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600;font-size:13px}
-
-/* Tabs */
 .tabs{display:flex;gap:10px;margin:4px 0;flex-wrap:wrap}
 .tab{background:var(--card);border:1px solid var(--border);padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:700;color:var(--muted);font-size:14px}
 .tab.active{background:linear-gradient(90deg,#E6F6F5,#F7FEFF);border-color:var(--accent);color:var(--text);box-shadow:var(--shadow-sm)}
-
-/* Grid */
 .main-grid{display:grid;grid-template-columns:1fr 380px;gap:20px}
 @media(max-width:1000px){.main-grid{grid-template-columns:1fr}}
-
-/* Cards */
 .card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
 .card h2{margin:0 0 16px 0;font-size:18px;color:var(--text);font-weight:800;text-transform:uppercase;letter-spacing:-0.5px}
-
-/* Table */
 .table-wrap{overflow:auto;border-radius:8px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:14px;min-width:720px;background:#fff}
 thead th{text-align:left;padding:14px 12px;background:#FBFDFF;color:var(--text);font-size:12px;font-weight:800;text-transform:uppercase;border-bottom:2px solid #EEF2F7}
 tbody td{padding:12px;border-bottom:1px solid #F3F4F6;vertical-align:middle}
 tbody tr{transition:transform .12s ease,box-shadow .12s ease}
 tbody tr:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(2,6,23,0.06);position:relative;z-index:2}
-
-/* Position badge */
 .pos{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;background:#F1F5F9;color:var(--text);border:1px solid var(--border)}
 .pos.top{background:linear-gradient(135deg,#0EA5A4,#06B6D4);color:#fff;border:0;box-shadow:0 8px 20px rgba(14,165,164,0.12)}
-
-/* Advisor link */
 .advisor-name-link{font-weight:800;font-size:15px;color:var(--text);cursor:pointer;text-decoration:none}
 .advisor-name-link:hover{color:var(--accent-2)}
-
-/* Small meta */
 .meta-small{font-size:12px;color:var(--muted);margin-top:4px}
-
-/* Score */
 .score{color:var(--accent-2);font-weight:900;font-size:16px;background:linear-gradient(90deg,rgba(245,158,11,0.08),rgba(14,165,164,0.03));padding:6px 12px;border-radius:8px;display:inline-block}
-
-/* Top highlights (gold/silver/bronze) */
 .top-highlight-1 td{background:var(--gold);color:#0B1220}
 .top-highlight-2 td{background:var(--silver);color:#0B1220}
 .top-highlight-3 td{background:var(--bronze);color:#0B1220}
-
-/* Badge TOP */
 .badge-top{display:inline-block;background:rgba(11,17,32,0.06);color:var(--text);padding:4px 8px;border-radius:999px;font-size:11px;margin-left:8px;font-weight:800;text-transform:uppercase}
 
-/* Progress bar (inline) */
-.progress-wrap{width:160px;background:#F3F4F6;border-radius:999px;padding:4px;border:1px solid var(--border)}
-.progress-bar{height:10px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%}
+/* Progress small (inline for each rubro) */
+.rubro-wrap{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.rubro-label{font-weight:800;font-size:13px;color:var(--muted)}
+.rubro-progress{width:180px;background:#F3F4F6;border-radius:999px;padding:4px;border:1px solid var(--border)}
+.rubro-bar{height:10px;border-radius:999px;width:0%}
+.rubro-percent{font-weight:800;font-size:12px;margin-left:8px;color:var(--text)}
 
-/* Status pill */
+/* status pills */
 .status-pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px;color:#fff}
 .status-cumplido{background:var(--success)}
 .status-cerca{background:var(--warning);color:#0B1220}
@@ -156,32 +74,22 @@ tbody tr:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(2,6,23,0.0
 .goal-title{font-weight:900;margin-bottom:8px;font-size:13px;color:var(--text);text-transform:uppercase}
 .goal-item{font-size:14px;margin:6px 0;display:flex;justify-content:space-between;border-bottom:1px dashed var(--border);padding-bottom:6px}
 .goal-item strong{color:var(--accent-2);font-size:15px}
-
-/* Stats cards */
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
 .stat{display:flex;flex-direction:column;padding:12px;border-radius:8px;background:#fff;border:1px solid var(--border);text-align:center}
 .stat .label{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:4px}
 .stat .value{font-weight:900;font-size:20px;color:var(--accent)}
-
-/* Modal & loader */
 .loading-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);z-index:9999;flex-direction:column;gap:16px}
 .spinner{width:50px;height:50px;border-radius:50%;border:6px solid #E6EEF8;border-top-color:var(--accent);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-weight:800;color:var(--text);font-size:16px}
 .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:none;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(4px)}
-.modal{background:#fff;border-radius:16px;padding:24px;max-width:420px;width:94%;box-shadow:var(--shadow-lg);text-align:center}
+.modal{background:#fff;border-radius:16px;padding:24px;max-width:420px;width:94%;box-shadow:0 18px 40px rgba(15,23,42,0.08);text-align:center}
 .chart-modal{max-width:900px !important;width:95%;padding:24px 32px !important;text-align:left}
 .modal h3{margin:0 0 8px 0;font-weight:900;font-size:20px}
 .modal .close{position:absolute;right:16px;top:16px;background:transparent;border:none;font-weight:900;font-size:24px;cursor:pointer;color:var(--muted)}
-.modal .close:hover{color:var(--text)}
 .modal input[type="password"]{padding:12px;border-radius:8px;border:2px solid var(--border);font-size:16px;text-align:center;font-weight:700}
 .modal button.primary{width:100%;padding:12px;font-size:16px}
-
-/* Responsive tweaks */
-@media(max-width:720px){
-  .progress-wrap{width:120px}
-  .main-grid{grid-template-columns:1fr}
-}
+@media(max-width:720px){.rubro-progress{width:120px}.main-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -349,12 +257,8 @@ tbody tr:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(2,6,23,0.0
 </div>
 
 <script>
-/******************************************************************
- * Mantengo la mayor parte de la lógica original y agrego:
- * - Cálculo de progreso vs metas por modalidad
- * - Render de barra de progreso y estado (Cumplido/Cerca/Lejos)
- * - Resaltado Top 3 con gradientes
- ******************************************************************/
+/* Mantengo la lógica previa y ahora calculo porcentajes por rubro (tickets/calls/chats)
+   usando las metas definidas en el panel lateral. Las barras se pintan según umbral. */
 
 const SPREADSHEET_ID = '1JBre4cLAbYiOJuYye_FGcsk5U_BIStDoAiCbV-B8WoA';
 const ASSESSORS_SPREADSHEET_ID = '1GBcoYjw-mziCA30F2CgqGM9kKWjJjeSiTGfHN6XM8rE';
@@ -370,227 +274,140 @@ const COL = {
   asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') }
 };
 
-let aliasMap = {};
-let metaMap = {};
-let cache = { tickets:[], chats:[], calls:[] };
-let activeGroup = 'All';
-let autoRefreshTimer = null;
-let pendingDownload = null;
-let advisorChartInstance = null;
+let aliasMap = {}; let metaMap = {}; let cache = { tickets:[], chats:[], calls:[] };
+let activeGroup = 'All'; let autoRefreshTimer = null; let pendingDownload = null; let advisorChartInstance = null;
 
-/* UTILIDADES (idénticas a las originales) */
+/* Utilidades (idénticas) */
 function parseCSV(text){
-  const rows = [];
-  let cur = '', row = [], inQuotes = false;
-  for(let i=0;i<text.length;i++){
-    const ch = text[i], next = text[i+1];
-    if(ch === '"'){
-      if(inQuotes && next === '"'){ cur += '"'; i++; continue; }
-      inQuotes = !inQuotes; continue;
-    }
-    if(ch === ',' && !inQuotes){ row.push(cur); cur=''; continue; }
-    if((ch === '\n' || ch === '\r') && !inQuotes){
-      if(ch === '\r' && next === '\n'){ i++; }
-      row.push(cur); rows.push(row); row=[]; cur=''; continue;
-    }
-    cur += ch;
+  const rows=[]; let cur='', row=[], inQuotes=false;
+  for(let i=0;i<text.length;i++){ const ch=text[i], next=text[i+1];
+    if(ch==='"'){ if(inQuotes && next==='"'){ cur+='"'; i++; continue; } inQuotes=!inQuotes; continue; }
+    if(ch===',' && !inQuotes){ row.push(cur); cur=''; continue; }
+    if((ch==='\n' || ch==='\r') && !inQuotes){ if(ch==='\r' && next==='\n'){ i++; } row.push(cur); rows.push(row); row=[]; cur=''; continue; }
+    cur+=ch;
   }
-  if(cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  if(cur!=='' || row.length){ row.push(cur); rows.push(row); }
   return rows;
 }
 function fetchSheetCSVRowsById(spreadsheetId, sheetName){
   const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
   return fetch(url).then(res => { if(!res.ok) throw new Error('Error al leer hoja ' + sheetName + ' (' + res.status + ')'); return res.text(); }).then(parseCSV);
 }
-function normalizeForKey(s){
-  if(s === null || s === undefined) return '';
-  let t = String(s).replace(/\u00A0/g,' ').replace(/\t/g,' ').trim();
-  t = t.replace(/[\\.,]/g,'');
-  t = t.toUpperCase();
-  const tokens = ['ATC PISTON','ATC SUP','ATC','SUP','CORD','COORD','ANL','CAP','AGT','AGENTE','SR','SRA'];
-  for(const tk of tokens){
-    const reStart = new RegExp('^\\s*' + tk + '[\\s\\-\\_\\.]*','i');
-    t = t.replace(reStart,'');
-    const reEnd = new RegExp('[\\s\\-\\_\\.]+' + tk + '\\s*$','i');
-    t = t.replace(reEnd,'');
-  }
-  if(t.includes(',')){
-    const parts = t.split(',');
-    if(parts.length >= 2){ t = (parts[1] + ' ' + parts[0]).trim(); }
-  }
-  t = t.replace(/\s+/g,' ').trim();
-  return t;
+function normalizeForKey(s){ if(s===null||s===undefined) return ''; let t=String(s).replace(/\u00A0/g,' ').replace(/\t/g,' ').trim(); t=t.replace(/[\\.,]/g,''); t=t.toUpperCase();
+  const tokens=['ATC PISTON','ATC SUP','ATC','SUP','CORD','COORD','ANL','CAP','AGT','AGENTE','SR','SRA'];
+  for(const tk of tokens){ const reStart=new RegExp('^\\s*'+tk+'[\\s\\-\\_\\.]*','i'); t=t.replace(reStart,''); const reEnd=new RegExp('[\\s\\-\\_\\.]+'+tk+'\\s*$','i'); t=t.replace(reEnd,''); }
+  if(t.includes(',')){ const parts=t.split(','); if(parts.length>=2){ t=(parts[1]+' '+parts[0]).trim(); } }
+  t=t.replace(/\s+/g,' ').trim(); return t;
 }
-function titleCase(s){ if(!s) return s; return s.toLowerCase().split(' ').map(w => w ? (w[0].toUpperCase() + w.slice(1)) : '').join(' '); }
-function durationToSeconds(s){
-  if(s === null || s === undefined) return 0;
-  const str = String(s).trim().toLowerCase();
-  if(!str) return 0;
-  let total = 0;
-  const mD = str.match(/(\d+)\s*d/); if(mD) total += parseInt(mD[1],10) * 86400;
-  const mH = str.match(/(\d+)\s*h/); if(mH) total += parseInt(mH[1],10) * 3600;
-  const mM = str.match(/(\d+)\s*m/); if(mM) total += parseInt(mM[1],10) * 60;
-  const mS = str.match(/(\d+)\s*s/); if(mS) total += parseInt(mS[1],10);
-  if(total === 0){
-    const onlyNum = str.match(/^(\d+)$/);
-    if(onlyNum) total = parseInt(onlyNum[1],10);
-  }
+function titleCase(s){ if(!s) return s; return s.toLowerCase().split(' ').map(w=>w?(w[0].toUpperCase()+w.slice(1)):'').join(' '); }
+function durationToSeconds(s){ if(s===null||s===undefined) return 0; const str=String(s).trim().toLowerCase(); if(!str) return 0; let total=0;
+  const mD=str.match(/(\d+)\s*d/); if(mD) total+=parseInt(mD[1],10)*86400;
+  const mH=str.match(/(\d+)\s*h/); if(mH) total+=parseInt(mH[1],10)*3600;
+  const mM=str.match(/(\d+)\s*m/); if(mM) total+=parseInt(mM[1],10)*60;
+  const mS=str.match(/(\d+)\s*s/); if(mS) total+=parseInt(mS[1],10);
+  if(total===0){ const onlyNum=str.match(/^(\d+)$/); if(onlyNum) total=parseInt(onlyNum[1],10); }
   return total;
 }
-function parseDateFlexible(v){
-  if(v === null || v === undefined) return null;
-  const s = String(v).trim();
-  if(s === '' || s === '0' || s === '-' || s.toLowerCase() === 'null') return null;
-  const d1 = new Date(s);
-  if(!isNaN(d1.getTime())) return d1;
-  const m = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
-  if(m){ const day=+m[1], mon=+m[2]-1, yr=+m[3]; return new Date(yr<100?2000+yr:yr,mon,day); }
-  const m2 = s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
-  if(m2){ return new Date(+m2[1], +m2[2]-1, +m2[3]); }
-  return null;
+function parseDateFlexible(v){ if(v===null||v===undefined) return null; const s=String(v).trim(); if(s===''||s==='0'||s==='-'||s.toLowerCase()==='null') return null;
+  const d1=new Date(s); if(!isNaN(d1.getTime())) return d1;
+  const m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/); if(m){ const day=+m[1], mon=+m[2]-1, yr=+m[3]; return new Date(yr<100?2000+yr:yr,mon,day); }
+  const m2=s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/); if(m2){ return new Date(+m2[1], +m2[2]-1, +m2[3]); } return null;
 }
 
 /* Alias / meta maps */
 async function buildAliasAndMetaMaps(){
-  aliasMap = {}; metaMap = {};
+  aliasMap={}; metaMap={};
   try{
     const rows = await fetchSheetCSVRowsById(ASSESSORS_SPREADSHEET_ID, SHEETS.asesoresSheet);
-    for(let r=0; r<rows.length; r++){
-      const row = rows[r];
-      const rawUser = (row[COL.asesores.username] || '').trim();
-      const rawGroup = (row[COL.asesores.group] || '').trim();
-      const rawSupervisor = (row[COL.asesores.supervisor] || '').trim();
+    for(let r=0;r<rows.length;r++){
+      const row=rows[r];
+      const rawUser=(row[COL.asesores.username]||'').trim();
+      const rawGroup=(row[COL.asesores.group]||'').trim();
+      const rawSupervisor=(row[COL.asesores.supervisor]||'').trim();
       if(!rawUser) continue;
-      const keyNorm = normalizeForKey(rawUser);
-      const canonical = titleCase(keyNorm);
-      const group = rawGroup ? rawGroup : 'OTROS';
-      const supervisor = rawSupervisor ? rawSupervisor.toUpperCase() : 'OTROS';
-      metaMap[canonical] = { group, supervisor };
-      aliasMap[keyNorm] = canonical;
-      aliasMap[normalizeForKey(rawUser.replace(/\s+/g,' '))] = canonical;
+      const keyNorm=normalizeForKey(rawUser);
+      const canonical=titleCase(keyNorm);
+      const group=rawGroup?rawGroup:'OTROS';
+      const supervisor=rawSupervisor?rawSupervisor.toUpperCase():'OTROS';
+      metaMap[canonical]={group,supervisor};
+      aliasMap[keyNorm]=canonical;
+      aliasMap[normalizeForKey(rawUser.replace(/\s+/g,' '))]=canonical;
     }
-  } catch(err){
-    console.warn('No se pudo cargar Asesores sheet:', err.message);
-  }
+  }catch(err){ console.warn('No se pudo cargar Asesores sheet:', err.message); }
 }
 function mapAdvisorToCanonical(raw){
-  const norm = normalizeForKey(raw);
-  if(!norm) return '';
+  const norm=normalizeForKey(raw); if(!norm) return '';
   if(aliasMap[norm]) return aliasMap[norm];
-  const candidates = Object.keys(metaMap);
-  const found = candidates.find(c => c.toUpperCase() === norm.toUpperCase());
+  const candidates=Object.keys(metaMap);
+  const found=candidates.find(c=>c.toUpperCase()===norm.toUpperCase());
   if(found) return found;
-  const canonical = titleCase(norm);
-  if(!metaMap[canonical]) metaMap[canonical] = { group: 'OTROS', supervisor: 'OTROS' };
-  aliasMap[norm] = canonical;
-  return canonical;
+  const canonical=titleCase(norm);
+  if(!metaMap[canonical]) metaMap[canonical]={group:'OTROS',supervisor:'OTROS'};
+  aliasMap[norm]=canonical; return canonical;
 }
 
-/* Aggregate counts (idéntico) */
+/* Conteos */
 function aggregateCountsOnly(ticketsRows, chatsRows, callsRows, filterFrom, filterTo, selectedGroup, selectedSupervisor){
-  const counts = {};
-  function ensure(name){ if(!counts[name]) counts[name] = { tickets:0, chats:0, calls:0 }; }
-  function inRangeDate(d, from, to){
-    if(!d) return false;
-    const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    if(from && dd < from) return false;
-    if(to && dd > to) return false;
-    return true;
-  }
-  function cell(row, idx){ return (row && idx>=0 && idx < row.length) ? row[idx] : ''; }
+  const counts={};
+  function ensure(name){ if(!counts[name]) counts[name]={tickets:0,chats:0,calls:0}; }
+  function inRangeDate(d,from,to){ if(!d) return false; const dd=new Date(d.getFullYear(),d.getMonth(),d.getDate()); if(from && dd<from) return false; if(to && dd>to) return false; return true; }
+  function cell(row,idx){ return (row && idx>=0 && idx<row.length)?row[idx]:''; }
 
-  for(let r=1; r<ticketsRows.length; r++){
-    const row = ticketsRows[r];
-    const rawAdvisor = cell(row, COL.tickets.advisor);
-    const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
+  for(let r=1;r<ticketsRows.length;r++){
+    const row=ticketsRows[r]; const rawAdvisor=cell(row,COL.tickets.advisor); const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
     if(!advisorCanonical) continue;
-    const meta = metaMap[advisorCanonical] || { group: 'OTROS', supervisor: 'OTROS' };
-    if(selectedGroup !== 'All' && meta.group !== selectedGroup) continue;
-    if(selectedSupervisor){
-      if(String(meta.supervisor || '').toUpperCase() !== String(selectedSupervisor || '').toUpperCase()) continue;
-    }
-    const rawStatus = cell(row, COL.tickets.status);
-    const status = String(rawStatus || '').trim().toUpperCase();
-    if(status !== 'CANALIZADO') continue;
-    const rawDate = cell(row, COL.tickets.date);
-    const parsed = parseDateFlexible(rawDate);
-    if((filterFrom || filterTo) && parsed){
-      if(!inRangeDate(parsed, filterFrom, filterTo)) continue;
-    }
-    ensure(advisorCanonical);
-    counts[advisorCanonical].tickets += 1;
+    const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
+    if(selectedGroup!=='All' && meta.group!==selectedGroup) continue;
+    if(selectedSupervisor){ if(String(meta.supervisor||'').toUpperCase()!==String(selectedSupervisor||'').toUpperCase()) continue; }
+    const rawStatus=cell(row,COL.tickets.status); const status=String(rawStatus||'').trim().toUpperCase();
+    if(status!=='CANALIZADO') continue;
+    const rawDate=cell(row,COL.tickets.date); const parsed=parseDateFlexible(rawDate);
+    if((filterFrom||filterTo) && parsed){ if(!inRangeDate(parsed,filterFrom,filterTo)) continue; }
+    ensure(advisorCanonical); counts[advisorCanonical].tickets += 1;
   }
 
-  for(let r=1; r<chatsRows.length; r++){
-    const row = chatsRows[r];
-    const rawAdvisor = cell(row, COL.chats.advisor);
-    const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
+  for(let r=1;r<chatsRows.length;r++){
+    const row=chatsRows[r]; const rawAdvisor=cell(row,COL.chats.advisor); const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
     if(!advisorCanonical) continue;
-    const meta = metaMap[advisorCanonical] || { group: 'OTROS', supervisor: 'OTROS' };
-    if(selectedGroup !== 'All' && meta.group !== selectedGroup) continue;
-    if(selectedSupervisor){
-      if(String(meta.supervisor || '').toUpperCase() !== String(selectedSupervisor || '').toUpperCase()) continue;
-    }
-    const rawDuration = cell(row, COL.chats.duration);
-    const seconds = durationToSeconds(rawDuration);
-    if(seconds === 0 && String(rawDuration || '').trim() === '') continue;
-    if(seconds > 300) continue;
-    const rawAgent = cell(row, COL.chats.agentFlag);
-    const agentFlag = String(rawAgent || '').trim().toUpperCase();
-    if(agentFlag !== 'AGENT') continue;
-    const rawDate = cell(row, COL.chats.date);
-    const parsed = parseDateFlexible(rawDate);
-    if(filterFrom || filterTo){
-      if(!parsed) continue;
-      if(!inRangeDate(parsed, filterFrom, filterTo)) continue;
-    }
-    ensure(advisorCanonical);
-    counts[advisorCanonical].chats += 1;
+    const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
+    if(selectedGroup!=='All' && meta.group!==selectedGroup) continue;
+    if(selectedSupervisor){ if(String(meta.supervisor||'').toUpperCase()!==String(selectedSupervisor||'').toUpperCase()) continue; }
+    const rawDuration=cell(row,COL.chats.duration); const seconds=durationToSeconds(rawDuration);
+    if(seconds===0 && String(rawDuration||'').trim()==='') continue;
+    if(seconds>300) continue;
+    const rawAgent=cell(row,COL.chats.agentFlag); const agentFlag=String(rawAgent||'').trim().toUpperCase();
+    if(agentFlag!=='AGENT') continue;
+    const rawDate=cell(row,COL.chats.date); const parsed=parseDateFlexible(rawDate);
+    if(filterFrom||filterTo){ if(!parsed) continue; if(!inRangeDate(parsed,filterFrom,filterTo)) continue; }
+    ensure(advisorCanonical); counts[advisorCanonical].chats += 1;
   }
 
-  for(let r=1; r<callsRows.length; r++){
-    const row = callsRows[r];
-    const rawAdvisor = cell(row, COL.calls.advisor);
-    const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
+  for(let r=1;r<callsRows.length;r++){
+    const row=callsRows[r]; const rawAdvisor=cell(row,COL.calls.advisor); const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
     if(!advisorCanonical) continue;
-    const meta = metaMap[advisorCanonical] || { group: 'OTROS', supervisor: 'OTROS' };
-    if(selectedGroup !== 'All' && meta.group !== selectedGroup) continue;
-    if(selectedSupervisor){
-      if(String(meta.supervisor || '').toUpperCase() !== String(selectedSupervisor || '').toUpperCase()) continue;
-    }
-    const rawStatus = cell(row, COL.calls.status);
-    const status = String(rawStatus || '').trim().toLowerCase();
-    if(status !== 'completed') continue;
-    const rawDuration = cell(row, COL.calls.duration);
-    const seconds = durationToSeconds(rawDuration);
-    if(seconds <= 35) continue;
-    const rawDate = cell(row, COL.calls.date);
-    const parsed = parseDateFlexible(rawDate);
-    if(filterFrom || filterTo){
-      if(!parsed) continue;
-      if(!inRangeDate(parsed, filterFrom, filterTo)) continue;
-    }
-    ensure(advisorCanonical);
-    counts[advisorCanonical].calls += 1;
+    const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
+    if(selectedGroup!=='All' && meta.group!==selectedGroup) continue;
+    if(selectedSupervisor){ if(String(meta.supervisor||'').toUpperCase()!==String(selectedSupervisor||'').toUpperCase()) continue; }
+    const rawStatus=cell(row,COL.calls.status); const status=String(rawStatus||'').trim().toLowerCase();
+    if(status!=='completed') continue;
+    const rawDuration=cell(row,COL.calls.duration); const seconds=durationToSeconds(rawDuration);
+    if(seconds<=35) continue;
+    const rawDate=cell(row,COL.calls.date); const parsed=parseDateFlexible(rawDate);
+    if(filterFrom||filterTo){ if(!parsed) continue; if(!inRangeDate(parsed,filterFrom,filterTo)) continue; }
+    ensure(advisorCanonical); counts[advisorCanonical].calls += 1;
   }
 
   return counts;
 }
 
-/* Calcular puntajes (idéntico) */
+/* Puntajes */
 function calculateScoresFromCountsSum(countsObj){
-  const counts = countsObj;
-  const advisors = Object.keys(counts);
-  if(advisors.length === 0) return [];
-  let maxTickets = 0, maxCalls = 0, maxChats = 0;
-  advisors.forEach(name => {
-    const c = counts[name];
-    if(c.tickets > maxTickets) maxTickets = c.tickets;
-    if(c.calls > maxCalls) maxCalls = c.calls;
-    if(c.chats > maxChats) maxChats = c.chats;
-  });
-  const arr = advisors.map(name => {
-    const c = counts[name];
+  const counts=countsObj; const advisors=Object.keys(counts);
+  if(advisors.length===0) return [];
+  let maxTickets=0, maxCalls=0, maxChats=0;
+  advisors.forEach(name=>{ const c=counts[name]; if(c.tickets>maxTickets) maxTickets=c.tickets; if(c.calls>maxCalls) maxCalls=c.calls; if(c.chats>maxChats) maxChats=c.chats; });
+  const arr=advisors.map(name=>{
+    const c=counts[name];
     const ticketPts = maxTickets ? (c.tickets / maxTickets) * 100 : 0;
     const callPts = maxCalls ? (c.calls / maxCalls) * 100 : 0;
     const chatPts = maxChats ? (c.chats / maxChats) * 100 : 0;
@@ -608,102 +425,23 @@ function calculateScoresFromCountsSum(countsObj){
       supervisor: metaMap[name] ? metaMap[name].supervisor : 'OTROS'
     };
   });
-  arr.sort((a,b) => b.total - a.total);
+  arr.sort((a,b)=>b.total-a.total);
   return arr;
 }
 
-/* --- Gráfica diaria (mantengo) --- */
+/* Gráfica diaria (idéntica) */
 function getDailyChartData(advisorName, start, end) {
-  const labels = [];
-  const pointsData = [];
-  const ticketsData = [];
-  const callsData = [];
-  const chatsData = [];
-  const dates = [];
-  let curr = new Date(start);
-  while(curr <= end) {
-    const ds = curr.getFullYear() + '-' + String(curr.getMonth()+1).padStart(2,'0') + '-' + String(curr.getDate()).padStart(2,'0');
-    dates.push(ds);
-    labels.push(String(curr.getDate()).padStart(2,'0') + '/' + String(curr.getMonth()+1).padStart(2,'0'));
-    curr.setDate(curr.getDate() + 1);
-  }
-  const dailyCounts = {};
-  dates.forEach(d => dailyCounts[d] = {});
-  function addCount(dateStr, adv, type) {
-    if(!dailyCounts[dateStr]) return;
-    if(!dailyCounts[dateStr][adv]) dailyCounts[dateStr][adv] = {t:0, c:0, ch:0};
-    dailyCounts[dateStr][adv][type]++;
-  }
-  for(let r=1; r<cache.tickets.length; r++){
-    const row = cache.tickets[r];
-    const canonical = mapAdvisorToCanonical(row[COL.tickets.advisor]);
-    if(!canonical) continue;
-    const status = String(row[COL.tickets.status] || '').trim().toUpperCase();
-    if(status !== 'CANALIZADO') continue;
-    const parsed = parseDateFlexible(row[COL.tickets.date]);
-    if(parsed) {
-      const dd = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
-      if(dd >= start && dd <= end) {
-        const ds = dd.getFullYear() + '-' + String(dd.getMonth()+1).padStart(2,'0') + '-' + String(dd.getDate()).padStart(2,'0');
-        addCount(ds, canonical, 't');
-      }
-    }
-  }
-  for(let r=1; r<cache.chats.length; r++){
-    const row = cache.chats[r];
-    const canonical = mapAdvisorToCanonical(row[COL.chats.advisor]);
-    if(!canonical) continue;
-    const seconds = durationToSeconds(row[COL.chats.duration]);
-    if(seconds === 0 && String(row[COL.chats.duration] || '').trim() === '') continue;
-    if(seconds > 300) continue;
-    const agentFlag = String(row[COL.chats.agentFlag] || '').trim().toUpperCase();
-    if(agentFlag !== 'AGENT') continue;
-    const parsed = parseDateFlexible(row[COL.chats.date]);
-    if(parsed) {
-      const dd = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
-      if(dd >= start && dd <= end) {
-        const ds = dd.getFullYear() + '-' + String(dd.getMonth()+1).padStart(2,'0') + '-' + String(dd.getDate()).padStart(2,'0');
-        addCount(ds, canonical, 'ch');
-      }
-    }
-  }
-  for(let r=1; r<cache.calls.length; r++){
-    const row = cache.calls[r];
-    const canonical = mapAdvisorToCanonical(row[COL.calls.advisor]);
-    if(!canonical) continue;
-    const status = String(row[COL.calls.status] || '').trim().toLowerCase();
-    if(status !== 'completed') continue;
-    const seconds = durationToSeconds(row[COL.calls.duration]);
-    if(seconds <= 35) continue;
-    const parsed = parseDateFlexible(row[COL.calls.date]);
-    if(parsed) {
-      const dd = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
-      if(dd >= start && dd <= end) {
-        const ds = dd.getFullYear() + '-' + String(dd.getMonth()+1).padStart(2,'0') + '-' + String(dd.getDate()).padStart(2,'0');
-        addCount(ds, canonical, 'c');
-      }
-    }
-  }
-  dates.forEach(ds => {
-    const dayData = dailyCounts[ds];
-    let maxT=0, maxC=0, maxCh=0;
-    for(let adv in dayData) {
-      if(dayData[adv].t > maxT) maxT = dayData[adv].t;
-      if(dayData[adv].c > maxC) maxC = dayData[adv].c;
-      if(dayData[adv].ch > maxCh) maxCh = dayData[adv].ch;
-    }
-    const advDay = dayData[advisorName] || {t:0, c:0, ch:0};
-    const ptsT = maxT ? (advDay.t / maxT)*100 : 0;
-    const ptsC = maxC ? (advDay.c / maxC)*100 : 0;
-    const ptsCh = maxCh ? (advDay.ch / maxCh)*100 : 0;
-    pointsData.push(Number((ptsT+ptsC+ptsCh).toFixed(2)));
-    ticketsData.push(advDay.t);
-    callsData.push(advDay.c);
-    chatsData.push(advDay.ch);
-  });
+  const labels=[]; const pointsData=[]; const ticketsData=[]; const callsData=[]; const chatsData=[]; const dates=[];
+  let curr=new Date(start);
+  while(curr<=end){ const ds=curr.getFullYear()+'-'+String(curr.getMonth()+1).padStart(2,'0')+'-'+String(curr.getDate()).padStart(2,'0'); dates.push(ds); labels.push(String(curr.getDate()).padStart(2,'0')+'/'+String(curr.getMonth()+1).padStart(2,'0')); curr.setDate(curr.getDate()+1); }
+  const dailyCounts={}; dates.forEach(d=>dailyCounts[d]={});
+  function addCount(dateStr,adv,type){ if(!dailyCounts[dateStr]) return; if(!dailyCounts[dateStr][adv]) dailyCounts[dateStr][adv]={t:0,c:0,ch:0}; dailyCounts[dateStr][adv][type]++; }
+  for(let r=1;r<cache.tickets.length;r++){ const row=cache.tickets[r]; const canonical=mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!canonical) continue; const status=String(row[COL.tickets.status]||'').trim().toUpperCase(); if(status!=='CANALIZADO') continue; const parsed=parseDateFlexible(row[COL.tickets.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'t'); } } }
+  for(let r=1;r<cache.chats.length;r++){ const row=cache.chats[r]; const canonical=mapAdvisorToCanonical(row[COL.chats.advisor]); if(!canonical) continue; const seconds=durationToSeconds(row[COL.chats.duration]); if(seconds===0 && String(row[COL.chats.duration]||'').trim()==='') continue; if(seconds>300) continue; const agentFlag=String(row[COL.chats.agentFlag]||'').trim().toUpperCase(); if(agentFlag!=='AGENT') continue; const parsed=parseDateFlexible(row[COL.chats.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'ch'); } } }
+  for(let r=1;r<cache.calls.length;r++){ const row=cache.calls[r]; const canonical=mapAdvisorToCanonical(row[COL.calls.advisor]); if(!canonical) continue; const status=String(row[COL.calls.status]||'').trim().toLowerCase(); if(status!=='completed') continue; const seconds=durationToSeconds(row[COL.calls.duration]); if(seconds<=35) continue; const parsed=parseDateFlexible(row[COL.calls.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'c'); } } }
+  dates.forEach(ds=>{ const dayData=dailyCounts[ds]; let maxT=0,maxC=0,maxCh=0; for(let adv in dayData){ if(dayData[adv].t>maxT) maxT=dayData[adv].t; if(dayData[adv].c>maxC) maxC=dayData[adv].c; if(dayData[adv].ch>maxCh) maxCh=dayData[adv].ch; } const advDay=dayData[advisorName]||{t:0,c:0,ch:0}; const ptsT=maxT?(advDay.t/maxT)*100:0; const ptsC=maxC?(advDay.c/maxC)*100:0; const ptsCh=maxCh?(advDay.ch/maxCh)*100:0; pointsData.push(Number((ptsT+ptsC+ptsCh).toFixed(2))); ticketsData.push(advDay.t); callsData.push(advDay.c); chatsData.push(advDay.ch); });
   return { labels, pointsData, ticketsData, callsData, chatsData };
 }
-
 function showChartModal(advisorName) {
   const { fromDateOnly, toDateOnly } = getPeriodRange();
   const today = new Date(); today.setHours(0,0,0,0);
@@ -731,38 +469,24 @@ function showChartModal(advisorName) {
     options: {
       responsive:true, maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
-      plugins:{
-        tooltip:{backgroundColor:'rgba(2,6,23,0.85)',titleFont:{size:14,weight:'bold'},bodyFont:{size:13},padding:12},
-        legend:{position:'bottom',labels:{font:{weight:'bold'},usePointStyle:true,boxWidth:8}}
-      },
-      scales:{
-        x:{grid:{display:false}},
-        y:{type:'linear',display:true,position:'left',title:{display:true,text:'Puntos de Rendimiento',font:{weight:'bold'}}},
-        y1:{type:'linear',display:true,position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'Volumen Base',font:{weight:'bold'}}}
-      }
+      plugins:{ tooltip:{backgroundColor:'rgba(2,6,23,0.85)',titleFont:{size:14,weight:'bold'},bodyFont:{size:13},padding:12}, legend:{position:'bottom',labels:{font:{weight:'bold'},usePointStyle:true,boxWidth:8}} },
+      scales:{ x:{grid:{display:false}}, y:{type:'linear',display:true,position:'left',title:{display:true,text:'Puntos de Rendimiento',font:{weight:'bold'}}}, y1:{type:'linear',display:true,position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'Volumen Base',font:{weight:'bold'}}} }
     }
   });
 }
 document.getElementById('chartModalClose').addEventListener('click', () => { document.getElementById('chartModalBackdrop').style.display = 'none'; });
 
-/* Renderizado: ahora con barra de progreso y estado */
+/* Renderizado con barras por rubro */
 function renderSkeletonRows(){
-  const tbody = document.getElementById('leaderboardBody'); tbody.innerHTML = '';
-  for(let i=0;i<6;i++){
-    const tr = document.createElement('tr'); tr.className='skeleton-row';
-    tr.innerHTML = `<td style="width:64px;height:68px"></td><td style="height:68px"></td><td></td><td></td><td></td><td></td>`;
-    tbody.appendChild(tr);
-  }
+  const tbody=document.getElementById('leaderboardBody'); tbody.innerHTML='';
+  for(let i=0;i<6;i++){ const tr=document.createElement('tr'); tr.className='skeleton-row'; tr.innerHTML=`<td style="width:64px;height:68px"></td><td style="height:68px"></td><td></td><td></td><td></td><td></td>`; tbody.appendChild(tr); }
 }
 
 function renderLeaderboard(scores){
-  const tbody = document.getElementById('leaderboardBody'); tbody.innerHTML = '';
-  if(scores.length === 0){
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);font-weight:700">No hay datos para mostrar</td></tr>';
-    return;
-  }
+  const tbody=document.getElementById('leaderboardBody'); tbody.innerHTML='';
+  if(scores.length===0){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);font-weight:700">No hay datos para mostrar</td></tr>'; return; }
 
-  // Leer metas actuales desde DOM
+  // Metas desde DOM
   const goalPresTickets = Number(document.getElementById('goal_pres_tickets').textContent || 0);
   const goalPresChats = Number(document.getElementById('goal_pres_chats').textContent || 0);
   const goalPresCalls = Number(document.getElementById('goal_pres_calls').textContent || 0);
@@ -770,18 +494,25 @@ function renderLeaderboard(scores){
   const goalHOChats = Number(document.getElementById('goal_ho_chats').textContent || 0);
 
   scores.forEach((row, idx) => {
-    const tr = document.createElement('tr');
-    // Determinar metas por modalidad (tickets como ejemplo principal para barra)
+    const tr=document.createElement('tr');
+
+    // Determinar metas por modalidad
     const isHO = (row.group || '').toLowerCase().includes('home');
-    const targetTickets = isHO ? (goalHOTickets || goalPresTickets) : (goalPresTickets || 1);
+    const targetTickets = isHO ? (goalHOTickets || goalPresTickets || 1) : (goalPresTickets || 1);
+    const targetCalls = isHO ? (goalPresCalls || 1) : (goalPresCalls || 1); // Home Office no tiene meta calls en tu config; usamos presencial como fallback
+    const targetChats = isHO ? (goalHOChats || goalPresChats || 1) : (goalPresChats || 1);
+
     const percentTickets = targetTickets ? Math.min(100, Math.round((row.tickets / targetTickets) * 100)) : 0;
+    const percentCalls = targetCalls ? Math.min(100, Math.round((row.calls / targetCalls) * 100)) : 0;
+    const percentChats = targetChats ? Math.min(100, Math.round((row.chats / targetChats) * 100)) : 0;
 
-    // Estado: Cumplido >=100, Cerca 80-99, Lejos <80
-    let statusClass = 'status-lejos', statusLabel = 'Lejos';
-    if(percentTickets >= 100){ statusClass = 'status-cumplido'; statusLabel = 'Cumplido'; }
-    else if(percentTickets >= 80){ statusClass = 'status-cerca'; statusLabel = 'Cerca'; }
+    // Estado global basado en tickets (puedes cambiar a promedio de los 3 si prefieres)
+    let statusClass='status-lejos', statusLabel='Lejos';
+    if(percentTickets>=100){ statusClass='status-cumplido'; statusLabel='Cumplido'; }
+    else if(percentTickets>=80){ statusClass='status-cerca'; statusLabel='Cerca'; }
 
-    const posClass = idx === 0 ? 'pos top' : 'pos';
+    const posClass = idx===0 ? 'pos top' : 'pos';
+
     tr.innerHTML = `
       <td><div class="${posClass}">${idx+1}</div></td>
       <td>
@@ -792,40 +523,65 @@ function renderLeaderboard(scores){
           </div>
         </div>
       </td>
+
       <td>
-        <div class="vol">${row.tickets}</div>
-        <div class="meta-small">${row.ticketPts} pts</div>
+        <div class="rubro-wrap">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="rubro-label">Tickets</div>
+            <div class="rubro-percent">${percentTickets}%</div>
+          </div>
+          <div class="rubro-progress" title="${percentTickets}% vs meta tickets">
+            <div class="rubro-bar" style="width:${percentTickets}%;background:${getColorForPercent(percentTickets)}"></div>
+          </div>
+          <div class="meta-small">${row.tickets} · ${row.ticketPts} pts</div>
+        </div>
       </td>
+
       <td>
-        <div class="vol">${row.calls}</div>
-        <div class="meta-small">${row.callPts} pts</div>
+        <div class="rubro-wrap">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="rubro-label">Llamadas</div>
+            <div class="rubro-percent">${percentCalls}%</div>
+          </div>
+          <div class="rubro-progress" title="${percentCalls}% vs meta llamadas">
+            <div class="rubro-bar" style="width:${percentCalls}%;background:${getColorForPercent(percentCalls)}"></div>
+          </div>
+          <div class="meta-small">${row.calls} · ${row.callPts} pts</div>
+        </div>
       </td>
+
       <td>
-        <div class="vol">${row.chats}</div>
-        <div class="meta-small">${row.chatPts} pts</div>
+        <div class="rubro-wrap">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="rubro-label">Chats</div>
+            <div class="rubro-percent">${percentChats}%</div>
+          </div>
+          <div class="rubro-progress" title="${percentChats}% vs meta chats">
+            <div class="rubro-bar" style="width:${percentChats}%;background:${getColorForPercent(percentChats)}"></div>
+          </div>
+          <div class="meta-small">${row.chats} · ${row.chatPts} pts</div>
+        </div>
       </td>
+
       <td>
         <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
           <div style="display:flex;align-items:center;gap:8px">
             <div class="score">${row.total}</div>
             <div class="status-pill ${statusClass}">${statusLabel}</div>
           </div>
-          <div class="progress-wrap" title="${percentTickets}% tickets vs meta">
-            <div class="progress-bar" style="width:${percentTickets}%"></div>
-          </div>
+          <div class="meta-small">Tickets meta: ${targetTickets} · Chats meta: ${targetChats} · Llamadas meta: ${targetCalls}</div>
         </div>
       </td>
     `;
     tbody.appendChild(tr);
   });
 
-  // Aplicar highlights Top 3
+  // Highlights Top 3
   const rows = tbody.querySelectorAll('tr');
   if(rows[0]) rows[0].classList.add('top-highlight-1');
   if(rows[1]) rows[1].classList.add('top-highlight-2');
   if(rows[2]) rows[2].classList.add('top-highlight-3');
 
-  // Añadir badge TOP X
   for(let i=0;i<3;i++){
     const row = rows[i]; if(!row) continue;
     const nameCell = row.querySelector('td:nth-child(2) .advisor-name-link');
@@ -836,174 +592,85 @@ function renderLeaderboard(scores){
   }
 }
 
-/* CSV helpers (idénticos) */
-function rowsToCSV(rows){
-  return rows.map(r => r.map(cell => {
-    if(cell === null || cell === undefined) return '';
-    const s = String(cell).replace(/"/g,'""');
-    return `"${s}"`;
-  }).join(',')).join('\n');
+/* Color según porcentaje */
+function getColorForPercent(p){
+  if(p>=100) return 'linear-gradient(90deg,#10B981,#059669)'; // verde
+  if(p>=80) return 'linear-gradient(90deg,#F59E0B,#FBBF24)'; // amarillo
+  return 'linear-gradient(90deg,#EF4444,#DC2626)'; // rojo
 }
+
+/* CSV helpers y export (idénticos) */
+function rowsToCSV(rows){ return rows.map(r=>r.map(cell=>{ if(cell===null||cell===undefined) return ''; const s=String(cell).replace(/"/g,'""'); return `"${s}"`; }).join(',')).join('\n'); }
 function buildFilteredRawRows(){
-  const out = [];
-  out.push(['Tipo','Fecha','AsesorCanonical','AsesorRaw','Grupo','Supervisor','Estado/Agent','Duración','RawRow']);
+  const out=[]; out.push(['Tipo','Fecha','AsesorCanonical','AsesorRaw','Grupo','Supervisor','Estado/Agent','Duración','RawRow']);
   const { fromDateOnly, toDateOnly } = getPeriodRange();
   const selectedSupervisorRaw = document.getElementById('filterSupervisor').value || '';
   const selectedSupervisor = selectedSupervisorRaw || '';
   function passesMeta(advisorCanonical){
     const meta = metaMap[advisorCanonical] || { group: 'OTROS', supervisor: 'OTROS' };
     if(activeGroup !== 'All' && meta.group !== activeGroup) return false;
-    if(selectedSupervisor){
-      if(String(meta.supervisor || '').toUpperCase() !== String(selectedSupervisor || '').toUpperCase()) return false;
-    }
+    if(selectedSupervisor){ if(String(meta.supervisor || '').toUpperCase() !== String(selectedSupervisor || '').toUpperCase()) return false; }
     return true;
   }
   const tickets = cache.tickets || [];
-  for(let r=1; r<tickets.length; r++){
-    const row = tickets[r];
-    const rawAdvisor = row[COL.tickets.advisor] || '';
-    const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
-    if(!advisorCanonical) continue;
-    if(!passesMeta(advisorCanonical)) continue;
-    const status = String(row[COL.tickets.status] || '').trim().toUpperCase();
-    if(status !== 'CANALIZADO') continue;
-    const rawDate = row[COL.tickets.date];
-    const parsed = parseDateFlexible(rawDate);
-    if((fromDateOnly || toDateOnly) && parsed){
-      const dd = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
-      if(fromDateOnly && dd < fromDateOnly) continue;
-      if(toDateOnly && dd > toDateOnly) continue;
-    }
-    if((fromDateOnly || toDateOnly) && !parsed) continue;
-    const meta = metaMap[advisorCanonical] || { group:'OTROS', supervisor:'OTROS' };
-    out.push(['Ticket', parsed ? parsed.toISOString().slice(0,10) : (rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, status, '', row.join(' | ')]);
+  for(let r=1;r<tickets.length;r++){
+    const row=tickets[r]; const rawAdvisor=row[COL.tickets.advisor]||''; const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
+    if(!advisorCanonical) continue; if(!passesMeta(advisorCanonical)) continue;
+    const status=String(row[COL.tickets.status]||'').trim().toUpperCase(); if(status!=='CANALIZADO') continue;
+    const rawDate=row[COL.tickets.date]; const parsed=parseDateFlexible(rawDate);
+    if((fromDateOnly||toDateOnly) && parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(fromDateOnly && dd<fromDateOnly) continue; if(toDateOnly && dd>toDateOnly) continue; }
+    if((fromDateOnly||toDateOnly) && !parsed) continue;
+    const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
+    out.push(['Ticket', parsed?parsed.toISOString().slice(0,10):(rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, status, '', row.join(' | ')]);
   }
   const chats = cache.chats || [];
-  for(let r=1; r<chats.length; r++){
-    const row = chats[r];
-    const rawAdvisor = row[COL.chats.advisor] || '';
-    const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
-    if(!advisorCanonical) continue;
-    if(!passesMeta(advisorCanonical)) continue;
-    const rawDuration = row[COL.chats.duration];
-    const seconds = durationToSeconds(rawDuration);
-    if(seconds === 0 && String(rawDuration || '').trim() === '') continue;
-    if(seconds > 300) continue;
-    const agentFlag = String(row[COL.chats.agentFlag] || '').trim().toUpperCase();
-    if(agentFlag !== 'AGENT') continue;
-    const rawDate = row[COL.chats.date];
-    const parsed = parseDateFlexible(rawDate);
-    if((fromDateOnly || toDateOnly) && parsed){
-      const dd = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
-      if(fromDateOnly && dd < fromDateOnly) continue;
-      if(toDateOnly && dd > toDateOnly) continue;
-    }
-    if((fromDateOnly || toDateOnly) && !parsed) continue;
-    const meta = metaMap[advisorCanonical] || { group:'OTROS', supervisor:'OTROS' };
-    out.push(['Chat', parsed ? parsed.toISOString().slice(0,10) : (rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, agentFlag, rawDuration || '', row.join(' | ')]);
+  for(let r=1;r<chats.length;r++){
+    const row=chats[r]; const rawAdvisor=row[COL.chats.advisor]||''; const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
+    if(!advisorCanonical) continue; if(!passesMeta(advisorCanonical)) continue;
+    const rawDuration=row[COL.chats.duration]; const seconds=durationToSeconds(rawDuration);
+    if(seconds===0 && String(rawDuration||'').trim()==='') continue; if(seconds>300) continue;
+    const agentFlag=String(row[COL.chats.agentFlag]||'').trim().toUpperCase(); if(agentFlag!=='AGENT') continue;
+    const rawDate=row[COL.chats.date]; const parsed=parseDateFlexible(rawDate);
+    if((fromDateOnly||toDateOnly) && parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(fromDateOnly && dd<fromDateOnly) continue; if(toDateOnly && dd>toDateOnly) continue; }
+    if((fromDateOnly||toDateOnly) && !parsed) continue;
+    const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
+    out.push(['Chat', parsed?parsed.toISOString().slice(0,10):(rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, agentFlag, rawDuration||'', row.join(' | ')]);
   }
   const calls = cache.calls || [];
-  for(let r=1; r<calls.length; r++){
-    const row = calls[r];
-    const rawAdvisor = row[COL.calls.advisor] || '';
-    const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
-    if(!advisorCanonical) continue;
-    if(!passesMeta(advisorCanonical)) continue;
-    const status = String(row[COL.calls.status] || '').trim().toLowerCase();
-    if(status !== 'completed') continue;
-    const rawDuration = row[COL.calls.duration];
-    const seconds = durationToSeconds(rawDuration);
-    if(seconds < 60) continue;
-    const rawDate = row[COL.calls.date];
-    const parsed = parseDateFlexible(rawDate);
-    if((fromDateOnly || toDateOnly) && parsed){
-      const dd = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
-      if(fromDateOnly && dd < fromDateOnly) continue;
-      if(toDateOnly && dd > toDateOnly) continue;
-    }
-    if((fromDateOnly || toDateOnly) && !parsed) continue;
-    const meta = metaMap[advisorCanonical] || { group:'OTROS', supervisor:'OTROS' };
-    out.push(['Llamada', parsed ? parsed.toISOString().slice(0,10) : (rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, status, rawDuration || '', row.join(' | ')]);
+  for(let r=1;r<calls.length;r++){
+    const row=calls[r]; const rawAdvisor=row[COL.calls.advisor]||''; const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
+    if(!advisorCanonical) continue; if(!passesMeta(advisorCanonical)) continue;
+    const status=String(row[COL.calls.status]||'').trim().toLowerCase(); if(status!=='completed') continue;
+    const rawDuration=row[COL.calls.duration]; const seconds=durationToSeconds(rawDuration); if(seconds<60) continue;
+    const rawDate=row[COL.calls.date]; const parsed=parseDateFlexible(rawDate);
+    if((fromDateOnly||toDateOnly) && parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(fromDateOnly && dd<fromDateOnly) continue; if(toDateOnly && dd>toDateOnly) continue; }
+    if((fromDateOnly||toDateOnly) && !parsed) continue;
+    const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
+    out.push(['Llamada', parsed?parsed.toISOString().slice(0,10):(rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, status, rawDuration||'', row.join(' | ')]);
   }
   return out;
 }
-function downloadCSV(text, filename){
-  const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-}
-function openPasswordModal(){ document.getElementById('modalBackdrop').style.display = 'flex'; document.getElementById('downloadPassword').value=''; document.getElementById('modalMsg').textContent=''; document.getElementById('downloadPassword').focus(); }
-function closePasswordModal(){ document.getElementById('modalBackdrop').style.display = 'none'; pendingDownload = null; }
-async function confirmDownloadAction(){
-  const val = (document.getElementById('downloadPassword').value || '').trim();
-  if(!val){ document.getElementById('modalMsg').textContent = '⚠️ Introduce la clave'; return; }
-  if(val !== SECRET_CODE){ document.getElementById('modalMsg').textContent = '❌ Clave incorrecta'; return; }
-  const pd = pendingDownload; if(!pd){ closePasswordModal(); return; }
-  downloadCSV(pd.data.csv, pd.data.filename); closePasswordModal();
-}
+function downloadCSV(text, filename){ const blob=new Blob([text],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+function openPasswordModal(){ document.getElementById('modalBackdrop').style.display='flex'; document.getElementById('downloadPassword').value=''; document.getElementById('modalMsg').textContent=''; document.getElementById('downloadPassword').focus(); }
+function closePasswordModal(){ document.getElementById('modalBackdrop').style.display='none'; pendingDownload=null; }
+async function confirmDownloadAction(){ const val=(document.getElementById('downloadPassword').value||'').trim(); if(!val){ document.getElementById('modalMsg').textContent='⚠️ Introduce la clave'; return; } if(val!==SECRET_CODE){ document.getElementById('modalMsg').textContent='❌ Clave incorrecta'; return; } const pd=pendingDownload; if(!pd){ closePasswordModal(); return; } downloadCSV(pd.data.csv, pd.data.filename); closePasswordModal(); }
 
-/* Refresh y carga inicial (idénticos) */
-async function refreshDataOnly(){
-  try{ showLoading();
-    const [ticketsRows, chatsRows, callsRows] = await Promise.all([
-      fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.tickets),
-      fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.chats),
-      fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.calls)
-    ]);
-    cache.tickets = ticketsRows; cache.chats = chatsRows; cache.calls = callsRows;
-    document.getElementById('lastSync').textContent = formatHHmm(new Date());
-    applyFiltersAndRender();
-  } catch(err){ console.warn('Error al refrescar datos:', err.message); } finally{ hideLoading(); }
-}
+/* Refresh y carga inicial */
+async function refreshDataOnly(){ try{ showLoading(); const [ticketsRows,chatsRows,callsRows]=await Promise.all([ fetchSheetCSVRowsById(SPREADSHEET_ID,SHEETS.tickets), fetchSheetCSVRowsById(SPREADSHEET_ID,SHEETS.chats), fetchSheetCSVRowsById(SPREADSHEET_ID,SHEETS.calls) ]); cache.tickets=ticketsRows; cache.chats=chatsRows; cache.calls=callsRows; document.getElementById('lastSync').textContent=formatHHmm(new Date()); applyFiltersAndRender(); }catch(err){ console.warn('Error al refrescar datos:', err.message); }finally{ hideLoading(); } }
 
-async function loadAndRender(){
-  try{
-    renderSkeletonRows(); showLoading();
-    document.getElementById('periodSelector').value = 'thisMonth';
-    const { fromDateOnly, toDateOnly } = getPeriodRange();
-    if(fromDateOnly) document.getElementById('dateFrom').value = fromDateOnly.toISOString().slice(0,10);
-    if(toDateOnly) document.getElementById('dateTo').value = toDateOnly.toISOString().slice(0,10);
-    document.getElementById('lastSync').textContent = formatHHmm(new Date());
-    await buildAliasAndMetaMaps();
-    populateSupervisorFilter();
-    const [ticketsRows, chatsRows, callsRows] = await Promise.all([
-      fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.tickets),
-      fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.chats),
-      fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.calls)
-    ]);
-    cache.tickets = ticketsRows; cache.chats = chatsRows; cache.calls = callsRows;
-    applyFiltersAndRender();
-    if(autoRefreshTimer) clearInterval(autoRefreshTimer);
-    autoRefreshTimer = setInterval(() => { refreshDataOnly(); }, AUTO_REFRESH_MS);
-  } catch(err){ console.error(err); alert('Error al cargar datos: ' + err.message + '. Revisa permisos de las hojas o la consola.'); } finally{ hideLoading(); }
-}
+async function loadAndRender(){ try{ renderSkeletonRows(); showLoading(); document.getElementById('periodSelector').value='thisMonth'; const { fromDateOnly, toDateOnly } = getPeriodRange(); if(fromDateOnly) document.getElementById('dateFrom').value = fromDateOnly.toISOString().slice(0,10); if(toDateOnly) document.getElementById('dateTo').value = toDateOnly.toISOString().slice(0,10); document.getElementById('lastSync').textContent = formatHHmm(new Date()); await buildAliasAndMetaMaps(); populateSupervisorFilter(); const [ticketsRows,chatsRows,callsRows]=await Promise.all([ fetchSheetCSVRowsById(SPREADSHEET_ID,SHEETS.tickets), fetchSheetCSVRowsById(SPREADSHEET_ID,SHEETS.chats), fetchSheetCSVRowsById(SPREADSHEET_ID,SHEETS.calls) ]); cache.tickets=ticketsRows; cache.chats=chatsRows; cache.calls=callsRows; applyFiltersAndRender(); if(autoRefreshTimer) clearInterval(autoRefreshTimer); autoRefreshTimer=setInterval(()=>{ refreshDataOnly(); }, AUTO_REFRESH_MS); }catch(err){ console.error(err); alert('Error al cargar datos: '+err.message+'. Revisa permisos de las hojas o la consola.'); }finally{ hideLoading(); } }
 
 /* Period / Filters helpers */
 function getPeriodRange(){
-  const sel = document.getElementById('periodSelector').value;
-  const today = new Date();
-  let fromDateOnly = null, toDateOnly = null;
-  if(sel === 'today'){ fromDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate()); toDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate()); }
-  else if(sel === 'thisMonth'){ fromDateOnly = new Date(today.getFullYear(), today.getMonth(), 1); toDateOnly = new Date(today.getFullYear(), today.getMonth()+1, 0); }
-  else if(sel === 'lastMonth'){ const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth()-1, 1); const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0); fromDateOnly = firstDayLastMonth; toDateOnly = lastDayLastMonth; }
-  else {
-    const fromVal = document.getElementById('dateFrom').value;
-    const toVal = document.getElementById('dateTo').value;
-    fromDateOnly = fromVal ? new Date(fromVal + 'T00:00:00') : null;
-    toDateOnly = toVal ? new Date(toVal + 'T23:59:59') : null;
-    if(fromDateOnly) fromDateOnly = new Date(fromDateOnly.getFullYear(), fromDateOnly.getMonth(), fromDateOnly.getDate());
-    if(toDateOnly) toDateOnly = new Date(toDateOnly.getFullYear(), toDateOnly.getMonth(), toDateOnly.getDate());
-  }
+  const sel=document.getElementById('periodSelector').value; const today=new Date();
+  let fromDateOnly=null, toDateOnly=null;
+  if(sel==='today'){ fromDateOnly=new Date(today.getFullYear(),today.getMonth(),today.getDate()); toDateOnly=new Date(today.getFullYear(),today.getMonth(),today.getDate()); }
+  else if(sel==='thisMonth'){ fromDateOnly=new Date(today.getFullYear(),today.getMonth(),1); toDateOnly=new Date(today.getFullYear(),today.getMonth()+1,0); }
+  else if(sel==='lastMonth'){ const firstDayLastMonth=new Date(today.getFullYear(),today.getMonth()-1,1); const lastDayLastMonth=new Date(today.getFullYear(),today.getMonth(),0); fromDateOnly=firstDayLastMonth; toDateOnly=lastDayLastMonth; }
+  else { const fromVal=document.getElementById('dateFrom').value; const toVal=document.getElementById('dateTo').value; fromDateOnly = fromVal ? new Date(fromVal+'T00:00:00') : null; toDateOnly = toVal ? new Date(toVal+'T23:59:59') : null; if(fromDateOnly) fromDateOnly=new Date(fromDateOnly.getFullYear(),fromDateOnly.getMonth(),fromDateOnly.getDate()); if(toDateOnly) toDateOnly=new Date(toDateOnly.getFullYear(),toDateOnly.getMonth(),toDateOnly.getDate()); }
   return { fromDateOnly, toDateOnly };
 }
-
-function populateSupervisorFilter(){
-  const sel = document.getElementById('filterSupervisor'); sel.innerHTML = '';
-  const firstOpt = document.createElement('option'); firstOpt.value=''; firstOpt.textContent='Todos los supervisores'; sel.appendChild(firstOpt);
-  const fixedOptions = ["IVAN GERARDO MORENO GARATACHEA","CECILIA CARRERA MORALES","OTROS"];
-  fixedOptions.forEach(sup => { const opt = document.createElement('option'); opt.value = sup; opt.textContent = sup; sel.appendChild(opt); });
-}
+function populateSupervisorFilter(){ const sel=document.getElementById('filterSupervisor'); sel.innerHTML=''; const firstOpt=document.createElement('option'); firstOpt.value=''; firstOpt.textContent='Todos los supervisores'; sel.appendChild(firstOpt); const fixedOptions=["IVAN GERARDO MORENO GARATACHEA","CECILIA CARRERA MORALES","OTROS"]; fixedOptions.forEach(sup=>{ const opt=document.createElement('option'); opt.value=sup; opt.textContent=sup; sel.appendChild(opt); }); }
 
 function applyFiltersAndRender(){
   const { fromDateOnly, toDateOnly } = getPeriodRange();
@@ -1026,16 +693,12 @@ function updateSideStats(counts){
   document.getElementById('statChats').textContent = totalChats;
 }
 
-/* UI events */
+/* Eventos UI */
 document.getElementById('applyFilters').addEventListener('click', () => applyFiltersAndRender());
 document.getElementById('refreshBtn').addEventListener('click', () => refreshDataOnly());
 document.getElementById('periodSelector').addEventListener('change', () => {
-  const sel = document.getElementById('periodSelector').value;
-  if(sel !== 'custom'){
-    const { fromDateOnly, toDateOnly } = getPeriodRange();
-    if(fromDateOnly) document.getElementById('dateFrom').value = fromDateOnly.toISOString().slice(0,10);
-    if(toDateOnly) document.getElementById('dateTo').value = toDateOnly.toISOString().slice(0,10);
-  }
+  const sel=document.getElementById('periodSelector').value;
+  if(sel!=='custom'){ const { fromDateOnly, toDateOnly } = getPeriodRange(); if(fromDateOnly) document.getElementById('dateFrom').value = fromDateOnly.toISOString().slice(0,10); if(toDateOnly) document.getElementById('dateTo').value = toDateOnly.toISOString().slice(0,10); }
   applyFiltersAndRender();
 });
 document.getElementById('filterSupervisor').addEventListener('change', () => applyFiltersAndRender());
@@ -1082,8 +745,8 @@ document.getElementById('confirmDownload').addEventListener('click', confirmDown
 document.getElementById('downloadPassword').addEventListener('keydown', (e) => { if(e.key === 'Enter') confirmDownloadAction(); });
 
 /* Helpers */
-function showLoading(){ document.getElementById('loadingOverlay').style.display = 'flex'; }
-function hideLoading(){ document.getElementById('loadingOverlay').style.display = 'none'; }
+function showLoading(){ document.getElementById('loadingOverlay').style.display='flex'; }
+function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
 function escapeHtml(s){ return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function formatHHmm(date){ const d=new Date(date); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
 
