@@ -1,387 +1,1074 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Garantías Vento — Control Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --color-black: #111111;
-            --color-white: #FFFFFF;
-            --color-orange: #FF5722;
-            --color-orange-hover: #E64A19;
-            --color-gray-dark: #1E1E1E;
-            --color-gray-light: #F5F5F5;
-            --color-border: #E0E0E0;
-            --font-main: 'Outfit', system-ui, sans-serif;
-        }
+  <meta charset="utf-8" />
+  <title>Dashboard Asesores — Rendimiento y Metas</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root {
+      /* Paleta estricta: Blanco, Negro y Naranja */
+      --bg: #F4F4F5; 
+      --card: #FFFFFF; 
+      --muted: #666666; 
+      --text: #000000; 
+      --accent: #FF6600; /* Naranja vibrante */
+      --accent-hover: #E65C00; 
+      --border: rgba(0, 0, 0, 0.08); 
+      --radius: 12px; 
+      --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.1);
+      
+      /* Gradientes para el Top 3 usando la paleta oficial */
+      --top1: linear-gradient(90deg, #000000, #1A1A1A);
+      --top2: linear-gradient(90deg, #333333, #4D4D4D);
+      --top3: linear-gradient(90deg, #666666, #808080);
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body { 
+      margin: 0; 
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      -webkit-font-smoothing: antialiased; 
+    }
+    
+    .container { 
+      max-width: 1200px; 
+      margin: 28px auto; 
+      padding: 20px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 20px; 
+    }
+    
+    /* Encabezado */
+    header { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      gap: 12px; 
+      background: var(--card);
+      padding: 16px 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+    .brand { display: flex; align-items: center; gap: 16px; }
+    .logo { 
+      width: 56px; 
+      height: 56px; 
+      border-radius: 12px; 
+      background: #000; 
+      color: var(--accent); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-weight: 900; 
+      font-size: 22px; 
+      border: 2px solid var(--accent);
+      box-shadow: 0 4px 10px rgba(255, 102, 0, 0.2);
+    }
+    h1 { font-size: 22px; margin: 0; font-weight: 800; }
+    .subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+    
+    /* Controles y Filtros */
+    .controls { 
+      display: flex; 
+      gap: 12px; 
+      flex-wrap: wrap; 
+      align-items: flex-end; 
+      background: var(--card);
+      padding: 16px 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+    .control { flex: 1; min-width: 180px; }
+    .control label { display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
+    select, input[type="date"] { 
+      width: 100%; 
+      padding: 10px; 
+      border-radius: 8px; 
+      border: 1px solid var(--border); 
+      font-size: 14px; 
+      background: #FAFAFA;
+      transition: all 0.2s ease;
+    }
+    select:focus, input[type="date"]:focus { outline: none; border-color: var(--accent); background: #FFF; box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1); }
+    
+    /* Botones */
+    .actions { display: flex; gap: 12px; align-items: center; }
+    button { transition: all 0.2s ease; font-family: inherit; }
+    button.primary { 
+      background: var(--accent); 
+      border: none; 
+      color: #FFF; 
+      padding: 10px 18px; 
+      border-radius: 8px; 
+      font-weight: 700; 
+      cursor: pointer; 
+      box-shadow: 0 4px 12px rgba(255, 102, 0, 0.2);
+    }
+    button.primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255, 102, 0, 0.3); }
+    button.primary:active { transform: translateY(0); }
+    
+    button.ghost { 
+      background: transparent; 
+      border: 2px solid #000; 
+      color: #000; 
+      padding: 8px 16px; 
+      border-radius: 8px; 
+      font-weight: 700;
+      cursor: pointer; 
+    }
+    button.ghost:hover { background: #000; color: #FFF; transform: translateY(-2px); }
+    
+    .small-btn { 
+      padding: 8px 12px; 
+      border-radius: 8px; 
+      border: 1px solid var(--border); 
+      background: #FFF; 
+      cursor: pointer; 
+      text-align: center;
+      font-weight: 600;
+      font-size: 13px;
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+    .small-btn:hover { border-color: #000; background: #000; color: #FFF; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: var(--font-main); background-color: var(--color-gray-light); color: var(--color-black); display: flex; height: 100vh; overflow: hidden; }
+    /* Pestañas */
+    .tabs { display: flex; gap: 10px; margin: 4px 0; flex-wrap: wrap; }
+    .tab { 
+      background: var(--card); 
+      border: 1px solid var(--border); 
+      padding: 10px 16px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-weight: 700; 
+      color: var(--muted);
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+    .tab:hover { border-color: #000; color: #000; }
+    .tab.active { 
+      background: #000; 
+      border-color: #000;
+      color: #FFF; 
+      box-shadow: var(--shadow-sm); 
+    }
 
-        /* Sidebar de Filtros y Búsqueda */
-        aside.sidebar { width: 320px; background-color: var(--color-black); color: var(--color-white); padding: 30px 24px; display: flex; flex-direction: column; gap: 24px; border-right: 1px solid rgba(255,255,255,0.1); }
-        .brand { font-size: 24px; font-weight: 800; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
-        .brand span { color: var(--color-orange); }
-        
-        .search-box { display: flex; flex-direction: column; gap: 8px; }
-        .search-box label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 600; }
-        .input-text { width: 100%; padding: 14px; background: var(--color-gray-dark); border: 1px solid #333; border-radius: 8px; color: var(--color-white); font-size: 15px; outline: none; transition: border 0.2s; }
-        .input-text:focus { border-color: var(--color-orange); }
-        
-        .btn-primary { background: var(--color-orange); color: var(--color-white); border: none; padding: 14px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 15px; }
-        .btn-primary:hover { background: var(--color-orange-hover); }
-        .btn-secondary { background: transparent; color: #AAA; border: 1px solid #333; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; }
-        .btn-secondary:hover { color: var(--color-white); border-color: #555; }
+    /* Grilla Principal */
+    .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+    @media(max-width:1000px){ .main-grid { grid-template-columns: 1fr; } }
+    
+    .card { 
+      background: var(--card); 
+      border-radius: var(--radius); 
+      padding: 20px; 
+      border: 1px solid var(--border); 
+      box-shadow: var(--shadow-sm); 
+    }
+    .card h2 { margin: 0 0 16px 0; font-size: 18px; color: #000; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px;}
+    
+    /* Tabla de Leaderboard */
+    .table-wrap { overflow: auto; border-radius: 8px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 720px; background: #FFF; }
+    thead th { 
+      text-align: left; 
+      padding: 14px 12px; 
+      background: #FAFAFA;
+      color: #000; 
+      font-size: 12px; 
+      font-weight: 800;
+      text-transform: uppercase;
+      border-bottom: 2px solid #EAEAEA; 
+    }
+    tbody td { padding: 14px 12px; border-bottom: 1px solid #F0F0F0; vertical-align: middle; transition: background 0.2s ease; }
+    tbody tr { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    tbody tr:hover { 
+      background: rgba(255, 102, 0, 0.04); 
+      transform: scale(1.005); 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      position: relative;
+      z-index: 2;
+      border-left: 4px solid var(--accent);
+    }
+    
+    /* Posiciones y Puntajes */
+    .pos { 
+      width: 40px; 
+      height: 40px; 
+      border-radius: 8px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-weight: 900; 
+      background: #F4F4F5; 
+      color: #000;
+      border: 1px solid var(--border); 
+    }
+    .pos.top { background: #000; color: var(--accent); border: 2px solid var(--accent); }
+    .advisor-name { font-weight: 800; font-size: 15px; color: #000; }
+    .meta-small { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .vol { font-weight: 700; font-size: 14px; }
+    .score { 
+      color: var(--accent); 
+      font-weight: 900; 
+      font-size: 18px; 
+      background: rgba(255,102,0,0.1); 
+      padding: 6px 12px; 
+      border-radius: 8px; 
+      display: inline-block;
+    }
+    
+    /* Highlights del Top 3 */
+    .top-highlight-1 td { background: var(--top1); color: #FFF; border-bottom: none; }
+    .top-highlight-1 .advisor-name, .top-highlight-1 .vol, .top-highlight-1 .meta-small { color: #FFF; }
+    .top-highlight-1 .score { background: #FFF; color: #000; }
+    
+    .top-highlight-2 td { background: var(--top2); color: #FFF; border-bottom: none;}
+    .top-highlight-2 .advisor-name, .top-highlight-2 .vol, .top-highlight-2 .meta-small { color: #FFF; }
+    .top-highlight-2 .score { background: #FFF; color: #000; }
+    
+    .top-highlight-3 td { background: var(--top3); color: #FFF; border-bottom: none;}
+    .top-highlight-3 .advisor-name, .top-highlight-3 .vol, .top-highlight-3 .meta-small { color: #FFF; }
+    .top-highlight-3 .score { background: #FFF; color: #000; }
+    
+    .badge-top { 
+      display: inline-block; 
+      background: var(--accent); 
+      color: #FFF; 
+      padding: 4px 8px; 
+      border-radius: 6px; 
+      font-size: 11px; 
+      margin-left: 8px; 
+      font-weight: 900; 
+      vertical-align: middle;
+      text-transform: uppercase;
+    }
 
-        /* Pestañas de estado (Reemplazo del panel de pendientes viejo) */
-        .status-filters { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .filter-tab { width: 100%; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; color: #AAA; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
-        .filter-tab:hover, .filter-tab.active { background: var(--color-gray-dark); color: var(--color-white); }
-        .filter-tab.active { border-left: 4px solid var(--color-orange); padding-left: 12px; }
-        .badge { background: #333; padding: 2px 8px; border-radius: 20px; font-size: 11px; color: #FFF; }
-        .filter-tab.active .badge { background: var(--color-orange); }
+    /* Metas y Estadísticas */
+    .goals { margin-top: 12px; display: flex; flex-direction: column; gap: 12px;}
+    .goal-block { 
+      padding: 14px; 
+      border-radius: 8px; 
+      background: #FAFAFA; 
+      border-left: 4px solid #000;
+      transition: transform 0.2s ease;
+    }
+    .goal-block:hover { transform: translateX(4px); background: #FFF; box-shadow: var(--shadow-sm); border-left-color: var(--accent); }
+    .goal-title { font-weight: 900; margin-bottom: 8px; font-size: 13px; color: #000; text-transform: uppercase; }
+    .goal-item { font-size: 14px; margin: 6px 0; display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;}
+    .goal-item strong { color: var(--accent); font-size: 15px; }
+    
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .stat { 
+      display: flex; 
+      flex-direction: column; 
+      padding: 12px; 
+      border-radius: 8px; 
+      background: #000; 
+      color: #FFF;
+      border: 1px solid var(--border); 
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+    .stat:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .stat .label { color: #CCC; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;}
+    .stat .value { font-weight: 900; font-size: 20px; color: var(--accent); }
 
-        /* Contenedor Principal */
-        main.content-wrapper { flex: 1; display: flex; flex-direction: column; background: var(--color-white); overflow: hidden; }
-        header.top-bar { padding: 20px 40px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; }
-        header.top-bar h1 { font-size: 20px; font-weight: 800; }
+    .export-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 
-        .table-container { flex: 1; overflow: auto; padding: 0 40px 40px 40px; }
-        table.main-table { width: 100%; border-collapse: collapse; text-align: left; }
-        table.main-table th { position: sticky; top: 0; background: var(--color-white); padding: 16px 12px; font-size: 12px; text-transform: uppercase; color: #666; border-bottom: 2px solid var(--color-black); letter-spacing: 0.5px; }
-        table.main-table td { padding: 16px 12px; font-size: 14px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
-        table.main-table tbody tr:hover { background-color: rgba(0,0,0,0.02); cursor: pointer; }
+    /* Modales y Loaders */
+    .loading-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(255,255,255,0.9); z-index: 9999; flex-direction: column; gap: 16px; }
+    .spinner { width: 50px; height: 50px; border-radius: 50%; border: 6px solid #EAEAEA; border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-weight: 800; color: #000; font-size: 16px; letter-spacing: 0.5px;}
+    
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(4px); }
+    .modal { background: #FFF; border-radius: 16px; padding: 24px; max-width: 400px; width: 94%; box-shadow: var(--shadow-lg); text-align: center;}
+    .modal h3 { margin: 0 0 8px 0; font-weight: 900; font-size: 20px; }
+    .modal .close { position: absolute; right: 16px; top: 16px; background: transparent; border: none; font-weight: 900; font-size: 24px; cursor: pointer; color: var(--muted); }
+    .modal .close:hover { color: #000; }
+    .modal .row { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .modal input[type="password"] { padding: 12px; border-radius: 8px; border: 2px solid var(--border); font-size: 16px; text-align: center; font-weight: 700;}
+    .modal input[type="password"]:focus { border-color: var(--accent); outline: none; }
+    .modal button.primary { width: 100%; padding: 12px; font-size: 16px; }
 
-        /* Badges de Estatus Nuevos */
-        .status-pill { display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .status-pill.pendiente { background: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; }
-        .status-pill.autorizado { background: #E8F5E9; color: #1B5E20; border: 1px solid #C8E6C9; }
-        .status-pill.rechazado { background: #FFEBEE; color: #B71C1C; border: 1px solid #FFCDD2; }
-
-        /* Modal Vista Partida (Split View) */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 30px; }
-        .modal-card { background: var(--color-white); width: 100%; max-width: 1400px; height: 90vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
-        .modal-header { padding: 20px 30px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: var(--color-black); color: var(--color-white); }
-        
-        .modal-body { flex: 1; display: flex; overflow: hidden; }
-        .panel-left { width: 45%; border-right: 1px solid var(--color-border); overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px; background: var(--color-gray-light); }
-        .panel-right { flex: 1; display: flex; flex-direction: column; padding: 24px; gap: 16px; }
-
-        .data-field { background: var(--color-white); padding: 12px 16px; border-radius: 6px; border: 1px solid var(--color-border); display: flex; flex-direction: column; gap: 4px; }
-        .data-field strong { font-size: 11px; text-transform: uppercase; color: #777; letter-spacing: 0.5px; }
-        .data-field span { font-size: 14px; font-weight: 600; color: var(--color-black); word-break: break-all; }
-
-        /* Selector de Previews del PDF derecho */
-        .preview-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--color-border); padding-bottom: 10px; }
-        .tab-btn { padding: 10px 16px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-gray-light); font-size: 13px; font-weight: 600; cursor: pointer; }
-        .tab-btn.active { background: var(--color-black); color: var(--color-white); border-color: var(--color-black); }
-
-        .iframe-container { flex: 1; background: #EEE; border-radius: 8px; overflow: hidden; border: 1px solid var(--color-border); }
-        .iframe-container iframe { width: 100%; height: 100%; border: none; }
-
-        .modal-footer { padding: 20px 30px; border-top: 1px solid var(--color-border); display: flex; justify-content: flex-end; align-items: center; gap: 12px; background: var(--color-gray-light); }
-        
-        .select-autoriza { padding: 12px; border-radius: 8px; border: 1px solid var(--color-border); font-size: 14px; font-weight: 600; outline: none; margin-right: 12px; }
-        .btn-approve { background: #2e7d32; color: white; }
-        .btn-approve:hover { background: #1b5e20; }
-        .btn-reject { background: #c62828; color: white; }
-        .btn-reject:hover { background: #b71c1c; }
-        
-        .empty-state { text-align: center; padding: 40px; color: #888; font-weight: 600; }
-    </style>
+    footer { font-size: 12px; color: var(--muted); text-align: center; margin-top: 16px; font-weight: 600; padding-bottom: 20px;}
+  </style>
 </head>
 <body>
-
-    <aside class="sidebar">
-        <div class="brand">VENTO <span>•</span></div>
-        
-        <div class="search-box">
-            <label for="serial">Número de Serie (VIN)</label>
-            <input id="serial" type="text" class="input-text" placeholder="Ej: 12345-ABC" />
-            <button id="btnSearch" class="btn-primary" style="margin-top: 6px;">Buscar</button>
-            <button id="btnClear" class="btn-secondary">Limpiar Filtros</button>
-        </div>
-
-        <hr style="border: none; border-top: 1px solid #333; margin: 10px 0;">
-
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">AS</div>
         <div>
-            <p style="font-size: 11px; text-transform: uppercase; color: #666; font-weight: 700; margin-bottom: 10px; letter-spacing: 1px;">Filtrar por estatus</p>
-            <div class="status-filters">
-                <button class="filter-tab active" data-status="TODOS">🔑 Mostrar Todos <span class="badge" id="badge-todos">0</span></button>
-                <button class="filter-tab" data-status="PENDIENTE">⏳ Pendientes <span class="badge" id="badge-pendientes" style="background: #E65100;">0</span></button>
-                <button class="filter-tab" data-status="AUTORIZADO">✅ Autorizados <span class="badge" id="badge-autorizados">0</span></button>
-                <button class="filter-tab" data-status="RECHAZADO">❌ Rechazados <span class="badge" id="badge-rechazados">0</span></button>
-            </div>
+          <h1>Indicadores Asesores</h1>
+          <div class="subtitle">RENDIMIENTO · PUNTOS · METAS</div>
         </div>
-        
-        <div style="margin-top: auto;">
-            <label style="font-size: 11px; color: #666; display: block; margin-bottom: 6px;">CONTRASEÑA SUPERVISOR</label>
-            <input id="superPassInline" type="password" class="input-text" placeholder="••••••••" style="padding: 10px;" />
-        </div>
-    </aside>
-
-    <main class="content-wrapper">
-        <header class="top-bar">
-            <h1 id="view-title">Todas las Solicitudes</h1>
-            <button id="btnRefresh" class="btn-secondary" style="padding: 10px 20px;">🔄 Sincronizar Base de Datos</button>
-        </header>
-
-        <div class="table-container">
-            <table class="main-table" id="recordsTable">
-                <thead>
-                    <tr>
-                        <th>Serie / VIN</th>
-                        <th>Cliente</th>
-                        <th>Fecha Solicitud</th>
-                        <th>Modelo</th>
-                        <th>Estatus</th>
-                        <th>Evidencias</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    </tbody>
-            </table>
-            <div id="emptyState" class="empty-state" style="display: none;">No se encontraron registros para mostrar.</div>
-        </div>
-    </main>
-
-    <div id="detailModal" class="modal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3 id="modalSerialTitle">Detalle de Garantía</h3>
-                <button id="detailClose" class="btn-secondary" style="color: white; border-color: #444;">Cerrar Vista</button>
-            </div>
-            <div class="modal-body">
-                <div class="panel-left" id="panelLeftFields"></div>
-                
-                <div class="panel-right">
-                    <div class="preview-tabs" id="previewTabsContainer"></div>
-                    <div class="iframe-container">
-                        <iframe id="detailPdfFrame" src=""></iframe>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <label style="font-size: 13px; font-weight: 600;">Autorizar como:</label>
-                <select id="detailAutoriza" class="select-autoriza">
-                    <option value="IVAN">IVAN</option>
-                    <option value="CESAR">CESAR</option>
-                    <option value="ANGEL">ANGEL</option>
-                    <option value="CECILIA">CECILIA</option>
-                </select>
-                <button id="btnAuthorize" class="btn-primary btn-approve">AUTORIZAR GARANTÍA</button>
-                <button id="btnPrimary btn-reject" id="btnReject" class="btn-primary btn-reject">RECHAZAR SOLICITUD</button>
-            </div>
-        </div>
+      </div>
+      <div style="text-align: right; background: #FAFAFA; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border);">
+        <div style="font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase;">Última sincronización</div>
+        <div id="lastSync" style="font-weight: 900; color: #000; font-size: 16px; margin-top: 2px;">--:--</div>
+      </div>
+    </header>
+    
+    <div class="controls">
+      <div class="control">
+        <label>Periodo</label>
+        <select id="periodSelector" aria-label="Periodo">
+          <option value="custom">Personalizado</option>
+          <option value="today">Hoy</option>
+          <option value="thisMonth">Este Mes</option>
+          <option value="lastMonth">Mes Pasado</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>Fecha inicio</label>
+        <input type="date" id="dateFrom" aria-label="Fecha inicio">
+      </div>
+      <div class="control">
+        <label>Fecha fin</label>
+        <input type="date" id="dateTo" aria-label="Fecha fin">
+      </div>
+      <div class="control" style="min-width:220px">
+        <label>Supervisor</label>
+        <select id="filterSupervisor" aria-label="Supervisor">
+          <option value="">Todos los supervisores</option>
+        </select>
+      </div>
+      <div class="actions" style="margin-bottom: 2px;">
+        <button class="primary" id="applyFilters">Aplicar Filtros</button>
+        <button class="ghost" id="refreshBtn" title="Refrescar datos">↻ Refrescar</button>
+      </div>
     </div>
-
-    <script>
-        /* ============================
-           CONFIGURACIÓN DIRECTA E INTEGRADA
-           ============================ */
-        const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbz-kBTZySqCBfqzMSfhBo9pZ-bkuCtdhenb2B58zhjLVReWrJbOWa09oG7toE8zjSVF/exec';
+    
+    <div class="tabs" role="tablist" aria-label="Grupos">
+      <div class="tab active" data-group="All">Todos</div>
+      <div class="tab" data-group="Vento">Vento</div>
+      <div class="tab" data-group="Piston">Piston</div>
+      <div class="tab" data-group="Home Office">Home Office</div>
+      <div class="tab" data-group="Nuevo ingreso">Nuevo ingreso</div>
+      <div class="tab" data-group="OTROS">OTROS</div>
+    </div>
+    
+    <div class="main-grid">
+      <section class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h2 style="margin: 0;">Leaderboard de Puntos</h2>
+          <button class="small-btn" id="downloadFiltered" style="width: auto;">↓ Descargar Filtrados</button>
+        </div>
+        <div class="table-wrap" role="table" aria-label="Leaderboard">
+          <table id="leaderboardTable" role="grid" aria-live="polite">
+            <thead>
+              <tr>
+                <th>Pos</th>
+                <th>Asesor</th>
+                <th>Tickets<br><span class="meta-small" style="color: #666;">Vol / Pts</span></th>
+                <th>Llamadas<br><span class="meta-small" style="color: #666;">Vol / Pts</span></th>
+                <th>Chats<br><span class="meta-small" style="color: #666;">Vol / Pts</span></th>
+                <th>Puntaje Total</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:16px; color:var(--muted); font-size:12px; font-weight: 500; background: #FAFAFA; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+          <strong>Reglas de medición:</strong> Tickets canalizados (col M = CANALIZADO). Llamadas completadas y duración &gt;60s. Chats duración ≤5min y agent flag = AGENT. Nombres consolidados por Asesores; sin grupo → OTROS.
+        </div>
+      </section>
+      
+      <aside class="card">
+        <h2>Metas del Mes</h2>
+        <div class="goals" aria-live="polite">
+           <div class="goal-block" aria-label="Meta general">
+            <div class="goal-title">🎯 META GENERAL</div>
+            <div class="goal-item"><span>Total de Tickets:</span> <strong id="goal_general">< 415</strong></div>
+          </div>
+          
+          <div class="goal-block" aria-label="Modalidad Presencial">
+            <div class="goal-title">🏢 MODALIDAD PRESENCIAL</div>
+            <div class="goal-item"><span>Tickets:</span> <strong id="goal_pres_tickets">374</strong></div>
+            <div class="goal-item"><span>Chats:</span> <strong id="goal_pres_chats">384</strong></div>
+            <div class="goal-item"><span>Llamadas:</span> <strong id="goal_pres_calls">393</strong></div>
+          </div>
+          
+          <div class="goal-block" aria-label="Modalidad Home Office">
+            <div class="goal-title">🏡 MODALIDAD HOME OFFICE</div>
+            <div class="goal-item"><span>Tickets:</span> <strong id="goal_ho_tickets">524</strong></div>
+            <div class="goal-item"><span>Chats:</span> <strong id="goal_ho_chats">1727</strong></div>
+          </div>
+        </div>
         
-        const COL_INDEX = {
-            fecha:0, emailRemitente:1, tipoSolicitud:2, facturaCompra:3, cliente:4, correoCliente:5, telefonoCliente:6, modelo:7,
-            serial:8, fechaFactura:9, fechaEntrega:10, ticketAYA:11, evidenciaEntrega:12, ticketReparacion:13, evidenciaTaller:14,
-            fechaIngresoTaller:15, fechaSalidaTaller:16, folio:17, fechaLimiteServicio:18, estatus:19, fechaDecision:20, autorizadoPor:21, comentarios:22, pdf:23
+        <div style="margin-top: 24px; border-top: 2px solid var(--border); padding-top: 20px;">
+          <h3 style="margin:0 0 12px 0; font-size:14px; color:#000; font-weight: 800; text-transform: uppercase;">Métricas Generales</h3>
+          <div class="stats" aria-hidden="false">
+            <div class="stat"><div class="label">Asesores</div><div class="value" id="statAdvisors">--</div></div>
+            <div class="stat"><div class="label">Tickets</div><div class="value" id="statTickets">--</div></div>
+            <div class="stat"><div class="label">Llamadas</div><div class="value" id="statCalls">--</div></div>
+            <div class="stat"><div class="label">Chats</div><div class="value" id="statChats">--</div></div>
+          </div>
+          
+          <div style="margin-top:20px">
+            <h3 style="margin:0 0 8px 0; font-size:12px; color:var(--muted); font-weight: 700; text-transform: uppercase;">Exportación de Bases (Protegidas)</h3>
+            <div class="export-actions">
+              <button class="small-btn" id="exportTickets">Exportar Tickets_BD (CSV)</button>
+              <button class="small-btn" id="exportChats">Exportar Chats_BD (CSV)</button>
+              <button class="small-btn" id="exportCalls">Exportar Llamadas_BD (CSV)</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <footer>Interfaz optimizada · Actualización automática (15 min) · Descargas con autenticación requerida</footer>
+  </div>
+  
+  <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+    <div class="spinner" role="status" aria-live="polite"></div>
+    <div class="loading-text">Sincronizando datos...</div>
+  </div>
+  
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle" style="position: relative;">
+      <button class="close" id="modalClose" aria-label="Cerrar">&times;</button>
+      <h3 id="modalTitle">Autorización Requerida</h3>
+      <div style="color:var(--muted); font-size:13px; margin-top:6px; font-weight: 500;">Introduce la clave maestra para descargar la base de datos.</div>
+      <div class="row">
+        <input id="downloadPassword" type="password" placeholder="••••••••" aria-label="Clave de descarga">
+        <button class="primary" id="confirmDownload">Validar y Descargar</button>
+      </div>
+      <div id="modalMsg" style="margin-top:12px; color:var(--accent); font-size:14px; font-weight: 700;"></div>
+    </div>
+  </div>
+
+  <script>
+    /******************************************************************
+     * CONFIG
+     ******************************************************************/
+    const SPREADSHEET_ID = '1JBre4cLAbYiOJuYye_FGcsk5U_BIStDoAiCbV-B8WoA';
+    const ASSESSORS_SPREADSHEET_ID = '1GBcoYjw-mziCA30F2CgqGM9kKWjJjeSiTGfHN6XM8rE';
+    const SHEETS = { tickets: 'Tickets_BD', chats: 'Chats_BD', calls: 'Llamadas_BD', asesoresSheet: 'Asesores' };
+    const SECRET_CODE = 'SUPER';
+    const AUTO_REFRESH_MS = 15 * 60 * 1000;
+    function letterToIndex(letter){ return letter.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0); }
+    const COL = {
+      tickets: { advisor: letterToIndex('E'), date: letterToIndex('H'), status: letterToIndex('M') },
+      chats:  { advisor: letterToIndex('B'), duration: letterToIndex('C'), date: letterToIndex('I'), agentFlag: letterToIndex('M') },
+      calls:  { advisor: letterToIndex('B'), date: letterToIndex('C'), status: letterToIndex('D'), duration: letterToIndex('K') },
+      asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') }
+    };
+    let aliasMap = {};
+    let metaMap = {};
+    let cache = { tickets:[], chats:[], calls:[] };
+    let activeGroup = 'All';
+    let autoRefreshTimer = null;
+    let pendingDownload = null;
+    /******************************************************************
+     * UTILIDADES
+     ******************************************************************/
+    function parseCSV(text){
+      const rows = [];
+      let cur = '', row = [], inQuotes = false;
+      for(let i=0;i<text.length;i++){
+        const ch = text[i], next = text[i+1];
+        if(ch === '"'){
+          if(inQuotes && next === '"'){ cur += '"'; i++; continue; }
+          inQuotes = !inQuotes; continue;
+        }
+        if(ch === ',' && !inQuotes){ row.push(cur); cur=''; continue; }
+        if((ch === '\n' || ch === '\r') && !inQuotes){
+          if(ch === '\r' && next === '\n'){ i++; }
+          row.push(cur); rows.push(row); row=[]; cur=''; continue;
+        }
+        cur += ch;
+      }
+      if(cur !== '' || row.length) { row.push(cur); rows.push(row); }
+      return rows;
+    }
+    function fetchSheetCSVRowsById(spreadsheetId, sheetName){
+      const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+      return fetch(url).then(res => { if(!res.ok) throw new Error('Error al leer hoja ' + sheetName + ' (' + res.status + ')'); return res.text(); }).then(parseCSV);
+    }
+    function normalizeForKey(s){
+      if(s === null || s === undefined) return '';
+      let t = String(s).replace(/\u00A0/g,' ').replace(/\t/g,' ').trim();
+      t = t.replace(/[\.\,]/g,'');
+      t = t.toUpperCase();
+      const tokens = ['ATC PISTON','ATC SUP','ATC','SUP','CORD','COORD','ANL','CAP','AGT','AGENTE','SR','SRA'];
+      for(const tk of tokens){
+        const reStart = new RegExp('^\\s*' + tk + '[\\s\\-\\_\\.]*','i');
+        t = t.replace(reStart,'');
+        const reEnd = new RegExp('[\\s\\-\\_\\.]*' + tk + '\\s*$','i');
+        t = t.replace(reEnd,'');
+      }
+      if(t.includes(',')){
+        const parts = t.split(',');
+        if(parts.length >= 2){
+          t = (parts[1] + ' ' + parts[0]).trim();
+        }
+      }
+      t = t.replace(/\s+/g,' ').trim();
+      return t;
+    }
+    function titleCase(s){
+      if(!s) return s;
+      return s.toLowerCase().split(' ').map(w => w ? (w[0].toUpperCase() + w.slice(1)) : '').join(' ');
+    }
+    function durationToSeconds(s){
+      if(s === null || s === undefined) return 0;
+      const str = String(s).trim().toLowerCase();
+      if(!str) return 0;
+      let total = 0;
+      const mD = str.match(/(\d+)\s*d/); if(mD) total += parseInt(mD[1],10) * 86400;
+      const mH = str.match(/(\d+)\s*h/); if(mH) total += parseInt(mH[1],10) * 3600;
+      const mM = str.match(/(\d+)\s*m/); if(mM) total += parseInt(mM[1],10) * 60;
+      const mS = str.match(/(\d+)\s*s/); if(mS) total += parseInt(mS[1],10);
+      if(total === 0){
+        const onlyNum = str.match(/^(\d+)$/);
+        if(onlyNum) total = parseInt(onlyNum[1],10);
+      }
+      return total;
+    }
+    function parseDateFlexible(v){
+      if(v === null || v === undefined) return null;
+      const s = String(v).trim();
+      if(s === '' || s === '0' || s === '-' || s.toLowerCase() === 'null') return null;
+      const d1 = new Date(s);
+      if(!isNaN(d1.getTime())) return d1;
+      const m = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+      if(m){ const day=+m[1], mon=+m[2]-1, yr=+m[3]; return new Date(yr<100?2000+yr:yr,mon,day); }
+      const m2 = s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+      if(m2){ return new Date(+m2[1], +m2[2]-1, +m2[3]); }
+      return null;
+    }
+    /******************************************************************
+     * Alias / meta maps
+     ******************************************************************/
+    async function buildAliasAndMetaMaps(){
+      aliasMap = {};
+      metaMap = {};
+      try{
+        const rows = await fetchSheetCSVRowsById(ASSESSORS_SPREADSHEET_ID, SHEETS.asesoresSheet);
+        for(let r=0; r<rows.length; r++){
+          const row = rows[r];
+          const rawUser = (row[COL.asesores.username] || '').trim();
+          const rawGroup = (row[COL.asesores.group] || '').trim();
+          const rawSupervisor = (row[COL.asesores.supervisor] || '').trim();
+          if(!rawUser) continue;
+          const keyNorm = normalizeForKey(rawUser);
+          const canonical = titleCase(keyNorm);
+          const group = rawGroup ? rawGroup : 'OTROS';
+          const supervisor = rawSupervisor ? rawSupervisor.toUpperCase() : 'OTROS';
+          metaMap[canonical] = { group, supervisor };
+          aliasMap[keyNorm] = canonical;
+          aliasMap[normalizeForKey(rawUser.replace(/\s+/g,' '))] = canonical;
+        }
+      } catch(err){
+        console.warn('No se pudo cargar Asesores sheet:', err.message);
+      }
+    }
+    function mapAdvisorToCanonical(raw){
+      const norm = normalizeForKey(raw);
+      if(!norm) return '';
+      if(aliasMap[norm]) return aliasMap[norm];
+      const candidates = Object.keys(metaMap);
+      const found = candidates.find(c => c.toUpperCase() === norm.toUpperCase());
+      if(found) return found;
+      const canonical = titleCase(norm);
+      if(!metaMap[canonical]) metaMap[canonical] = { group: 'OTROS', supervisor: 'OTROS' };
+      aliasMap[norm] = canonical;
+      return canonical;
+    }
+    /******************************************************************
+     * Conteos y puntajes
+     ******************************************************************/
+    function aggregateCountsOnly(ticketsRows, chatsRows, callsRows, filterFrom, filterTo, selectedGroup, selectedSupervisor){
+      const counts = {};
+      function ensure(name){ if(!counts[name]) counts[name] = { tickets:0, chats:0, calls:0 }; }
+      function inRangeDate(d, from, to){
+        if(!d) return false;
+        const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        if(from && dd < from) return false;
+        if(to && dd > to) return false;
+        return true;
+      }
+      function cell(row, idx){ return (row && idx>=0 && idx < row.length) ? row[idx] : ''; }
+      for(let r=1; r<ticketsRows.length; r++){
+        const row = ticketsRows[r];
+        const rawAdvisor = cell(row, COL.tickets.advisor);
+        const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
+        if(!advisorCanonical) continue;
+        const meta = metaMap[advisorCanonical] || { group: 'OTROS', supervisor: 'OTROS' };
+        if(selectedGroup !== 'All' && meta.group !== selectedGroup) continue;
+        if(selectedSupervisor){
+          if(String(meta.supervisor || '').toUpperCase() !== String(selectedSupervisor || '').toUpperCase()) continue;
+        }
+        const rawStatus = cell(row, COL.tickets.status);
+        const status = String(rawStatus || '').trim().toUpperCase();
+        if(status !== 'CANALIZADO') continue;
+        const rawDate = cell(row, COL.tickets.date);
+        const parsed = parseDateFlexible(rawDate);
+        if((filterFrom || filterTo) && parsed){
+          if(!inRangeDate(parsed, filterFrom, filterTo)) continue;
+        }
+        ensure(advisorCanonical);
+        counts[advisorCanonical].tickets += 1;
+      }
+      for(let r=1; r<chatsRows.length; r++){
+        const row = chatsRows[r];
+        const rawAdvisor = cell(row, COL.chats.advisor);
+        const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
+        if(!advisorCanonical) continue;
+        const meta = metaMap[advisorCanonical] || { group: 'OTROS', supervisor: 'OTROS' };
+        if(selectedGroup !== 'All' && meta.group !== selectedGroup) continue;
+        if(selectedSupervisor){
+          if(String(meta.supervisor || '').toUpperCase() !== String(selectedSupervisor || '').toUpperCase()) continue;
+        }
+        const rawDuration = cell(row, COL.chats.duration);
+        const seconds = durationToSeconds(rawDuration);
+        if(seconds === 0 && String(rawDuration || '').trim() === '') continue;
+        if(seconds > 300) continue;
+        const rawAgent = cell(row, COL.chats.agentFlag);
+        const agentFlag = String(rawAgent || '').trim().toUpperCase();
+        if(agentFlag !== 'AGENT') continue;
+        const rawDate = cell(row, COL.chats.date);
+        const parsed = parseDateFlexible(rawDate);
+        if(filterFrom || filterTo){
+          if(!parsed) continue;
+          if(!inRangeDate(parsed, filterFrom, filterTo)) continue;
+        }
+        ensure(advisorCanonical);
+        counts[advisorCanonical].chats += 1;
+      }
+      for(let r=1; r<callsRows.length; r++){
+        const row = callsRows[r];
+        const rawAdvisor = cell(row, COL.calls.advisor);
+        const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
+        if(!advisorCanonical) continue;
+        const meta = metaMap[advisorCanonical] || { group: 'OTROS', supervisor: 'OTROS' };
+        if(selectedGroup !== 'All' && meta.group !== selectedGroup) continue;
+        if(selectedSupervisor){
+          if(String(meta.supervisor || '').toUpperCase() !== String(selectedSupervisor || '').toUpperCase()) continue;
+        }
+        const rawStatus = cell(row, COL.calls.status);
+        const status = String(rawStatus || '').trim().toLowerCase();
+        if(status !== 'completed') continue;
+        const rawDuration = cell(row, COL.calls.duration);
+        const seconds = durationToSeconds(rawDuration);
+        if(seconds <= 35) continue;
+        const rawDate = cell(row, COL.calls.date);
+        const parsed = parseDateFlexible(rawDate);
+        if(filterFrom || filterTo){
+          if(!parsed) continue;
+          if(!inRangeDate(parsed, filterFrom, filterTo)) continue;
+        }
+        ensure(advisorCanonical);
+        counts[advisorCanonical].calls += 1;
+      }
+      return counts;
+    }
+    function calculateScoresFromCountsSum(countsObj){
+      const counts = countsObj;
+      const advisors = Object.keys(counts);
+      if(advisors.length === 0) return [];
+      let maxTickets = 0, maxCalls = 0, maxChats = 0;
+      advisors.forEach(name => {
+        const c = counts[name];
+        if(c.tickets > maxTickets) maxTickets = c.tickets;
+        if(c.calls > maxCalls) maxCalls = c.calls;
+        if(c.chats > maxChats) maxChats = c.chats;
+      });
+      const arr = advisors.map(name => {
+        const c = counts[name];
+        const ticketPts = maxTickets ? (c.tickets / maxTickets) * 100 : 0;
+        const callPts   = maxCalls   ? (c.calls   / maxCalls)   * 100 : 0;
+        const chatPts   = maxChats   ? (c.chats   / maxChats)   * 100 : 0;
+        const total = ticketPts + callPts + chatPts;
+        return {
+          name,
+          tickets: c.tickets,
+          ticketPts: Number(ticketPts.toFixed(2)),
+          calls: c.calls,
+          callPts: Number(callPts.toFixed(2)),
+          chats: c.chats,
+          chatPts: Number(chatPts.toFixed(2)),
+          total: Number(total.toFixed(2)),
+          group: metaMap[name] ? metaMap[name].group : 'OTROS',
+          supervisor: metaMap[name] ? metaMap[name].supervisor : 'OTROS'
         };
-
-        const LABELS_A_X = ['Marca temporal','Dirección de correo electrónico','Tipo de Solicitud','Factura de compra de la unidad','Nombre del cliente','Correo del cliente','Numero celular del cliente','Modelo de la Unidad','Número de Serie (VIN)','Fecha de Factura','Fecha de entrega de la unidad','Ticket de AYA','Evidencia de entrega','Número de Ticket de Reparación','Evidencia de que la moto estuvo en taller','Fecha de ingreso al taller','Fecha de salida del taller','FOLIO','Fecha Límite Servicio','ESTATUS','Fecha de aprobación','AUTORIZADO POR','Comentarios','Link_PDF'];
-
-        let allRecords = [];
-        let currentFilter = 'TODOS';
-        let currentDetailRecord = null;
-
-        /* DOM Elements */
-        const tableBody = document.getElementById('tableBody');
-        const emptyState = document.getElementById('emptyState');
-        const serialInput = document.getElementById('serial');
-        const superPassInline = document.getElementById('superPassInline');
-        const detailModal = document.getElementById('detailModal');
-        const detailPdfFrame = document.getElementById('detailPdfFrame');
-
-        /* Inicialización */
-        window.addEventListener('load', fetchAllData);
-        document.getElementById('btnRefresh').addEventListener('click', fetchAllData);
-        document.getElementById('btnSearch').addEventListener('click', () => renderTable(allRecords));
-        document.getElementById('btnClear').addEventListener('click', () => { serialInput.value = ''; renderTable(allRecords); });
-        document.getElementById('detailClose').addEventListener('click', () => { detailModal.style.display = 'none'; detailPdfFrame.src = ''; });
-
-        /* Manejo de Filtros de Estado */
-        document.querySelectorAll('.filter-tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-                const target = e.currentTarget;
-                target.classList.add('active');
-                currentFilter = target.dataset.status;
-                document.getElementById('view-title').textContent = target.textContent.split(' ')[0] === 'Mostrar' ? 'Todas las Solicitudes' : 'Solicitudes ' + currentFilter + 'S';
-                renderTable(allRecords);
-            });
-        });
-
-        /* Descarga de datos inicial (Carga unificada) */
-        async function fetchAllData() {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 40px;">🔄 Cargando base de datos de garantías de Vento...</td></tr>';
-            try {
-                const url = new URL(WEBAPP_URL);
-                url.searchParams.set('action', 'pending'); // Pide registros pendientes iniciales
-                const res = await fetch(url.toString());
-                if(res.ok) {
-                    allRecords = await res.json();
-                    updateBadges(allRecords);
-                    renderTable(allRecords);
-                }
-            } catch (e) {
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red; padding:40px;">⚠️ Error de conexión con Google Sheets. Revisa los permisos de tu WebApp URL.</td></tr>';
-            }
+      });
+      arr.sort((a,b) => b.total - a.total);
+      return arr;
+    }
+    /******************************************************************
+     * Renderizado
+     ******************************************************************/
+    function renderSkeletonRows(){
+      const tbody = document.getElementById('leaderboardBody');
+      tbody.innerHTML = '';
+      for(let i=0;i<6;i++){
+        const tr = document.createElement('tr');
+        tr.className = 'skeleton-row';
+        tr.innerHTML = `<td style="width:64px;height:68px"></td><td style="height:68px"></td><td></td><td></td><td></td><td></td>`;
+        tbody.appendChild(tr);
+      }
+    }
+    function renderLeaderboard(scores){
+      const tbody = document.getElementById('leaderboardBody');
+      tbody.innerHTML = '';
+      if(scores.length === 0){
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 32px; color: #666; font-weight: 700;">No hay datos para mostrar</td></tr>';
+        return;
+      }
+      scores.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        const posClass = idx === 0 ? 'pos top' : 'pos';
+        tr.innerHTML = `
+          <td><div class="${posClass}">${idx+1}</div></td>
+          <td>
+            <div class="advisor-name">${escapeHtml(row.name)}</div>
+            <div class="meta-small">${escapeHtml(row.group)} · ${escapeHtml(row.supervisor)}</div>
+          </td>
+          <td><div class="vol">${row.tickets}</div><div class="meta-small">${row.ticketPts} pts</div></td>
+          <td><div class="vol">${row.calls}</div><div class="meta-small">${row.callPts} pts</div></td>
+          <td><div class="vol">${row.chats}</div><div class="meta-small">${row.chatPts} pts</div></td>
+          <td><div class="score">${row.total}</div></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      if(scores.length > 7){
+        const rows = tbody.querySelectorAll('tr');
+        if(rows[0]) rows[0].classList.add('top-highlight-1');
+        if(rows[1]) rows[1].classList.add('top-highlight-2');
+        if(rows[2]) rows[2].classList.add('top-highlight-3');
+        for(let i=0;i<3;i++){
+          const row = rows[i];
+          if(!row) continue;
+          const nameCell = row.querySelector('td:nth-child(2) .advisor-name');
+          if(nameCell){
+            const badge = document.createElement('span');
+            badge.className = 'badge-top';
+            badge.textContent = `TOP ${i+1}`;
+            nameCell.appendChild(badge);
+          }
         }
-
-        function updateBadges(list) {
-            document.getElementById('badge-todos').textContent = list.length;
-            document.getElementById('badge-pendientes').textContent = list.filter(r => (r.estatus || r[COL_INDEX.estatus] || '').toString().toUpperCase() === 'PENDIENTE').length;
-            document.getElementById('badge-autorizados').textContent = list.filter(r => (r.estatus || r[COL_INDEX.estatus] || '').toString().toUpperCase() === 'AUTORIZADO').length;
-            document.getElementById('badge-rechazados').textContent = list.filter(r => (r.estatus || r[COL_INDEX.estatus] || '').toString().toUpperCase() === 'RECHAZADO').length;
+      }
+    }
+    /******************************************************************
+     * Descargas: construir CSV raw filtrado (para cruces)
+     ******************************************************************/
+    function rowsToCSV(rows){
+      return rows.map(r => r.map(cell => {
+        if(cell === null || cell === undefined) return '';
+        const s = String(cell).replace(/"/g,'""');
+        return `"${s}"`;
+      }).join(',')).join('\n');
+    }
+    function buildFilteredRawRows(){
+      const out = [];
+      out.push(['Tipo','Fecha','AsesorCanonical','AsesorRaw','Grupo','Supervisor','Estado/Agent','Duración','RawRow']);
+      const { fromDateOnly, toDateOnly } = getPeriodRange();
+      const selectedSupervisorRaw = document.getElementById('filterSupervisor').value || '';
+      const selectedSupervisor = selectedSupervisorRaw || '';
+      function passesMeta(advisorCanonical){
+        const meta = metaMap[advisorCanonical] || { group: 'OTROS', supervisor: 'OTROS' };
+        if(activeGroup !== 'All' && meta.group !== activeGroup) return false;
+        if(selectedSupervisor){
+          if(String(meta.supervisor || '').toUpperCase() !== String(selectedSupervisor || '').toUpperCase()) return false;
         }
-
-        function transformToPreviewUrl(raw){
-            if(!raw) return '';
-            try{
-                const u = new URL(raw);
-                if(u.hostname.includes('drive.google.com')){
-                    const m = raw.match(/\/file\/d\/([^\/]+)\/?/);
-                    if(m && m[1]) return `https://drive.google.com/file/d/${m[1]}/preview`;
-                }
-                return raw;
-            }catch(e){ return raw; }
+        return true;
+      }
+      const tickets = cache.tickets || [];
+      for(let r=1; r<tickets.length; r++){
+        const row = tickets[r];
+        const rawAdvisor = row[COL.tickets.advisor] || '';
+        const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
+        if(!advisorCanonical) continue;
+        if(!passesMeta(advisorCanonical)) continue;
+        const status = String(row[COL.tickets.status] || '').trim().toUpperCase();
+        if(status !== 'CANALIZADO') continue;
+        const rawDate = row[COL.tickets.date];
+        const parsed = parseDateFlexible(rawDate);
+        if((fromDateOnly || toDateOnly) && parsed){
+          const dd = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+          if(fromDateOnly && dd < fromDateOnly) continue;
+          if(toDateOnly && dd > toDateOnly) continue;
         }
-
-        /* Renderizar Tabla Unificada */
-        function renderTable(list) {
-            const searchTerm = serialInput.value.trim().toLowerCase();
-            
-            // Filtrado dinámico doble (Por Estatus + Por Buscador VIN)
-            let filtered = list.filter(r => {
-                const statusValue = (r.estatus || r[COL_INDEX.estatus] || 'PENDIENTE').toString().toUpperCase();
-                const matchStatus = (currentFilter === 'TODOS' || statusValue === currentFilter);
-                const matchSerial = !searchTerm || (r.serial || '').toString().toLowerCase().includes(searchTerm);
-                return matchStatus && matchSerial;
-            });
-
-            if (filtered.length === 0) {
-                tableBody.innerHTML = '';
-                emptyState.style.display = 'block';
-                return;
-            }
-            emptyState.style.display = 'none';
-
-            tableBody.innerHTML = filtered.map(r => {
-                const est = (r.estatus || r[COL_INDEX.estatus] || 'PENDIENTE').toString().toUpperCase();
-                const badgeClass = est === 'AUTORIZADO' ? 'autorizado' : (est === 'RECHAZADO' ? 'rechazado' : 'pendiente');
-                
-                // Marcador de presencia de documentos
-                const checkDoc = (idx) => r[idx] || Object.values(r)[idx] ? '🔸' : '—';
-                const evs = `D:${checkDoc(3)} M:${checkDoc(12)} O:${checkDoc(14)} X:${checkDoc(23)}`;
-
-                return `<tr onclick="openDetailModal(${JSON.stringify(r).replace(/"/g, '&quot;')})">
-                    <td style="font-weight:800; color:var(--color-orange);">${r.serial || '—'}</td>
-                    <td style="font-weight:600;">${r.cliente || r[COL_INDEX.cliente] || '—'}</td>
-                    <td style="color:#666;">${r.fecha ? new Date(r.fecha).toLocaleDateString() : '—'}</td>
-                    <td>${r.modelo || '—'}</td>
-                    <td><span class="status-pill ${badgeClass}">${est}</span></td>
-                    <td style="font-size:12px; font-family:monospace; color:#555;">${evs}</td>
-                </tr>`;
-            }).join('');
+        if((fromDateOnly || toDateOnly) && !parsed) continue;
+        const meta = metaMap[advisorCanonical] || { group:'OTROS', supervisor:'OTROS' };
+        out.push(['Ticket', parsed ? parsed.toISOString().slice(0,10) : (rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, status, '', row.join(' | ')]);
+      }
+      const chats = cache.chats || [];
+      for(let r=1; r<chats.length; r++){
+        const row = chats[r];
+        const rawAdvisor = row[COL.chats.advisor] || '';
+        const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
+        if(!advisorCanonical) continue;
+        if(!passesMeta(advisorCanonical)) continue;
+        const rawDuration = row[COL.chats.duration];
+        const seconds = durationToSeconds(rawDuration);
+        if(seconds === 0 && String(rawDuration || '').trim() === '') continue;
+        if(seconds > 300) continue;
+        const agentFlag = String(row[COL.chats.agentFlag] || '').trim().toUpperCase();
+        if(agentFlag !== 'AGENT') continue;
+        const rawDate = row[COL.chats.date];
+        const parsed = parseDateFlexible(rawDate);
+        if((fromDateOnly || toDateOnly) && parsed){
+          const dd = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+          if(fromDateOnly && dd < fromDateOnly) continue;
+          if(toDateOnly && dd > toDateOnly) continue;
         }
-
-        /* Apertura y Generación de Vista Partida (Split View) */
-        function openDetailModal(record) {
-            currentDetailRecord = record;
-            document.getElementById('modalSerialTitle').textContent = `Garantía VIN: ${record.serial || 'Sin Serie'}`;
-            
-            // Render panel Izquierdo A..X
-            let leftHtml = '';
-            for(let i=0; i<24; i++) {
-                const letter = String.fromCharCode(65+i);
-                let val = record[Object.keys(COL_INDEX).find(k=>COL_INDEX[k]===i)] || record[letter] || record[i] || '—';
-                if(typeof val === 'object' && val !== null) val = val.url || 'Ver PDF';
-                leftHtml += `<div class="data-field"><strong>${letter} • ${LABELS_A_X[i]}</strong><span>${val}</span></div>`;
-            }
-            document.getElementById('panelLeftFields').innerHTML = leftHtml;
-
-            // Render pestañas PDF derechas si existen enlaces
-            const docsIndices = [3, 12, 14, 23];
-            const tabsContainer = document.getElementById('previewTabsContainer');
-            tabsContainer.innerHTML = '';
-            let firstUrl = '';
-
-            docsIndices.forEach(idx => {
-                const letter = String.fromCharCode(65+idx);
-                let rawUrl = record[Object.keys(COL_INDEX).find(k=>COL_INDEX[k]===idx)] || record[letter] || record[idx];
-                if (rawUrl && typeof rawUrl === 'string' && rawUrl.startsWith('http')) {
-                    const btn = document.createElement('button');
-                    btn.className = 'tab-btn';
-                    btn.textContent = `${letter} • ${LABELS_A_X[idx].substring(0,15)}...`;
-                    const previewUrl = transformToPreviewUrl(rawUrl);
-                    if(!firstUrl) firstUrl = previewUrl;
-
-                    btn.onclick = () => {
-                        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        detailPdfFrame.src = previewUrl;
-                    };
-                    tabsContainer.appendChild(btn);
-                }
-            });
-
-            if(firstUrl) {
-                detailPdfFrame.src = firstUrl;
-                if(tabsContainer.firstChild) tabsContainer.firstChild.classList.add('active');
-            } else {
-                detailPdfFrame.src = '';
-                tabsContainer.innerHTML = '<span style="font-size:13px; color:#888;">Ningún campo contiene un enlace a PDF previsualizable.</span>';
-            }
-
-            document.getElementById('detailModal').style.display = 'flex';
+        if((fromDateOnly || toDateOnly) && !parsed) continue;
+        const meta = metaMap[advisorCanonical] || { group:'OTROS', supervisor:'OTROS' };
+        out.push(['Chat', parsed ? parsed.toISOString().slice(0,10) : (rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, agentFlag, rawDuration || '', row.join(' | ')]);
+      }
+      const calls = cache.calls || [];
+      for(let r=1; r<calls.length; r++){
+        const row = calls[r];
+        const rawAdvisor = row[COL.calls.advisor] || '';
+        const advisorCanonical = mapAdvisorToCanonical(rawAdvisor);
+        if(!advisorCanonical) continue;
+        if(!passesMeta(advisorCanonical)) continue;
+        const status = String(row[COL.calls.status] || '').trim().toLowerCase();
+        if(status !== 'completed') continue;
+        const rawDuration = row[COL.calls.duration];
+        const seconds = durationToSeconds(rawDuration);
+        if(seconds < 60) continue;
+        const rawDate = row[COL.calls.date];
+        const parsed = parseDateFlexible(rawDate);
+        if((fromDateOnly || toDateOnly) && parsed){
+          const dd = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+          if(fromDateOnly && dd < fromDateOnly) continue;
+          if(toDateOnly && dd > toDateOnly) continue;
         }
-
-        /* Acciones de Validación */
-        document.getElementById('btnAuthorize').addEventListener('click', () => processAction('AUTORIZADO'));
-        document.getElementById('btnReject').addEventListener('click', () => processAction('RECHAZADO'));
-
-        async function processAction(statusAction) {
-            let pass = superPassInline.value.trim();
-            if(!pass) {
-                pass = prompt(`Por seguridad introduce la contraseña del supervisor para marcar como ${statusAction}:`);
-                if(!pass) return;
-            }
-
-            const autorizador = document.getElementById('detailAutoriza').value;
-            
-            try {
-                const url = new URL(WEBAPP_URL);
-                url.searchParams.set('action', 'update');
-                url.searchParams.set('serial', currentDetailRecord.serial);
-                url.searchParams.set('newStatus', statusAction);
-                url.searchParams.set('autorizador', autorizador);
-                url.searchParams.set('pass', pass);
-
-                const res = await fetch(url.toString());
-                const data = await res.json();
-                
-                if(data && data.ok) {
-                    alert(`Éxito: Garantía dictaminada como ${statusAction} por ${autorizador}.`);
-                    document.getElementById('detailModal').style.display = 'none';
-                    fetchAllData();
-                } else {
-                    alert('Error en validación: ' + (data.error || 'Verifica la contraseña del supervisor.'));
-                }
-            } catch(e) {
-                alert('Ocurrió un error al procesar la actualización remota.');
-            }
-        }
-    </script>
+        if((fromDateOnly || toDateOnly) && !parsed) continue;
+        const meta = metaMap[advisorCanonical] || { group:'OTROS', supervisor:'OTROS' };
+        out.push(['Llamada', parsed ? parsed.toISOString().slice(0,10) : (rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, status, rawDuration || '', row.join(' | ')]);
+      }
+      return out;
+    }
+    function downloadCSV(text, filename){
+      const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+    function openPasswordModal(){
+      document.getElementById('modalBackdrop').style.display = 'flex';
+      document.getElementById('downloadPassword').value = '';
+      document.getElementById('modalMsg').textContent = '';
+      document.getElementById('downloadPassword').focus();
+    }
+    function closePasswordModal(){
+      document.getElementById('modalBackdrop').style.display = 'none';
+      pendingDownload = null;
+    }
+    async function confirmDownloadAction(){
+      const val = (document.getElementById('downloadPassword').value || '').trim();
+      if(!val){ document.getElementById('modalMsg').textContent = '⚠️ Introduce la clave'; return; }
+      if(val !== SECRET_CODE){ document.getElementById('modalMsg').textContent = '❌ Clave incorrecta'; return; }
+      const pd = pendingDownload;
+      if(!pd){ closePasswordModal(); return; }
+      downloadCSV(pd.data.csv, pd.data.filename);
+      closePasswordModal();
+    }
+    /******************************************************************
+     * Refresh datos (solo datos) y flujo principal
+     ******************************************************************/
+    async function refreshDataOnly(){
+      try{
+        showLoading();
+        const [ticketsRows, chatsRows, callsRows] = await Promise.all([
+          fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.tickets),
+          fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.chats),
+          fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.calls)
+        ]);
+        cache.tickets = ticketsRows;
+        cache.chats = chatsRows;
+        cache.calls = callsRows;
+        document.getElementById('lastSync').textContent = formatHHmm(new Date());
+        applyFiltersAndRender();
+      } catch(err){
+        console.warn('Error al refrescar datos:', err.message);
+      } finally{
+        hideLoading();
+      }
+    }
+    async function loadAndRender(){
+      try{
+        renderSkeletonRows();
+        showLoading();
+        document.getElementById('periodSelector').value = 'thisMonth';
+        const { fromDateOnly, toDateOnly } = getPeriodRange();
+        if(fromDateOnly) document.getElementById('dateFrom').value = fromDateOnly.toISOString().slice(0,10);
+        if(toDateOnly) document.getElementById('dateTo').value = toDateOnly.toISOString().slice(0,10);
+        document.getElementById('lastSync').textContent = formatHHmm(new Date());
+        await buildAliasAndMetaMaps();
+        populateSupervisorFilter();
+        const [ticketsRows, chatsRows, callsRows] = await Promise.all([
+          fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.tickets),
+          fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.chats),
+          fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.calls)
+        ]);
+        cache.tickets = ticketsRows;
+        cache.chats = chatsRows;
+        cache.calls = callsRows;
+        applyFiltersAndRender();
+        if(autoRefreshTimer) clearInterval(autoRefreshTimer);
+        autoRefreshTimer = setInterval(() => {
+          refreshDataOnly();
+        }, AUTO_REFRESH_MS);
+      } catch(err){
+        console.error(err);
+        alert('Error al cargar datos: ' + err.message + '. Revisa permisos de las hojas o la consola.');
+      } finally{
+        hideLoading();
+      }
+    }
+    /******************************************************************
+     * Period / Filters helpers
+     ******************************************************************/
+    function getPeriodRange(){
+      const sel = document.getElementById('periodSelector').value;
+      const today = new Date();
+      let fromDateOnly = null, toDateOnly = null;
+      if(sel === 'today'){
+        fromDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        toDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      } else if(sel === 'thisMonth'){
+        fromDateOnly = new Date(today.getFullYear(), today.getMonth(), 1);
+        toDateOnly = new Date(today.getFullYear(), today.getMonth()+1, 0);
+      } else if(sel === 'lastMonth'){
+        const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth()-1, 1);
+        const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        fromDateOnly = firstDayLastMonth;
+        toDateOnly = lastDayLastMonth;
+      } else {
+        const fromVal = document.getElementById('dateFrom').value;
+        const toVal   = document.getElementById('dateTo').value;
+        fromDateOnly = fromVal ? new Date(fromVal + 'T00:00:00') : null;
+        toDateOnly   = toVal   ? new Date(toVal + 'T23:59:59') : null;
+        if(fromDateOnly) fromDateOnly = new Date(fromDateOnly.getFullYear(), fromDateOnly.getMonth(), fromDateOnly.getDate());
+        if(toDateOnly) toDateOnly = new Date(toDateOnly.getFullYear(), toDateOnly.getMonth(), toDateOnly.getDate());
+      }
+      return { fromDateOnly, toDateOnly };
+    }
+    function populateSupervisorFilter(){
+      const sel = document.getElementById('filterSupervisor');
+      sel.innerHTML = '';
+      const firstOpt = document.createElement('option');
+      firstOpt.value = '';
+      firstOpt.textContent = 'Todos los supervisores';
+      sel.appendChild(firstOpt);
+      const fixedOptions = [
+        "IVAN GERARDO MORENO GARATACHEA",
+        "CECILIA CARRERA MORALES",
+        "OTROS"
+      ];
+      fixedOptions.forEach(sup => {
+        const opt = document.createElement('option');
+        opt.value = sup;
+        opt.textContent = sup;
+        sel.appendChild(opt);
+      });
+    }
+    function applyFiltersAndRender(){
+      const { fromDateOnly, toDateOnly } = getPeriodRange();
+      const selectedSupervisorRaw = document.getElementById('filterSupervisor').value || '';
+      const selectedSupervisor = selectedSupervisorRaw || '';
+      const counts = aggregateCountsOnly(cache.tickets, cache.chats, cache.calls, fromDateOnly, toDateOnly, activeGroup, selectedSupervisor);
+      const scores = calculateScoresFromCountsSum(counts);
+      updateSideStats(counts);
+      renderLeaderboard(scores);
+      window.__lastRenderedScores = scores;
+    }
+    function updateSideStats(counts){
+      const advisors = Object.keys(counts).length;
+      const totalTickets = Object.values(counts).reduce((s,c)=>s+(c.tickets||0),0);
+      const totalCalls = Object.values(counts).reduce((s,c)=>s+(c.calls||0),0);
+      const totalChats = Object.values(counts).reduce((s,c)=>s+(c.chats||0),0);
+      document.getElementById('statAdvisors').textContent = advisors;
+      document.getElementById('statTickets').textContent = totalTickets;
+      document.getElementById('statCalls').textContent = totalCalls;
+      document.getElementById('statChats').textContent = totalChats;
+    }
+    /******************************************************************
+     * UI events and download wiring
+     ******************************************************************/
+    document.getElementById('applyFilters').addEventListener('click', () => applyFiltersAndRender());
+    document.getElementById('refreshBtn').addEventListener('click', () => refreshDataOnly());
+    document.getElementById('periodSelector').addEventListener('change', () => {
+      const sel = document.getElementById('periodSelector').value;
+      if(sel !== 'custom'){
+        const { fromDateOnly, toDateOnly } = getPeriodRange();
+        if(fromDateOnly) document.getElementById('dateFrom').value = fromDateOnly.toISOString().slice(0,10);
+        if(toDateOnly) document.getElementById('dateTo').value = toDateOnly.toISOString().slice(0,10);
+      }
+      applyFiltersAndRender();
+    });
+    document.getElementById('filterSupervisor').addEventListener('change', () => applyFiltersAndRender());
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeGroup = tab.getAttribute('data-group') || 'All';
+        applyFiltersAndRender();
+      });
+    });
+    document.getElementById('downloadFiltered').addEventListener('click', () => {
+      const rows = buildFilteredRawRows();
+      if(rows.length <= 1){
+        alert('No hay registros que coincidan con el filtro actual.');
+        return;
+      }
+      const csv = rowsToCSV(rows);
+      const now = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+      const filename = `datos_filtrados_raw_${now}.csv`;
+      pendingDownload = { type: 'filtered', data: { csv, filename } };
+      openPasswordModal();
+    });
+    document.getElementById('exportTickets').addEventListener('click', () => {
+      if(!cache.tickets || cache.tickets.length === 0){ alert('No hay datos de Tickets en cache. Refresca.'); return; }
+      const csv = rowsToCSV(cache.tickets);
+      const filename = `Tickets_BD_full.csv`;
+      pendingDownload = { type: 'tickets', data: { csv, filename } };
+      openPasswordModal();
+    });
+    document.getElementById('exportChats').addEventListener('click', () => {
+      if(!cache.chats || cache.chats.length === 0){ alert('No hay datos de Chats en cache. Refresca.'); return; }
+      const csv = rowsToCSV(cache.chats);
+      const filename = `Chats_BD_full.csv`;
+      pendingDownload = { type: 'chats', data: { csv, filename } };
+      openPasswordModal();
+    });
+    document.getElementById('exportCalls').addEventListener('click', () => {
+      if(!cache.calls || cache.calls.length === 0){ alert('No hay datos de Llamadas en cache. Refresca.'); return; }
+      const csv = rowsToCSV(cache.calls);
+      const filename = `Llamadas_BD_full.csv`;
+      pendingDownload = { type: 'calls', data: { csv, filename } };
+      openPasswordModal();
+    });
+    document.getElementById('modalClose').addEventListener('click', closePasswordModal);
+    document.getElementById('confirmDownload').addEventListener('click', confirmDownloadAction);
+    document.getElementById('downloadPassword').addEventListener('keydown', (e) => { if(e.key === 'Enter') confirmDownloadAction(); });
+    /******************************************************************
+     * Helpers
+     ******************************************************************/
+    function showLoading(){ document.getElementById('loadingOverlay').style.display = 'flex'; }
+    function hideLoading(){ document.getElementById('loadingOverlay').style.display = 'none'; }
+    function escapeHtml(s){ return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function formatHHmm(date){ const d=new Date(date); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+    /******************************************************************
+     * Inicialización
+     ******************************************************************/
+    loadAndRender();
+  </script>
 </body>
 </html>
