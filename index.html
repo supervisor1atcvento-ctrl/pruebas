@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Dashboard Asesores — Rendimiento y Metas (Barras por Rubro)</title>
+<title>Dashboard Asesores — Barras por Rubro (Home Office sin Llamadas)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
@@ -48,7 +48,7 @@ tbody tr:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(2,6,23,0.0
 .advisor-name-link{font-weight:800;font-size:15px;color:var(--text);cursor:pointer;text-decoration:none}
 .advisor-name-link:hover{color:var(--accent-2)}
 .meta-small{font-size:12px;color:var(--muted);margin-top:4px}
-.score{color:var(--accent-2);font-weight:900;font-size:16px;background:linear-gradient(90deg,rgba(245,158,11,0.08),rgba(14,165,164,0.03));padding:6px 12px;border-radius:8px;display:inline-block}
+.score{color:var(--accent-2);font-weight:900;font-size:16px;padding:6px 12px;border-radius:8px;display:inline-block;background:linear-gradient(90deg,rgba(245,158,11,0.06),rgba(14,165,164,0.02))}
 .top-highlight-1 td{background:var(--gold);color:#0B1220}
 .top-highlight-2 td{background:var(--silver);color:#0B1220}
 .top-highlight-3 td{background:var(--bronze);color:#0B1220}
@@ -257,9 +257,7 @@ tbody tr:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(2,6,23,0.0
 </div>
 
 <script>
-/* Mantengo la lógica previa y ahora calculo porcentajes por rubro (tickets/calls/chats)
-   usando las metas definidas en el panel lateral. Las barras se pintan según umbral. */
-
+/* Variables y configuración */
 const SPREADSHEET_ID = '1JBre4cLAbYiOJuYye_FGcsk5U_BIStDoAiCbV-B8WoA';
 const ASSESSORS_SPREADSHEET_ID = '1GBcoYjw-mziCA30F2CgqGM9kKWjJjeSiTGfHN6XM8rE';
 const SHEETS = { tickets: 'Tickets_BD', chats: 'Chats_BD', calls: 'Llamadas_BD', asesoresSheet: 'Asesores' };
@@ -277,7 +275,7 @@ const COL = {
 let aliasMap = {}; let metaMap = {}; let cache = { tickets:[], chats:[], calls:[] };
 let activeGroup = 'All'; let autoRefreshTimer = null; let pendingDownload = null; let advisorChartInstance = null;
 
-/* Utilidades (idénticas) */
+/* Utilidades */
 function parseCSV(text){
   const rows=[]; let cur='', row=[], inQuotes=false;
   for(let i=0;i<text.length;i++){ const ch=text[i], next=text[i+1];
@@ -429,7 +427,7 @@ function calculateScoresFromCountsSum(countsObj){
   return arr;
 }
 
-/* Gráfica diaria (idéntica) */
+/* Gráfica diaria */
 function getDailyChartData(advisorName, start, end) {
   const labels=[]; const pointsData=[]; const ticketsData=[]; const callsData=[]; const chatsData=[]; const dates=[];
   let curr=new Date(start);
@@ -476,17 +474,24 @@ function showChartModal(advisorName) {
 }
 document.getElementById('chartModalClose').addEventListener('click', () => { document.getElementById('chartModalBackdrop').style.display = 'none'; });
 
-/* Renderizado con barras por rubro */
+/* Renderizado con barras por rubro y sin meta escrita en Puntaje */
 function renderSkeletonRows(){
   const tbody=document.getElementById('leaderboardBody'); tbody.innerHTML='';
   for(let i=0;i<6;i++){ const tr=document.createElement('tr'); tr.className='skeleton-row'; tr.innerHTML=`<td style="width:64px;height:68px"></td><td style="height:68px"></td><td></td><td></td><td></td><td></td>`; tbody.appendChild(tr); }
+}
+
+/* Color según porcentaje (retorna CSS válido para background) */
+function getColorForPercent(p){
+  if(p === null || p === undefined) return '#E6EEF8';
+  if(p >= 100) return 'linear-gradient(90deg,#10B981,#059669)';
+  if(p >= 80) return 'linear-gradient(90deg,#F59E0B,#FBBF24)';
+  return 'linear-gradient(90deg,#EF4444,#DC2626)';
 }
 
 function renderLeaderboard(scores){
   const tbody=document.getElementById('leaderboardBody'); tbody.innerHTML='';
   if(scores.length===0){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);font-weight:700">No hay datos para mostrar</td></tr>'; return; }
 
-  // Metas desde DOM
   const goalPresTickets = Number(document.getElementById('goal_pres_tickets').textContent || 0);
   const goalPresChats = Number(document.getElementById('goal_pres_chats').textContent || 0);
   const goalPresCalls = Number(document.getElementById('goal_pres_calls').textContent || 0);
@@ -496,22 +501,48 @@ function renderLeaderboard(scores){
   scores.forEach((row, idx) => {
     const tr=document.createElement('tr');
 
-    // Determinar metas por modalidad
     const isHO = (row.group || '').toLowerCase().includes('home');
+
     const targetTickets = isHO ? (goalHOTickets || goalPresTickets || 1) : (goalPresTickets || 1);
-    const targetCalls = isHO ? (goalPresCalls || 1) : (goalPresCalls || 1); // Home Office no tiene meta calls en tu config; usamos presencial como fallback
+    const targetCalls = isHO ? null : (goalPresCalls || 1);
     const targetChats = isHO ? (goalHOChats || goalPresChats || 1) : (goalPresChats || 1);
 
     const percentTickets = targetTickets ? Math.min(100, Math.round((row.tickets / targetTickets) * 100)) : 0;
-    const percentCalls = targetCalls ? Math.min(100, Math.round((row.calls / targetCalls) * 100)) : 0;
+    const percentCalls = (targetCalls === null) ? null : (targetCalls ? Math.min(100, Math.round((row.calls / targetCalls) * 100)) : 0);
     const percentChats = targetChats ? Math.min(100, Math.round((row.chats / targetChats) * 100)) : 0;
 
-    // Estado global basado en tickets (puedes cambiar a promedio de los 3 si prefieres)
     let statusClass='status-lejos', statusLabel='Lejos';
     if(percentTickets>=100){ statusClass='status-cumplido'; statusLabel='Cumplido'; }
     else if(percentTickets>=80){ statusClass='status-cerca'; statusLabel='Cerca'; }
 
     const posClass = idx===0 ? 'pos top' : 'pos';
+
+    const llamadasCell = (function(){
+      if(isHO){
+        return `
+          <div class="rubro-wrap">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="rubro-label">Llamadas</div>
+              <div class="rubro-percent">N/A</div>
+            </div>
+            <div class="meta-small">No aplica (Home Office)</div>
+          </div>
+        `;
+      } else {
+        return `
+          <div class="rubro-wrap">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="rubro-label">Llamadas</div>
+              <div class="rubro-percent">${percentCalls}%</div>
+            </div>
+            <div class="rubro-progress" title="${percentCalls}% vs meta llamadas">
+              <div class="rubro-bar" style="width:${percentCalls}%;background:${getColorForPercent(percentCalls)}"></div>
+            </div>
+            <div class="meta-small">${row.calls} · ${row.callPts} pts</div>
+          </div>
+        `;
+      }
+    })();
 
     tr.innerHTML = `
       <td><div class="${posClass}">${idx+1}</div></td>
@@ -538,16 +569,7 @@ function renderLeaderboard(scores){
       </td>
 
       <td>
-        <div class="rubro-wrap">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="rubro-label">Llamadas</div>
-            <div class="rubro-percent">${percentCalls}%</div>
-          </div>
-          <div class="rubro-progress" title="${percentCalls}% vs meta llamadas">
-            <div class="rubro-bar" style="width:${percentCalls}%;background:${getColorForPercent(percentCalls)}"></div>
-          </div>
-          <div class="meta-small">${row.calls} · ${row.callPts} pts</div>
-        </div>
+        ${llamadasCell}
       </td>
 
       <td>
@@ -569,14 +591,12 @@ function renderLeaderboard(scores){
             <div class="score">${row.total}</div>
             <div class="status-pill ${statusClass}">${statusLabel}</div>
           </div>
-          <div class="meta-small">Tickets meta: ${targetTickets} · Chats meta: ${targetChats} · Llamadas meta: ${targetCalls}</div>
         </div>
       </td>
     `;
     tbody.appendChild(tr);
   });
 
-  // Highlights Top 3
   const rows = tbody.querySelectorAll('tr');
   if(rows[0]) rows[0].classList.add('top-highlight-1');
   if(rows[1]) rows[1].classList.add('top-highlight-2');
@@ -592,14 +612,7 @@ function renderLeaderboard(scores){
   }
 }
 
-/* Color según porcentaje */
-function getColorForPercent(p){
-  if(p>=100) return 'linear-gradient(90deg,#10B981,#059669)'; // verde
-  if(p>=80) return 'linear-gradient(90deg,#F59E0B,#FBBF24)'; // amarillo
-  return 'linear-gradient(90deg,#EF4444,#DC2626)'; // rojo
-}
-
-/* CSV helpers y export (idénticos) */
+/* CSV helpers y export */
 function rowsToCSV(rows){ return rows.map(r=>r.map(cell=>{ if(cell===null||cell===undefined) return ''; const s=String(cell).replace(/"/g,'""'); return `"${s}"`; }).join(',')).join('\n'); }
 function buildFilteredRawRows(){
   const out=[]; out.push(['Tipo','Fecha','AsesorCanonical','AsesorRaw','Grupo','Supervisor','Estado/Agent','Duración','RawRow']);
