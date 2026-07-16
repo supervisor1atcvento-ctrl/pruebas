@@ -92,35 +92,22 @@ button.ghost{background:transparent;border:2px solid var(--text);color:var(--tex
 .card{background:var(--card);border-radius:var(--radius);padding:14px;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
 .card h2{margin:0 0 12px 0;font-size:16px;color:var(--text);font-weight:800;text-transform:uppercase;letter-spacing:-0.5px}
 
-/* Tabla de Leaderboard */
-    .table-wrap { overflow: auto; border-radius: 8px; border: 1px solid var(--border); }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 720px; background: #FFF; }
-    thead th { 
-      text-align: left; 
-      padding: 14px 12px; 
-      background: #FAFAFA;
-      color: #000; 
-      font-size: 12px; 
-      font-weight: 800;
-      text-transform: uppercase;
-      border-bottom: 2px solid #EAEAEA; 
-    }
-    tbody td { 
-      padding: 14px 12px; 
-      border-bottom: 1px solid #F0F0F0; 
-      vertical-align: middle; 
-      transition: background 0.2s ease; 
-    }
-    
-    tbody tr { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    tbody tr:hover { 
-      background: rgba(255, 102, 0, 0.04); 
-      transform: scale(1.005); 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      position: relative;
-      z-index: 2;
-      border-left: 4px solid var(--accent);
-    }
+/* Tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto; /* 🔑 Permite que las columnas se ajusten al contenido */
+}
+
+thead th, tbody td {
+  white-space: nowrap; /* Mantiene el texto en una sola línea */
+  text-align: left;
+  padding: 12px;
+}
+
+.advisor-name-link {
+  white-space: normal; /* Permite que el nombre del asesor se divida en varias líneas si es muy largo */
+  word-break: break-word; /* Evita desbordes */
 
 /* Position badge */
 .pos{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;background:#F1F5F9;color:var(--text);border:1px solid var(--border);font-size:14px}
