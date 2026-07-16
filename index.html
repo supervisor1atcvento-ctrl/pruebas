@@ -4,13 +4,15 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Dashboard Asesores — Barras por Rubro (Nombres completos)</title>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 :root{
-  --bg:#F7FAFC; --card:#FFFFFF; --muted:#6B7280; --text:#0F172A;
-  --accent:#0EA5A4; --accent-2:#F59E0B; --success:#10B981; --warning:#F59E0B; --danger:#EF4444;
-  --border:rgba(15,23,42,0.06); --radius:10px; --shadow-sm:0 6px 18px rgba(15,23,42,0.06);
-  --gold:linear-gradient(90deg,#FFD54A,#FFC107); --silver:linear-gradient(90deg,#E6EEF8,#C7D2E8); --bronze:linear-gradient(90deg,#FFD8B5,#F59E0B);
+--bg:#F7FAFC; --card:#FFFFFF; --muted:#6B7280; --text:#0F172A;
+--accent:#0EA5A4; --accent-2:#F59E0B; --success:#10B981; --warning:#F59E0B; --danger:#EF4444;
+--border:rgba(15,23,42,0.06); --radius:10px; --shadow-sm:0 6px 18px rgba(15,23,42,0.06);
+--gold:linear-gradient(90deg,#FFD54A,#FFC107); --silver:linear-gradient(90deg,#E6EEF8,#C7D2E8); --bronze:linear-gradient(90deg,#FFD8B5,#F59E0B);
 }
 
 /* Reset y tipografía */
@@ -92,33 +94,52 @@ button.ghost{background:transparent;border:2px solid var(--text);color:var(--tex
 .card{background:var(--card);border-radius:var(--radius);padding:14px;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
 .card h2{margin:0 0 12px 0;font-size:16px;color:var(--text);font-weight:800;text-transform:uppercase;letter-spacing:-0.5px}
 
-/* Tabla */
+/* Tabla de Leaderboard - ajustada para autoajuste por contenido */
+.table-wrap { overflow: auto; border-radius: 8px; border: 1px solid var(--border); background: #FFF; }
+
+/* Clave: table-layout: auto permite que las columnas se dimensionen según contenido */
 table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: auto; /* 🔑 Permite que las columnas se ajusten al contenido */
+  font-size: 14px;
+  min-width: 0; /* evitar forzar ancho mínimo */
+  table-layout: auto;
 }
 
-thead th, tbody td {
-  white-space: nowrap; /* Mantiene el texto en una sola línea */
+/* Encabezados */
+thead th {
   text-align: left;
-  padding: 12px;
+  padding: 14px 12px;
+  background: #FAFAFA;
+  color: #000;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  border-bottom: 2px solid #EAEAEA;
+  vertical-align: middle;
 }
 
-.advisor-name-link {
-  white-space: normal; /* Permite que el nombre del asesor se divida en varias líneas si es muy largo */
-  word-break: break-word; /* Evita desbordes */
+/* Celdas */
+tbody td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #F0F0F0;
+  vertical-align: middle;
+  transition: background 0.2s ease;
+}
 
-/* Position badge */
-.pos{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;background:#F1F5F9;color:var(--text);border:1px solid var(--border);font-size:14px}
-.pos.top{background:linear-gradient(135deg,#0EA5A4,#06B6D4);color:#fff;border:0;box-shadow:0 8px 20px rgba(14,165,164,0.12)}
+/* Evitar que números y etiquetas se rompan en varias líneas */
+tbody td.number, thead th.number {
+  white-space: nowrap;
+  text-align: right;
+  font-weight:800;
+}
 
-/* Advisor link: show full name (no truncation) */
+/* Nombre del asesor: permitir wrapping controlado para respetar nombres largos */
 .advisor-name-link{
   font-weight:800;font-size:15px;color:var(--text);cursor:pointer;text-decoration:none;
-  display:block; /* allow full width */
-  white-space:normal; /* allow wrapping */
-  word-break:break-word; /* break long words */
+  display:block;
+  white-space:normal;
+  word-break:break-word;
   line-height:1.05;
 }
 
@@ -138,7 +159,7 @@ thead th, tbody td {
 .top-highlight-3 td{background:var(--bronze);color:#0B1220}
 .badge-top{display:inline-block;background:rgba(11,17,32,0.06);color:var(--text);padding:4px 8px;border-radius:999px;font-size:11px;margin-left:8px;font-weight:800;text-transform:uppercase}
 
-/* Progress small (inline for each rubro) - compact */
+/* Progress small (inline for cada rubro) - compact */
 .rubro-wrap{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
 .rubro-label{font-weight:800;font-size:12px;color:var(--muted)}
 .rubro-progress{width:140px;background:#F3F4F6;border-radius:999px;padding:3px;border:1px solid var(--border)}
@@ -181,140 +202,238 @@ thead th, tbody td {
   .rubro-progress{width:110px}
   .logo{width:44px;height:44px;font-size:16px}
 }
+
+/* Utilities for column sizing */
+.col-fit { white-space: nowrap; width: 1%; }
+.col-flex { width: auto; min-width: 140px; }
+
+/* Compact helper to avoid tall rows */
+.skeleton-row td { height:56px; }
 </style>
+
 </head>
+
 <body>
+
 <div class="container">
-  <header>
-    <div class="brand">
-      <div class="logo">AS</div>
-      <div>
-        <h1>Indicadores Asesores</h1>
-        <div class="subtitle">Rendimiento · Puntos · Metas</div>
-      </div>
-    </div>
-    <div style="text-align:right;background:#FBFDFF;padding:8px 12px;border-radius:8px;border:1px solid var(--border)">
-      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Última sincronización</div>
-      <div id="lastSync" style="font-weight:900;color:var(--text);font-size:14px;margin-top:2px">--:--</div>
-    </div>
-  </header>
 
-  <div class="controls">
-    <div class="control">
-      <label>Periodo</label>
-      <select id="periodSelector" aria-label="Periodo">
-        <option value="custom">Personalizado</option>
-        <option value="today">Hoy</option>
-        <option value="thisMonth">Este Mes</option>
-        <option value="lastMonth">Mes Pasado</option>
-      </select>
-    </div>
-    <div class="control">
-      <label>Fecha inicio</label>
-      <input type="date" id="dateFrom" aria-label="Fecha inicio">
-    </div>
-    <div class="control">
-      <label>Fecha fin</label>
-      <input type="date" id="dateTo" aria-label="Fecha fin">
-    </div>
-    <div class="control" style="min-width:200px">
-      <label>Supervisor</label>
-      <select id="filterSupervisor" aria-label="Supervisor">
-        <option value="">Todos los supervisores</option>
-      </select>
-    </div>
-    <div class="actions" style="margin-bottom:2px">
-      <button class="primary" id="applyFilters">Aplicar Filtros</button>
-      <button class="ghost" id="refreshBtn" title="Refrescar datos">↻ Refrescar</button>
-    </div>
-  </div>
+<header>
 
-  <div class="tabs" role="tablist" aria-label="Grupos">
-    <div class="tab active" data-group="All">Todos</div>
-    <div class="tab" data-group="Vento">Vento</div>
-    <div class="tab" data-group="Piston">Piston</div>
-    <div class="tab" data-group="Home Office">Home Office</div>
-    <div class="tab" data-group="Nuevo ingreso">Nuevo ingreso</div>
-    <div class="tab" data-group="OTROS">OTROS</div>
-  </div>
+<div class="brand">
 
-  <div class="main-grid">
-    <section class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h2 style="margin:0">Leaderboard de Puntos</h2>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="small-btn" id="downloadFiltered" style="width:auto">↓ Descargar Filtrados</button>
-        </div>
-      </div>
+<div class="logo">AS</div>
 
-      <div class="table-wrap" role="table" aria-label="Leaderboard">
-        <table id="leaderboardTable" role="grid" aria-live="polite">
-          <thead>
-            <tr>
-              <th>Pos</th>
-              <th>Asesor</th>
-              <th>Tickets<br><span class="meta-small" style="color:var(--muted)">Vol / Pts</span></th>
-              <th>Llamadas<br><span class="meta-small" style="color:var(--muted)">Vol / Pts</span></th>
-              <th>Chats<br><span class="meta-small" style="color:var(--muted)">Vol / Pts</span></th>
-              <th>Puntaje / Progreso</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboardBody"></tbody>
-        </table>
-      </div>
+<div>
 
-      <div style="margin-top:12px;color:var(--muted);font-size:12px;font-weight:500;background:#FBFDFF;padding:10px;border-radius:8px;border:1px solid var(--border)">
-        <strong>💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para ver su rendimiento por día en una gráfica detallada.  
-        <div style="margin-top:6px"><strong>Reglas de medición:</strong> Tickets canalizados (col M = CANALIZADO). Llamadas completadas y duración &gt;60s. Chats duración ≤5min y agent flag = AGENT.</div>
-      </div>
-    </section>
+<h1>Indicadores Asesores</h1>
 
-    <aside class="card">
-      <h2>Metas del Mes</h2>
-      <div class="goals" aria-live="polite">
-        <div class="goal-block" aria-label="Meta general">
-          <div class="goal-title">🎯 META GENERAL</div>
-          <div class="goal-item"><span>Total de Tickets:</span> <strong id="goal_general">&lt; 415</strong></div>
-        </div>
+<div class="subtitle">Rendimiento · Puntos · Metas</div>
 
-        <div class="goal-block" aria-label="Modalidad Presencial">
-          <div class="goal-title">🏢 MODALIDAD PRESENCIAL</div>
-          <div class="goal-item"><span>Tickets:</span> <strong id="goal_pres_tickets">374</strong></div>
-          <div class="goal-item"><span>Chats:</span> <strong id="goal_pres_chats">384</strong></div>
-          <div class="goal-item"><span>Llamadas:</span> <strong id="goal_pres_calls">393</strong></div>
-        </div>
+</div>
 
-        <div class="goal-block" aria-label="Modalidad Home Office">
-          <div class="goal-title">🏡 MODALIDAD HOME OFFICE</div>
-          <div class="goal-item"><span>Tickets:</span> <strong id="goal_ho_tickets">524</strong></div>
-          <div class="goal-item"><span>Chats:</span> <strong id="goal_ho_chats">1727</strong></div>
-        </div>
-      </div>
+</div>
 
-      <div style="margin-top:12px;border-top:2px solid var(--border);padding-top:12px">
-        <h3 style="margin:0 0 8px 0;font-size:13px;color:var(--text);font-weight:800;text-transform:uppercase">Métricas Generales</h3>
-        <div class="stats" aria-hidden="false">
-          <div class="stat"><div class="label">Asesores</div><div class="value" id="statAdvisors">--</div></div>
-          <div class="stat"><div class="label">Tickets</div><div class="value" id="statTickets">--</div></div>
-          <div class="stat"><div class="label">Llamadas</div><div class="value" id="statCalls">--</div></div>
-          <div class="stat"><div class="label">Chats</div><div class="value" id="statChats">--</div></div>
-        </div>
+<div style="text-align:right;background:#FBFDFF;padding:8px 12px;border-radius:8px;border:1px solid var(--border)">
 
-        <div style="margin-top:10px">
-          <h3 style="margin:0 0 6px 0;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase">Exportación de Bases (Protegidas)</h3>
-          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-            <button class="small-btn" id="exportTickets">Exportar Tickets_BD (CSV)</button>
-            <button class="small-btn" id="exportChats">Exportar Chats_BD (CSV)</button>
-            <button class="small-btn" id="exportCalls">Exportar Llamadas_BD (CSV)</button>
-          </div>
-        </div>
-      </div>
-    </aside>
-  </div>
+<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Última sincronización</div>
 
-  <footer style="font-size:12px;color:var(--muted);text-align:center;margin-top:12px;font-weight:600;padding-bottom:12px">
-    Interfaz optimizada · Actualización automática (15 min) · Descargas con autenticación requerida
-  </footer>
+<div id="lastSync" style="font-weight:900;color:var(--text);font-size:14px;margin-top:2px">--:--</div>
+
+</div>
+
+</header>
+
+<div class="controls">
+
+<div class="control">
+
+<label>Periodo</label>
+
+<select id="periodSelector" aria-label="Periodo">
+<option value="custom">Personalizado</option>
+<option value="today">Hoy</option>
+<option value="thisMonth">Este Mes</option>
+<option value="lastMonth">Mes Pasado</option>
+</select>
+
+</div>
+
+<div class="control">
+
+<label>Fecha inicio</label>
+
+<input type="date" id="dateFrom" aria-label="Fecha inicio">
+
+</div>
+
+<div class="control">
+
+<label>Fecha fin</label>
+
+<input type="date" id="dateTo" aria-label="Fecha fin">
+
+</div>
+
+<div class="control" style="min-width:200px">
+
+<label>Supervisor</label>
+
+<select id="filterSupervisor" aria-label="Supervisor">
+<option value="">Todos los supervisores</option>
+</select>
+
+</div>
+
+<div class="actions" style="margin-bottom:2px">
+
+<button class="primary" id="applyFilters">Aplicar Filtros</button>
+
+<button class="ghost" id="refreshBtn" title="Refrescar datos">↻ Refrescar</button>
+
+</div>
+
+</div>
+
+<div class="tabs" role="tablist" aria-label="Grupos">
+
+<div class="tab active" data-group="All">Todos</div>
+
+<div class="tab" data-group="Vento">Vento</div>
+
+<div class="tab" data-group="Piston">Piston</div>
+
+<div class="tab" data-group="Home Office">Home Office</div>
+
+<div class="tab" data-group="Nuevo ingreso">Nuevo ingreso</div>
+
+<div class="tab" data-group="OTROS">OTROS</div>
+
+</div>
+
+<div class="main-grid">
+
+<section class="card">
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+
+<h2 style="margin:0">Leaderboard de Puntos</h2>
+
+<div style="display:flex;gap:8px;align-items:center">
+
+<button class="small-btn" id="downloadFiltered" style="width:auto">↓ Descargar Filtrados</button>
+
+</div>
+
+</div>
+
+<div class="table-wrap" role="table" aria-label="Leaderboard">
+
+<table id="leaderboardTable" role="grid" aria-live="polite">
+<thead>
+<tr>
+  <th class="col-fit">Pos</th>
+  <th style="min-width:220px">Asesor</th>
+  <th class="col-fit number">Tickets<br><span class="meta-small" style="color:var(--muted)">Vol / Pts</span></th>
+  <th class="col-fit number">Llamadas<br><span class="meta-small" style="color:var(--muted)">Vol / Pts</span></th>
+  <th class="col-fit number">Chats<br><span class="meta-small" style="color:var(--muted)">Vol / Pts</span></th>
+  <th class="col-flex">Puntaje / Progreso</th>
+</tr>
+</thead>
+<tbody id="leaderboardBody"></tbody>
+</table>
+
+</div>
+
+<div style="margin-top:12px;color:var(--muted);font-size:12px;font-weight:500;background:#FBFDFF;padding:10px;border-radius:8px;border:1px solid var(--border)">
+
+<strong>💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para ver su rendimiento por día en una gráfica detallada.
+
+<div style="margin-top:6px"><strong>Reglas de medición:</strong> Tickets canalizados (col M = CANALIZADO). Llamadas completadas y duración &gt;60s. Chats duración ≤5min y agent flag = AGENT.</div>
+
+</div>
+
+</section>
+
+<aside class="card">
+
+<h2>Metas del Mes</h2>
+
+<div class="goals" aria-live="polite">
+
+<div class="goal-block" aria-label="Meta general">
+
+<div class="goal-title">🎯 META GENERAL</div>
+
+<div class="goal-item"><span>Total de Tickets:</span> <strong id="goal_general">&lt; 415</strong></div>
+
+</div>
+
+<div class="goal-block" aria-label="Modalidad Presencial">
+
+<div class="goal-title">🏢 MODALIDAD PRESENCIAL</div>
+
+<div class="goal-item"><span>Tickets:</span> <strong id="goal_pres_tickets">374</strong></div>
+
+<div class="goal-item"><span>Chats:</span> <strong id="goal_pres_chats">384</strong></div>
+
+<div class="goal-item"><span>Llamadas:</span> <strong id="goal_pres_calls">393</strong></div>
+
+</div>
+
+<div class="goal-block" aria-label="Modalidad Home Office">
+
+<div class="goal-title">🏡 MODALIDAD HOME OFFICE</div>
+
+<div class="goal-item"><span>Tickets:</span> <strong id="goal_ho_tickets">524</strong></div>
+
+<div class="goal-item"><span>Chats:</span> <strong id="goal_ho_chats">1727</strong></div>
+
+</div>
+
+</div>
+
+<div style="margin-top:12px;border-top:2px solid var(--border);padding-top:12px">
+
+<h3 style="margin:0 0 8px 0;font-size:13px;color:var(--text);font-weight:800;text-transform:uppercase">Métricas Generales</h3>
+
+<div class="stats" aria-hidden="false">
+
+<div class="stat"><div class="label">Asesores</div><div class="value" id="statAdvisors">--</div></div>
+
+<div class="stat"><div class="label">Tickets</div><div class="value" id="statTickets">--</div></div>
+
+<div class="stat"><div class="label">Llamadas</div><div class="value" id="statCalls">--</div></div>
+
+<div class="stat"><div class="label">Chats</div><div class="value" id="statChats">--</div></div>
+
+</div>
+
+<div style="margin-top:10px">
+
+<h3 style="margin:0 0 6px 0;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase">Exportación de Bases (Protegidas)</h3>
+
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+
+<button class="small-btn" id="exportTickets">Exportar Tickets_BD (CSV)</button>
+
+<button class="small-btn" id="exportChats">Exportar Chats_BD (CSV)</button>
+
+<button class="small-btn" id="exportCalls">Exportar Llamadas_BD (CSV)</button>
+
+</div>
+
+</div>
+
+</div>
+
+</aside>
+
+</div>
+
+<footer style="font-size:12px;color:var(--muted);text-align:center;margin-top:12px;font-weight:600;padding-bottom:12px">
+Interfaz optimizada · Actualización automática (15 min) · Descargas con autenticación requerida
+</footer>
+
 </div>
 
 <!-- Loaders & Modals -->
@@ -348,6 +467,7 @@ thead th, tbody td {
 </div>
 
 <script>
+
 /******************************************************************
  * Código JS (sin cambios funcionales respecto a la versión previa)
  * - Muestra nombres completos (sin truncar)
@@ -374,6 +494,7 @@ let aliasMap = {}; let metaMap = {}; let cache = { tickets:[], chats:[], calls:[
 let activeGroup = 'All'; let autoRefreshTimer = null; let pendingDownload = null; let advisorChartInstance = null;
 
 /* UTILIDADES */
+
 function parseCSV(text){
   const rows=[]; let cur='', row=[], inQuotes=false;
   for(let i=0;i<text.length;i++){ const ch=text[i], next=text[i+1];
@@ -385,17 +506,21 @@ function parseCSV(text){
   if(cur!=='' || row.length){ row.push(cur); rows.push(row); }
   return rows;
 }
+
 function fetchSheetCSVRowsById(spreadsheetId, sheetName){
   const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
   return fetch(url).then(res => { if(!res.ok) throw new Error('Error al leer hoja ' + sheetName + ' (' + res.status + ')'); return res.text(); }).then(parseCSV);
 }
-function normalizeForKey(s){ if(s===null||s===undefined) return ''; let t=String(s).replace(/\u00A0/g,' ').replace(/\t/g,' ').trim(); t=t.replace(/[\\.,]/g,''); t=t.toUpperCase();
+
+function normalizeForKey(s){ if(s===null||s===undefined) return ''; let t=String(s).replace(/\u00A0/g,' ').replace(/\t/g,' ').trim(); t=t.replace(/[\\\.,]/g,''); t=t.toUpperCase();
   const tokens=['ATC PISTON','ATC SUP','ATC','SUP','CORD','COORD','ANL','CAP','AGT','AGENTE','SR','SRA'];
   for(const tk of tokens){ const reStart=new RegExp('^\\s*'+tk+'[\\s\\-\\_\\.]*','i'); t=t.replace(reStart,''); const reEnd=new RegExp('[\\s\\-\\_\\.]+'+tk+'\\s*$','i'); t=t.replace(reEnd,''); }
   if(t.includes(',')){ const parts=t.split(','); if(parts.length>=2){ t=(parts[1]+' '+parts[0]).trim(); } }
   t=t.replace(/\s+/g,' ').trim(); return t;
 }
+
 function titleCase(s){ if(!s) return s; return s.toLowerCase().split(' ').map(w=>w?(w[0].toUpperCase()+w.slice(1)):'').join(' '); }
+
 function durationToSeconds(s){ if(s===null||s===undefined) return 0; const str=String(s).trim().toLowerCase(); if(!str) return 0; let total=0;
   const mD=str.match(/(\d+)\s*d/); if(mD) total+=parseInt(mD[1],10)*86400;
   const mH=str.match(/(\d+)\s*h/); if(mH) total+=parseInt(mH[1],10)*3600;
@@ -404,6 +529,7 @@ function durationToSeconds(s){ if(s===null||s===undefined) return 0; const str=S
   if(total===0){ const onlyNum=str.match(/^(\d+)$/); if(onlyNum) total=parseInt(onlyNum[1],10); }
   return total;
 }
+
 function parseDateFlexible(v){ if(v===null||v===undefined) return null; const s=String(v).trim(); if(s===''||s==='0'||s==='-'||s.toLowerCase()==='null') return null;
   const d1=new Date(s); if(!isNaN(d1.getTime())) return d1;
   const m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/); if(m){ const day=+m[1], mon=+m[2]-1, yr=+m[3]; return new Date(yr<100?2000+yr:yr,mon,day); }
@@ -431,6 +557,7 @@ async function buildAliasAndMetaMaps(){
     }
   }catch(err){ console.warn('No se pudo cargar Asesores sheet:', err.message); }
 }
+
 function mapAdvisorToCanonical(raw){
   const norm=normalizeForKey(raw); if(!norm) return '';
   if(aliasMap[norm]) return aliasMap[norm];
@@ -532,12 +659,18 @@ function getDailyChartData(advisorName, start, end) {
   while(curr<=end){ const ds=curr.getFullYear()+'-'+String(curr.getMonth()+1).padStart(2,'0')+'-'+String(curr.getDate()).padStart(2,'0'); dates.push(ds); labels.push(String(curr.getDate()).padStart(2,'0')+'/'+String(curr.getMonth()+1).padStart(2,'0')); curr.setDate(curr.getDate()+1); }
   const dailyCounts={}; dates.forEach(d=>dailyCounts[d]={});
   function addCount(dateStr,adv,type){ if(!dailyCounts[dateStr]) return; if(!dailyCounts[dateStr][adv]) dailyCounts[dateStr][adv]={t:0,c:0,ch:0}; dailyCounts[dateStr][adv][type]++; }
+
   for(let r=1;r<cache.tickets.length;r++){ const row=cache.tickets[r]; const canonical=mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!canonical) continue; const status=String(row[COL.tickets.status]||'').trim().toUpperCase(); if(status!=='CANALIZADO') continue; const parsed=parseDateFlexible(row[COL.tickets.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'t'); } } }
+
   for(let r=1;r<cache.chats.length;r++){ const row=cache.chats[r]; const canonical=mapAdvisorToCanonical(row[COL.chats.advisor]); if(!canonical) continue; const seconds=durationToSeconds(row[COL.chats.duration]); if(seconds===0 && String(row[COL.chats.duration]||'').trim()==='') continue; if(seconds>300) continue; const agentFlag=String(row[COL.chats.agentFlag]||'').trim().toUpperCase(); if(agentFlag!=='AGENT') continue; const parsed=parseDateFlexible(row[COL.chats.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'ch'); } } }
+
   for(let r=1;r<cache.calls.length;r++){ const row=cache.calls[r]; const canonical=mapAdvisorToCanonical(row[COL.calls.advisor]); if(!canonical) continue; const status=String(row[COL.calls.status]||'').trim().toLowerCase(); if(status!=='completed') continue; const seconds=durationToSeconds(row[COL.calls.duration]); if(seconds<=35) continue; const parsed=parseDateFlexible(row[COL.calls.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'c'); } } }
+
   dates.forEach(ds=>{ const dayData=dailyCounts[ds]; let maxT=0,maxC=0,maxCh=0; for(let adv in dayData){ if(dayData[adv].t>maxT) maxT=dayData[adv].t; if(dayData[adv].c>maxC) maxC=dayData[adv].c; if(dayData[adv].ch>maxCh) maxCh=dayData[adv].ch; } const advDay=dayData[advisorName]||{t:0,c:0,ch:0}; const ptsT=maxT?(advDay.t/maxT)*100:0; const ptsC=maxC?(advDay.c/maxC)*100:0; const ptsCh=maxCh?(advDay.ch/maxCh)*100:0; pointsData.push(Number((ptsT+ptsC+ptsCh).toFixed(2))); ticketsData.push(advDay.t); callsData.push(advDay.c); chatsData.push(advDay.ch); });
+
   return { labels, pointsData, ticketsData, callsData, chatsData };
 }
+
 function showChartModal(advisorName) {
   const { fromDateOnly, toDateOnly } = getPeriodRange();
   const today = new Date(); today.setHours(0,0,0,0);
@@ -570,6 +703,7 @@ function showChartModal(advisorName) {
     }
   });
 }
+
 document.getElementById('chartModalClose').addEventListener('click', () => { document.getElementById('chartModalBackdrop').style.display = 'none'; });
 
 /* Renderizado compacto con barras por rubro */
@@ -589,7 +723,6 @@ function getColorForPercent(p){
 function renderLeaderboard(scores){
   const tbody=document.getElementById('leaderboardBody'); tbody.innerHTML='';
   if(scores.length===0){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);font-weight:700">No hay datos para mostrar</td></tr>'; return; }
-
   const goalPresTickets = Number(document.getElementById('goal_pres_tickets').textContent || 0);
   const goalPresChats = Number(document.getElementById('goal_pres_chats').textContent || 0);
   const goalPresCalls = Number(document.getElementById('goal_pres_calls').textContent || 0);
@@ -598,100 +731,91 @@ function renderLeaderboard(scores){
 
   scores.forEach((row, idx) => {
     const tr=document.createElement('tr');
-
     const isHO = (row.group || '').toLowerCase().includes('home');
-
     const targetTickets = isHO ? (goalHOTickets || goalPresTickets || 1) : (goalPresTickets || 1);
     const targetCalls = isHO ? null : (goalPresCalls || 1);
     const targetChats = isHO ? (goalHOChats || goalPresChats || 1) : (goalPresChats || 1);
-
     const percentTickets = targetTickets ? Math.min(100, Math.round((row.tickets / targetTickets) * 100)) : 0;
     const percentCalls = (targetCalls === null) ? null : (targetCalls ? Math.min(100, Math.round((row.calls / targetCalls) * 100)) : 0);
     const percentChats = targetChats ? Math.min(100, Math.round((row.chats / targetChats) * 100)) : 0;
-
     let statusClass='status-lejos', statusLabel='Lejos';
     if(percentTickets>=100){ statusClass='status-cumplido'; statusLabel='Cumplido'; }
     else if(percentTickets>=80){ statusClass='status-cerca'; statusLabel='Cerca'; }
-
     const posClass = idx===0 ? 'pos top' : 'pos';
 
     const llamadasCell = (function(){
       if(isHO){
         return `
-          <div class="rubro-wrap">
-            <div style="display:flex;align-items:center;gap:8px">
-              <div class="rubro-label">Llamadas</div>
-              <div class="rubro-percent">N/A</div>
-            </div>
-            <div class="meta-small">No aplica (Home Office)</div>
-          </div>
-        `;
+<div class="rubro-wrap">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="rubro-label">Llamadas</div>
+    <div class="rubro-percent">N/A</div>
+  </div>
+  <div class="meta-small">No aplica (Home Office)</div>
+</div>
+`;
       } else {
         return `
-          <div class="rubro-wrap">
-            <div style="display:flex;align-items:center;gap:8px">
-              <div class="rubro-label">Llamadas</div>
-              <div class="rubro-percent">${percentCalls}%</div>
-            </div>
-            <div class="rubro-progress" title="${percentCalls}% vs meta llamadas">
-              <div class="rubro-bar" style="width:${percentCalls}%;background:${getColorForPercent(percentCalls)}"></div>
-            </div>
-            <div class="meta-small">${row.calls} · ${row.callPts} pts</div>
-          </div>
-        `;
+<div class="rubro-wrap">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="rubro-label">Llamadas</div>
+    <div class="rubro-percent">${percentCalls}%</div>
+  </div>
+  <div class="rubro-progress" title="${percentCalls}% vs meta llamadas">
+    <div class="rubro-bar" style="width:${percentCalls}%;background:${getColorForPercent(percentCalls)}"></div>
+  </div>
+  <div class="meta-small">${row.calls} · ${row.callPts} pts</div>
+</div>
+`;
       }
     })();
 
     tr.innerHTML = `
-      <td><div class="${posClass}">${idx+1}</div></td>
-      <td>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="flex:1">
-            <div class="advisor-name-link" onclick="showChartModal('${escapeHtml(row.name)}')">${escapeHtml(row.name)}</div>
-            <div class="meta-small">${escapeHtml(row.group)} · ${escapeHtml(row.supervisor)}</div>
-          </div>
-        </div>
-      </td>
-
-      <td>
-        <div class="rubro-wrap">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="rubro-label">Tickets</div>
-            <div class="rubro-percent">${percentTickets}%</div>
-          </div>
-          <div class="rubro-progress" title="${percentTickets}% vs meta tickets">
-            <div class="rubro-bar" style="width:${percentTickets}%;background:${getColorForPercent(percentTickets)}"></div>
-          </div>
-          <div class="meta-small">${row.tickets} · ${row.ticketPts} pts</div>
-        </div>
-      </td>
-
-      <td>
-        ${llamadasCell}
-      </td>
-
-      <td>
-        <div class="rubro-wrap">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="rubro-label">Chats</div>
-            <div class="rubro-percent">${percentChats}%</div>
-          </div>
-          <div class="rubro-progress" title="${percentChats}% vs meta chats">
-            <div class="rubro-bar" style="width:${percentChats}%;background:${getColorForPercent(percentChats)}"></div>
-          </div>
-          <div class="meta-small">${row.chats} · ${row.chatPts} pts</div>
-        </div>
-      </td>
-
-      <td>
-        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="score">${row.total}</div>
-            <div class="status-pill ${statusClass}">${statusLabel}</div>
-          </div>
-        </div>
-      </td>
-    `;
+<td><div class="${posClass}">${idx+1}</div></td>
+<td>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div style="flex:1">
+      <div class="advisor-name-link" onclick="showChartModal('${escapeHtml(row.name)}')">${escapeHtml(row.name)}</div>
+      <div class="meta-small">${escapeHtml(row.group)} · ${escapeHtml(row.supervisor)}</div>
+    </div>
+  </div>
+</td>
+<td>
+  <div class="rubro-wrap">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="rubro-label">Tickets</div>
+      <div class="rubro-percent">${percentTickets}%</div>
+    </div>
+    <div class="rubro-progress" title="${percentTickets}% vs meta tickets">
+      <div class="rubro-bar" style="width:${percentTickets}%;background:${getColorForPercent(percentTickets)}"></div>
+    </div>
+    <div class="meta-small">${row.tickets} · ${row.ticketPts} pts</div>
+  </div>
+</td>
+<td>
+  ${llamadasCell}
+</td>
+<td>
+  <div class="rubro-wrap">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="rubro-label">Chats</div>
+      <div class="rubro-percent">${percentChats}%</div>
+    </div>
+    <div class="rubro-progress" title="${percentChats}% vs meta chats">
+      <div class="rubro-bar" style="width:${percentChats}%;background:${getColorForPercent(percentChats)}"></div>
+    </div>
+    <div class="meta-small">${row.chats} · ${row.chatPts} pts</div>
+  </div>
+</td>
+<td>
+  <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="score">${row.total}</div>
+      <div class="status-pill ${statusClass}">${statusLabel}</div>
+    </div>
+  </div>
+</td>
+`;
     tbody.appendChild(tr);
   });
 
@@ -713,18 +837,21 @@ function renderLeaderboard(scores){
 }
 
 /* CSV helpers y export */
-function rowsToCSV(rows){ return rows.map(r=>r.map(cell=>{ if(cell===null||cell===undefined) return ''; const s=String(cell).replace(/"/g,'""'); return `"${s}"`; }).join(',')).join('\n'); }
+function rowsToCSV(rows){ return rows.map(r=>r.map(cell=>{ if(cell===null||cell===undefined) return ''; const s=String(cell).replace(/\"/g,'\"\"'); return `"${s}"`; }).join(',')).join('\n'); }
+
 function buildFilteredRawRows(){
   const out=[]; out.push(['Tipo','Fecha','AsesorCanonical','AsesorRaw','Grupo','Supervisor','Estado/Agent','Duración','RawRow']);
   const { fromDateOnly, toDateOnly } = getPeriodRange();
   const selectedSupervisorRaw = document.getElementById('filterSupervisor').value || '';
   const selectedSupervisor = selectedSupervisorRaw || '';
+
   function passesMeta(advisorCanonical){
     const meta = metaMap[advisorCanonical] || { group: 'OTROS', supervisor: 'OTROS' };
     if(activeGroup !== 'All' && meta.group !== activeGroup) return false;
     if(selectedSupervisor){ if(String(meta.supervisor || '').toUpperCase() !== String(selectedSupervisor || '').toUpperCase()) return false; }
     return true;
   }
+
   const tickets = cache.tickets || [];
   for(let r=1;r<tickets.length;r++){
     const row=tickets[r]; const rawAdvisor=row[COL.tickets.advisor]||''; const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
@@ -736,6 +863,7 @@ function buildFilteredRawRows(){
     const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
     out.push(['Ticket', parsed?parsed.toISOString().slice(0,10):(rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, status, '', row.join(' | ')]);
   }
+
   const chats = cache.chats || [];
   for(let r=1;r<chats.length;r++){
     const row=chats[r]; const rawAdvisor=row[COL.chats.advisor]||''; const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
@@ -749,6 +877,7 @@ function buildFilteredRawRows(){
     const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
     out.push(['Chat', parsed?parsed.toISOString().slice(0,10):(rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, agentFlag, rawDuration||'', row.join(' | ')]);
   }
+
   const calls = cache.calls || [];
   for(let r=1;r<calls.length;r++){
     const row=calls[r]; const rawAdvisor=row[COL.calls.advisor]||''; const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
@@ -761,11 +890,15 @@ function buildFilteredRawRows(){
     const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
     out.push(['Llamada', parsed?parsed.toISOString().slice(0,10):(rawDate||''), advisorCanonical, rawAdvisor, meta.group, meta.supervisor, status, rawDuration||'', row.join(' | ')]);
   }
+
   return out;
 }
+
 function downloadCSV(text, filename){ const blob=new Blob([text],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+
 function openPasswordModal(){ document.getElementById('modalBackdrop').style.display='flex'; document.getElementById('downloadPassword').value=''; document.getElementById('modalMsg').textContent=''; document.getElementById('downloadPassword').focus(); }
 function closePasswordModal(){ document.getElementById('modalBackdrop').style.display='none'; pendingDownload=null; }
+
 async function confirmDownloadAction(){ const val=(document.getElementById('downloadPassword').value||'').trim(); if(!val){ document.getElementById('modalMsg').textContent='⚠️ Introduce la clave'; return; } if(val!==SECRET_CODE){ document.getElementById('modalMsg').textContent='❌ Clave incorrecta'; return; } const pd=pendingDownload; if(!pd){ closePasswordModal(); return; } downloadCSV(pd.data.csv, pd.data.filename); closePasswordModal(); }
 
 /* Refresh y carga inicial */
@@ -783,6 +916,7 @@ function getPeriodRange(){
   else { const fromVal=document.getElementById('dateFrom').value; const toVal=document.getElementById('dateTo').value; fromDateOnly = fromVal ? new Date(fromVal+'T00:00:00') : null; toDateOnly = toVal ? new Date(toVal+'T23:59:59') : null; if(fromDateOnly) fromDateOnly=new Date(fromDateOnly.getFullYear(),fromDateOnly.getMonth(),fromDateOnly.getDate()); if(toDateOnly) toDateOnly=new Date(toDateOnly.getFullYear(),toDateOnly.getMonth(),toDateOnly.getDate()); }
   return { fromDateOnly, toDateOnly };
 }
+
 function populateSupervisorFilter(){ const sel=document.getElementById('filterSupervisor'); sel.innerHTML=''; const firstOpt=document.createElement('option'); firstOpt.value=''; firstOpt.textContent='Todos los supervisores'; sel.appendChild(firstOpt); const fixedOptions=["IVAN GERARDO MORENO GARATACHEA","CECILIA CARRERA MORALES","OTROS"]; fixedOptions.forEach(sup=>{ const opt=document.createElement('option'); opt.value=sup; opt.textContent=sup; sel.appendChild(opt); }); }
 
 function applyFiltersAndRender(){
@@ -823,6 +957,7 @@ document.querySelectorAll('.tab').forEach(tab => {
     applyFiltersAndRender();
   });
 });
+
 document.getElementById('downloadFiltered').addEventListener('click', () => {
   const rows = buildFilteredRawRows();
   if(rows.length <= 1){ alert('No hay registros que coincidan con el filtro actual.'); return; }
@@ -832,6 +967,7 @@ document.getElementById('downloadFiltered').addEventListener('click', () => {
   pendingDownload = { type: 'filtered', data: { csv, filename } };
   openPasswordModal();
 });
+
 document.getElementById('exportTickets').addEventListener('click', () => {
   if(!cache.tickets || cache.tickets.length === 0){ alert('No hay datos de Tickets en cache. Refresca.'); return; }
   const csv = rowsToCSV(cache.tickets);
@@ -839,6 +975,7 @@ document.getElementById('exportTickets').addEventListener('click', () => {
   pendingDownload = { type: 'tickets', data: { csv, filename } };
   openPasswordModal();
 });
+
 document.getElementById('exportChats').addEventListener('click', () => {
   if(!cache.chats || cache.chats.length === 0){ alert('No hay datos de Chats en cache. Refresca.'); return; }
   const csv = rowsToCSV(cache.chats);
@@ -846,6 +983,7 @@ document.getElementById('exportChats').addEventListener('click', () => {
   pendingDownload = { type: 'chats', data: { csv, filename } };
   openPasswordModal();
 });
+
 document.getElementById('exportCalls').addEventListener('click', () => {
   if(!cache.calls || cache.calls.length === 0){ alert('No hay datos de Llamadas en cache. Refresca.'); return; }
   const csv = rowsToCSV(cache.calls);
@@ -853,6 +991,7 @@ document.getElementById('exportCalls').addEventListener('click', () => {
   pendingDownload = { type: 'calls', data: { csv, filename } };
   openPasswordModal();
 });
+
 document.getElementById('modalClose').addEventListener('click', closePasswordModal);
 document.getElementById('confirmDownload').addEventListener('click', confirmDownloadAction);
 document.getElementById('downloadPassword').addEventListener('keydown', (e) => { if(e.key === 'Enter') confirmDownloadAction(); });
@@ -860,7 +999,7 @@ document.getElementById('downloadPassword').addEventListener('keydown', (e) => {
 /* Helpers */
 function showLoading(){ document.getElementById('loadingOverlay').style.display='flex'; }
 function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
-function escapeHtml(s){ return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escapeHtml(s){ return String(s).replace(/\"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function formatHHmm(date){ const d=new Date(date); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
 
 /* Compact helper to ensure rows stay slim */
@@ -874,8 +1013,55 @@ function compactLeaderboardRows() {
   void tbody.offsetHeight;
 }
 
+/* -------------------------
+  Ajuste dinámico de columna "Asesor"
+  -------------------------*/
+(function(){
+  const table = document.getElementById('leaderboardTable');
+  if(!table) return;
+
+  function adjustAdvisorColumn(){
+    const tbody = table.querySelector('tbody');
+    const headerAdvisor = table.querySelector('thead th:nth-child(2)');
+    if(!tbody || !headerAdvisor) return;
+
+    let maxWidth = headerAdvisor.offsetWidth;
+    const rows = tbody.querySelectorAll('tr');
+    rows.forEach(row=>{
+      const cell = row.children[1]; // segunda columna = Asesor
+      if(cell){
+        const clone = cell.cloneNode(true);
+        clone.style.position = 'absolute';
+        clone.style.visibility = 'hidden';
+        clone.style.whiteSpace = 'nowrap';
+        clone.style.padding = '0';
+        document.body.appendChild(clone);
+        const w = clone.offsetWidth + 24; // padding de seguridad
+        document.body.removeChild(clone);
+        if(w > maxWidth) maxWidth = w;
+      }
+    });
+
+    // Aplicar un min-width razonable para la columna Asesor (no exceder ancho de diseño)
+    headerAdvisor.style.minWidth = Math.min(maxWidth, 520) + 'px';
+  }
+
+  window.addEventListener('load', adjustAdvisorColumn);
+
+  const tbody = table.querySelector('tbody');
+  if(tbody){
+    const obs = new MutationObserver(()=>{ setTimeout(adjustAdvisorColumn, 40); });
+    obs.observe(tbody, { childList:true, subtree:true, characterData:true });
+  }
+
+  // Ajustar al redimensionar ventana
+  window.addEventListener('resize', ()=>{ setTimeout(adjustAdvisorColumn, 80); });
+})();
+
 /* Inicialización */
 loadAndRender();
+
 </script>
+
 </body>
 </html>
