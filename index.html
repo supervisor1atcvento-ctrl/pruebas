@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Dashboard Asesores — Barras por Rubro (Compacto)</title>
+<title>Dashboard Asesores — Barras por Rubro (Nombres completos)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
@@ -94,7 +94,7 @@ button.ghost{background:transparent;border:2px solid var(--text);color:var(--tex
 
 /* Table */
 .table-wrap{overflow:auto;border-radius:8px;border:1px solid var(--border)}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px;background:#fff;table-layout:auto}
 thead th{text-align:left;padding:10px 10px;background:#FBFDFF;color:var(--text);font-size:11px;font-weight:800;text-transform:uppercase;border-bottom:2px solid #EEF2F7}
 tbody td{
   padding:8px 10px;
@@ -109,10 +109,13 @@ tbody tr:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(2,6,23,0.05
 .pos{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;background:#F1F5F9;color:var(--text);border:1px solid var(--border);font-size:14px}
 .pos.top{background:linear-gradient(135deg,#0EA5A4,#06B6D4);color:#fff;border:0;box-shadow:0 8px 20px rgba(14,165,164,0.12)}
 
-/* Advisor link: allow up to 2 lines */
+/* Advisor link: show full name (no truncation) */
 .advisor-name-link{
   font-weight:800;font-size:15px;color:var(--text);cursor:pointer;text-decoration:none;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;word-break:break-word;line-height:1.05;
+  display:block; /* allow full width */
+  white-space:normal; /* allow wrapping */
+  word-break:break-word; /* break long words */
+  line-height:1.05;
 }
 
 /* Meta small */
@@ -169,13 +172,9 @@ tbody tr:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(2,6,23,0.05
 .modal input[type="password"]{padding:10px;border-radius:8px;border:2px solid var(--border);font-size:14px;text-align:center;font-weight:700}
 .modal button.primary{width:100%;padding:10px;font-size:14px}
 
-/* Table column width for advisor */
-table thead th:nth-child(2), table tbody td:nth-child(2) { max-width:320px; width:320px; }
-
 /* Responsive tweaks */
 @media(max-width:720px){
   .rubro-progress{width:110px}
-  table thead th:nth-child(2), table tbody td:nth-child(2) { max-width:200px; width:200px; }
   .logo{width:44px;height:44px;font-size:16px}
 }
 </style>
@@ -346,11 +345,11 @@ table thead th:nth-child(2), table tbody td:nth-child(2) { max-width:320px; widt
 
 <script>
 /******************************************************************
- * Código JS completo (compacto)
+ * Código JS (sin cambios funcionales respecto a la versión previa)
+ * - Muestra nombres completos (sin truncar)
  * - Barras por rubro dentro de Tickets/Calls/Chats
  * - Home Office: columna Llamadas muestra N/A
  * - Puntaje muestra solo score + etiqueta de progreso
- * - Filas compactas y nombres hasta 2 líneas
  ******************************************************************/
 
 const SPREADSHEET_ID = '1JBre4cLAbYiOJuYye_FGcsk5U_BIStDoAiCbV-B8WoA';
@@ -706,7 +705,6 @@ function renderLeaderboard(scores){
     }
   }
 
-  // Compact rows helper
   compactLeaderboardRows();
 }
 
