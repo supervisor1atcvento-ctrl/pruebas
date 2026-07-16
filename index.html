@@ -4,7 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Dashboard ATC — Rendimiento de Asesores</title>
+    <!-- Librería para Gráficas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Librería para generar Excel con pestañas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
         /* ----------------- Paleta e Identidad Corporativa ----------------- */
         :root {
@@ -243,7 +247,7 @@
             <strong>📌 Reglas de Negocio (Filtros de validación para metas):</strong>
             <ul>
                 <li><strong>Tickets:</strong> Únicamente se contabilizan los que cuentan con estatus <em>CANALIZADO</em>.</li>
-                <li><strong>Llamadas:</strong> Se cuentan con estatus <em>COMPLETED</em> y una duración <em>mayor a 35 segundos</em>.</li>
+                <li><strong>Llamadas:</strong> Se cuentan con estatus <em>COMPLETED</em> y una duración <em>mayor o igual a 1 minuto (60 segundos)</em>.</li>
                 <li><strong>Chats:</strong> Se cuentan los atendidos por <em>AGENT</em> y con una duración <em>menor o igual a 5 minutos (300 segundos)</em>.</li>
             </ul>
         </div>
@@ -253,7 +257,7 @@
             <button class="ghost" id="refreshBtn">↻ Refrescar</button>
             <button class="primary" id="applyFilters">Aplicar Filtros</button>
             <button class="download-btn" id="downloadFilteredBtn" title="Descarga la tabla resumen que ves en pantalla">📊 Resumen Leaderboard</button>
-            <button class="download-btn" id="downloadDetailBtn" title="Descarga todas las interacciones individuales que cumplieron las reglas en el periodo">🔍 Detalle Válido</button>
+            <button class="download-btn" id="downloadExcelTabsBtn" title="Descarga un Excel con 4 pestañas: Resumen y bases de datos detalladas exclusivas de interacciones válidas">🗂️ Descargar Excel Multi-Pestaña</button>
             <select id="downloadRawSelect" style="max-width: 200px; border: 2px solid var(--muted); font-weight: 600; border-radius:8px; padding:8px;">
                 <option value="">📁 Base en Crudo...</option>
                 <option value="tickets">Crudo: Tickets</option>
@@ -605,7 +609,7 @@ function getDailyChartData(advisorName, start, end) {
     cache.calls.forEach(row => {
         if(mapAdvisorToCanonical(row[COL.calls.advisor]) !== advisorName) return;
         if(String(row[COL.calls.status]||'').toLowerCase()!=='completed') return;
-        if(durationToSeconds(row[COL.calls.duration])<=35) return;
+        if(durationToSeconds(row[COL.calls.duration])<60) return; // <--- CORRECCIÓN DE REGLA AQUÍ
         const parsed=parseDateFlexible(row[COL.calls.date]);
         if(parsed && parsed>=start && parsed<=end){
             addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 'c');
@@ -646,7 +650,7 @@ function openChartModal(advisorName) {
 
 document.getElementById('closeModal').addEventListener('click', () => { document.getElementById('chartModal').style.display = 'none'; });
 
-/* ----------------- Descargas CSV ----------------- */
+/* ----------------- Descargas de Archivos ----------------- */
 function downloadCSV(csvContent, fileName) {
     const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a"); const url = URL.createObjectURL(blob);
@@ -663,15 +667,29 @@ function exportFilteredTable() {
     downloadCSV(csv, `Reporte_Leaderboard_${new Date().toISOString().split('T')[0]}.csv`);
 }
 
-function exportValidInteractionsDetail() {
+// NUEVA FUNCIÓN: Descarga de archivo Excel real (.xlsx) con las 4 pestañas y datos íntegros
+function exportExcelMultiTabs() {
+    if (typeof XLSX === 'undefined') {
+        alert("La librería de Excel no ha terminado de cargar. Por favor, intenta de nuevo en unos segundos.");
+        return;
+    }
+
     let from = null, to = null;
     if(document.getElementById('dateFrom').value) from = new Date(document.getElementById('dateFrom').value + 'T00:00:00');
     if(document.getElementById('dateTo').value) to = new Date(document.getElementById('dateTo').value + 'T23:59:59');
     const selectedSupervisor = document.getElementById('filterSupervisor').value;
 
-    let csv = "Canal,Asesor,Grupo,Supervisor,Modalidad,Fecha_Registro,Estatus,Duracion_Segundos\n";
+    // 1. Matriz de datos para la pestaña "Leaderboard"
+    const wsLeaderboardData = [["Posicion", "Asesor", "Grupo", "Supervisor", "Modalidad", "Tickets Válidos", "Llamadas Válidas", "Chats Válidos", "Puntaje"]];
+    currentFilteredData.forEach((s, idx) => {
+        wsLeaderboardData.push([idx + 1, s.name, s.group, s.supervisor, s.modality, s.tickets, s.calls, s.chats, s.total.toFixed(0)]);
+    });
 
-    cache.tickets.forEach(row => {
+    // 2. Matriz de datos para la pestaña "Tickets Válidos"
+    const wsTicketsData = [];
+    if(cache.tickets.length > 0) wsTicketsData.push(cache.tickets[0]); // Conservar las cabeceras originales
+    cache.tickets.forEach((row, index) => {
+        if(index === 0) return; // Saltamos la fila de cabeceras
         const adv = mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!adv) return;
         const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
         if(activeGroup !== 'All' && meta.group !== activeGroup) return;
@@ -680,11 +698,15 @@ function exportValidInteractionsDetail() {
         if(String(row[COL.tickets.status]||'').toUpperCase() === 'CANALIZADO') {
             const d = parseDateFlexible(row[COL.tickets.date]);
             if(from && d < from) return; if(to && d > to) return;
-            csv += `Ticket,"${adv}","${meta.group}","${meta.supervisor}","${meta.modality}","${row[COL.tickets.date]||''}","${row[COL.tickets.status]||''}",N/A\n`;
+            wsTicketsData.push(row); // Insertar toda la fila original
         }
     });
 
-    cache.chats.forEach(row => {
+    // 3. Matriz de datos para la pestaña "Chats Válidos"
+    const wsChatsData = [];
+    if(cache.chats.length > 0) wsChatsData.push(cache.chats[0]);
+    cache.chats.forEach((row, index) => {
+        if(index === 0) return;
         const adv = mapAdvisorToCanonical(row[COL.chats.advisor]); if(!adv) return;
         const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
         if(activeGroup !== 'All' && meta.group !== activeGroup) return;
@@ -694,25 +716,37 @@ function exportValidInteractionsDetail() {
         if(String(row[COL.chats.agentFlag]||'').toUpperCase() === 'AGENT' && durSecs <= 300) {
             const d = parseDateFlexible(row[COL.chats.date]);
             if(from && d < from) return; if(to && d > to) return;
-            csv += `Chat,"${adv}","${meta.group}","${meta.supervisor}","${meta.modality}","${row[COL.chats.date]||''}","${row[COL.chats.agentFlag]||''}",${durSecs}\n`;
+            wsChatsData.push(row); // Insertar toda la fila original
         }
     });
 
-    cache.calls.forEach(row => {
+    // 4. Matriz de datos para la pestaña "Llamadas Válidas"
+    const wsCallsData = [];
+    if(cache.calls.length > 0) wsCallsData.push(cache.calls[0]);
+    cache.calls.forEach((row, index) => {
+        if(index === 0) return;
         const adv = mapAdvisorToCanonical(row[COL.calls.advisor]); if(!adv) return;
         const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
         if(activeGroup !== 'All' && meta.group !== activeGroup) return;
         if(selectedSupervisor && meta.supervisor.toUpperCase() !== selectedSupervisor.toUpperCase()) return;
         
         const durSecs = durationToSeconds(row[COL.calls.duration]);
-        if(String(row[COL.calls.status]||'').toLowerCase() === 'completed' && durSecs > 35) {
+        if(String(row[COL.calls.status]||'').toLowerCase() === 'completed' && durSecs >= 60) { // <--- CORRECCIÓN DE REGLA AQUÍ
             const d = parseDateFlexible(row[COL.calls.date]);
             if(from && d < from) return; if(to && d > to) return;
-            csv += `Llamada,"${adv}","${meta.group}","${meta.supervisor}","${meta.modality}","${row[COL.calls.date]||''}","${row[COL.calls.status]||''}",${durSecs}\n`;
+            wsCallsData.push(row); // Insertar toda la fila original
         }
     });
 
-    downloadCSV(csv, `Detalle_Valido_Reglas_${new Date().toISOString().split('T')[0]}.csv`);
+    // Crear y configurar el documento Excel
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsLeaderboardData), "Leaderboard");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsTicketsData), "Tickets Válidos");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsChatsData), "Chats Válidos");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsCallsData), "Llamadas Válidas");
+
+    // Descargar el archivo
+    XLSX.writeFile(wb, `Reporte_Detallado_Valido_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
 function exportRawBase(type) {
@@ -727,7 +761,7 @@ function exportRawBase(type) {
 }
 
 document.getElementById('downloadFilteredBtn').addEventListener('click', exportFilteredTable);
-document.getElementById('downloadDetailBtn').addEventListener('click', exportValidInteractionsDetail);
+document.getElementById('downloadExcelTabsBtn').addEventListener('click', exportExcelMultiTabs);
 document.getElementById('downloadRawSelect').addEventListener('change', function() {
     if (this.value) { exportRawBase(this.value); this.value = ""; }
 });
@@ -766,7 +800,7 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
         const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
         if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
         if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
-        if(String(row[COL.calls.status]||'').toLowerCase()==='completed' && durationToSeconds(row[COL.calls.duration])>35){
+        if(String(row[COL.calls.status]||'').toLowerCase()==='completed' && durationToSeconds(row[COL.calls.duration])>=60){ // <--- CORRECCIÓN DE REGLA AQUÍ
             const d=parseDateFlexible(row[COL.calls.date]);
             if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
             ensure(adv); counts[adv].calls++;
