@@ -94,14 +94,26 @@ button.ghost{background:transparent;border:2px solid var(--text);color:var(--tex
 
 /* Table */
 .table-wrap{overflow:auto;border-radius:8px;border:1px solid var(--border)}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px;background:#fff;table-layout:auto}
-thead th{text-align:left;padding:10px 10px;background:#FBFDFF;color:var(--text);font-size:11px;font-weight:800;text-transform:uppercase;border-bottom:2px solid #EEF2F7}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:720px;background:#fff;}
+
+  thead th{
+  text-align:left;
+  padding:14px 12px;
+  background:#FBFDFF;
+  color:var(--text);
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+  border-bottom:2px solid #EEF2F7
+}
+  
 tbody td{
-  padding:8px 10px;
+  padding:14px 12px;
   border-bottom:1px solid #F3F4F6;
   vertical-align:middle;
   line-height:1.15;
 }
+  
 tbody tr{transition:transform .12s ease,box-shadow .12s ease}
 tbody tr:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(2,6,23,0.05);position:relative;z-index:2}
 
