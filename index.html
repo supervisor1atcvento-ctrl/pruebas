@@ -8,15 +8,15 @@
     <style>
         /* ----------------- Paleta e Identidad Corporativa ----------------- */
         :root {
-            --bg: #F5F5F5;            /* Fondo general claro para dar contraste */
-            --card: #FFFFFF;          /* Blanco (50%) */
-            --vento-primary: #231F20; /* Negro Institucional (30%) */
-            --muted: #616160;         /* Gris (15%) */
-            --vento-accent: #F28F17;  /* Naranja Institucional (5%) */
+            --bg: #F5F5F5;            
+            --card: #FFFFFF;          
+            --vento-primary: #231F20; /* Negro Institucional */
+            --muted: #616160;         /* Gris */
+            --vento-accent: #F28F17;  /* Naranja Institucional */
             
-            --success: #10B981;
-            --warning: #F59E0B;
-            --danger: #EF4444;
+            --success: #10B981;       /* Verde Meta */
+            --warning: #F59E0B;       /* Amarillo Cerca */
+            --danger: #EF4444;        /* Rojo Alejado */
             --border: #E5E7EB;
             --radius: 12px;
             --shadow-sm: 0 4px 20px rgba(35, 31, 32, 0.08);
@@ -24,7 +24,6 @@
             --gold: linear-gradient(90deg, #FFD54A, #FFC107);
             --silver: linear-gradient(90deg, #E6EEF8, #C7D2E8);
             --bronze: linear-gradient(90deg, #FFD8B5, #F59E0B);
-            --top3-text: #231F20;
         }
 
         /* ----------------- Reset y Tipografía ----------------- */
@@ -40,7 +39,6 @@
             font-size: 14px;
         }
 
-        /* ----------------- Contenedor Principal ----------------- */
         .container {
             max-width: 1320px;
             margin: 24px auto;
@@ -107,22 +105,23 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
             display: flex;
+            flex-direction: column;
             gap: 16px;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            justify-content: space-between;
         }
-        .filters { display: flex; gap: 16px; flex-wrap: wrap; flex: 1; }
-        .control { display: flex; flex-direction: column; min-width: 150px; }
+        .filters { display: flex; gap: 16px; flex-wrap: wrap; }
+        .control { display: flex; flex-direction: column; min-width: 160px; flex: 1; }
         .control label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; }
-        select, input[type="date"] { padding: 10px; border-radius: 8px; border: 1px solid #CCC; font-size: 14px; font-family: "Segoe UI", sans-serif; outline: none; }
+        select, input[type="date"] { padding: 10px; border-radius: 8px; border: 1px solid #CCC; font-size: 14px; font-family: "Segoe UI", sans-serif; outline: none; width: 100%; }
         select:focus, input[type="date"]:focus { border-color: var(--vento-accent); }
         
+        .actions-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 14px; }
         button { font-family: "Segoe UI", sans-serif; cursor: pointer; transition: all 0.2s; }
         button.primary { background: var(--vento-accent); border: none; color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 10px rgba(242, 143, 23, 0.3); }
         button.primary:hover { background: #D97D12; }
         button.ghost { background: transparent; border: 2px solid var(--vento-primary); color: var(--vento-primary); padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; }
         button.ghost:hover { background: var(--vento-primary); color: #FFF; }
+        button.download-btn { background: transparent; border: 2px solid var(--vento-accent); color: var(--vento-accent); padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; }
+        button.download-btn:hover { background: var(--vento-accent); color: #FFF; }
         
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
         .tab { background: var(--bg); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--muted); font-size: 14px; }
@@ -139,11 +138,10 @@
         .advisor-name-link:hover { color: var(--vento-accent); text-decoration: underline; }
         .meta-small { font-size: 12px; color: var(--muted); margin-top: 4px; }
         
-        /* Layout de las columnas de métricas con barras integradas */
-        .col-metric { min-width: 130px; }
+        .col-metric { min-width: 150px; }
         .metric-val { font-size: 18px; font-weight: 700; color: var(--vento-primary); margin-bottom: 4px; }
         .rubro-bar-wrap { width: 100%; background: #E5E7EB; border-radius: 4px; height: 6px; overflow: hidden; margin-bottom: 4px; }
-        .rubro-bar { height: 100%; background: var(--vento-accent); transition: width 0.5s ease; }
+        .rubro-bar { height: 100%; transition: width 0.5s ease, background-color 0.3s ease; }
         .metric-sub { font-size: 11px; font-weight: 600; color: var(--muted); }
         
         .score { font-size: 18px; padding: 6px 12px; border-radius: 8px; background: #FFF4E5; color: var(--vento-accent); font-weight: 700; display: inline-block; border: 1px solid rgba(242, 143, 23, 0.2); }
@@ -252,9 +250,17 @@
                 </select>
             </div>
         </div>
-        <div style="display: flex; gap: 12px; align-items: center;">
+        
+        <div class="actions-row">
             <button class="ghost" id="refreshBtn">↻ Refrescar Datos</button>
             <button class="primary" id="applyFilters">Aplicar Filtros</button>
+            <button class="download-btn" id="downloadFilteredBtn">📥 Descargar Vista</button>
+            <select id="downloadRawSelect" style="max-width: 230px; border: 2px solid var(--muted); font-weight: 600;">
+                <option value="">📥 Descargar Base Completa...</option>
+                <option value="tickets">Base completa: Tickets</option>
+                <option value="chats">Base completa: Chats</option>
+                <option value="calls">Base completa: Llamadas</option>
+            </select>
         </div>
     </div>
 
@@ -290,7 +296,7 @@
         
         <div style="margin-top: 16px; color: var(--muted); font-size: 12px; background: var(--bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border);">
             <strong style="color: var(--vento-accent);">💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para visualizar la gráfica de constancia diaria.<br>
-            <div style="margin-top: 4px;"><strong>Criterios de validación:</strong> Tickets (col M = CANALIZADO). Llamadas (status = completed, duración > 60s). Chats (duración ≤ 5min, agent flag = AGENT).</div>
+            <div style="margin-top: 4px;"><strong>Indicadores de color:</strong> <span style="color: var(--success); font-weight: bold;">■ Verde</span> (Igual o superior a lo esperado a la fecha), <span style="color: var(--warning); font-weight: bold;">■ Amarillo</span> (Cerca de la meta, &ge;80%), <span style="color: var(--danger); font-weight: bold;">■ Rojo</span> (Rezago, &lt;80%).</div>
         </div>
     </div>
 
@@ -331,15 +337,15 @@ const COL = {
     asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') }
 };
 
-/* ----------------- Estado ----------------- */
+/* ----------------- Estado Global ----------------- */
 let aliasMap = {}; let metaMap = {}; let cache = { tickets:[], chats:[], calls:[] };
-let activeGroup = 'All'; let autoRefreshTimer = null; let currentMonthKey = null;
-let currentChartInstance = null; // Instancia global para la gráfica
+let activeGroup = 'All'; let currentChartInstance = null;
+let currentFilteredData = []; 
 
-/* ----------------- Utilidades ----------------- */
+/* ----------------- Utilidades de Parseo ----------------- */
 function parseCSV(text){
     const rows=[]; let cur='', row=[], inQuotes=false;
-    for(let i=0;i<text.length;i++){ 
+    for(let i=0; i<text.length; i++){ 
         const ch=text[i], next=text[i+1];
         if(ch==='"'){ if(inQuotes && next==='"'){ cur+='"'; i++; continue; } inQuotes=!inQuotes; continue; }
         if(ch===',' && !inQuotes){ row.push(cur); cur=''; continue; }
@@ -383,7 +389,62 @@ function parseDateFlexible(v){
     const m2=s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/); if(m2){ return new Date(+m2[1], +m2[2]-1, +m2[3]); } return null;
 }
 
-/* ----------------- Data Loading ----------------- */
+/* ----------------- Lógica de Fechas Automatizadas ----------------- */
+document.getElementById('periodSelector').addEventListener('change', function() {
+    const period = this.value;
+    const today = new Date();
+    
+    const formatDateLocal = (date) => {
+        const offset = date.getTimezoneOffset();
+        const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+        return localDate.toISOString().split('T')[0];
+    };
+    
+    if (period === 'today') {
+        const dateStr = formatDateLocal(today);
+        document.getElementById('dateFrom').value = dateStr;
+        document.getElementById('dateTo').value = dateStr;
+    } else if (period === 'thisMonth') {
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        document.getElementById('dateFrom').value = formatDateLocal(firstDay);
+        document.getElementById('dateTo').value = formatDateLocal(lastDay);
+    }
+});
+
+/* ----------------- Días Laborales y Progreso Esperado ----------------- */
+function getWorkingDaysForMonth(modality, year, month) {
+    const total = new Date(year, month + 1, 0).getDate();
+    const result = [];
+    for (let d = 1; d <= total; d++) {
+        const dt = new Date(year, month, d);
+        const dow = dt.getDay();
+        if (modality === 'Home Office') {
+            if (dow !== 4 && dow !== 5) result.push(dt);
+        } else {
+            if (dow !== 0) result.push(dt); 
+        }
+    }
+    return result;
+}
+
+function expectedUntilToday(monthlyMeta, workingDaysArray, today = new Date()) {
+    const total = workingDaysArray.length;
+    const passed = workingDaysArray.filter(d => d <= today).length;
+    if (total === 0) return 0;
+    return (monthlyMeta / total) * passed;
+}
+
+// Devuelve el color del semáforo contrastando lo real contra lo esperado a la fecha
+function getBarColor(real, expected) {
+    if (expected <= 0) return 'var(--success)';
+    const ratio = real / expected;
+    if (ratio >= 1.0) return 'var(--success)';  // Verde (En meta)
+    if (ratio >= 0.8) return 'var(--warning)';  // Amarillo (Cerca)
+    return 'var(--danger)';                     // Rojo (Alejado)
+}
+
+/* ----------------- Mapeo de Usuarios ----------------- */
 async function buildAliasAndMetaMaps(){
     aliasMap={}; metaMap={};
     try{
@@ -404,11 +465,9 @@ async function buildAliasAndMetaMaps(){
             
             metaMap[canonical]={group,supervisor,modality};
             aliasMap[keyNorm]=canonical;
-            
             if(supervisor !== 'OTROS') supervisorSet.add(supervisor);
         }
         
-        // Populate supervisor filter dropdown
         const supSelect = document.getElementById('filterSupervisor');
         const currentVal = supSelect.value;
         supSelect.innerHTML = '<option value="">Todos los supervisores</option>';
@@ -417,7 +476,6 @@ async function buildAliasAndMetaMaps(){
             supSelect.appendChild(opt);
         });
         supSelect.value = currentVal;
-        
     }catch(err){ console.warn('Error Asesores:', err.message); }
 }
 
@@ -431,30 +489,7 @@ function mapAdvisorToCanonical(raw){
     aliasMap[norm]=canonical; return canonical;
 }
 
-/* ----------------- Cálculo de Puntuaciones y Días ----------------- */
-function getWorkingDaysForMonth(modality, year, month) {
-    const total = new Date(year, month + 1, 0).getDate();
-    const result = [];
-    for (let d = 1; d <= total; d++) {
-        const dt = new Date(year, month, d);
-        const dow = dt.getDay();
-        if (modality === 'Home Office') {
-            if (dow !== 4 && dow !== 5) result.push(dt);
-        } else {
-            if (dow !== 0) result.push(dt); // Simplificado: L-S presencial
-        }
-    }
-    return result;
-}
-
-function expectedUntilToday(monthlyMeta, workingDaysArray, today = new Date()) {
-    const total = workingDaysArray.length;
-    const passed = workingDaysArray.filter(d => d <= today).length;
-    if (total === 0) return 0;
-    return (monthlyMeta / total) * passed;
-}
-
-/* ----------------- Render de la Tabla Principal ----------------- */
+/* ----------------- Renderizado del Leaderboard ----------------- */
 function buildLeaderboardRows(scoresArr) {
     const tbody = document.getElementById('leaderboardBody');
     tbody.innerHTML = '';
@@ -483,6 +518,11 @@ function buildLeaderboardRows(scoresArr) {
         const pctC = meta.calls > 0 ? Math.min(100, (s.calls / meta.calls) * 100) : 0;
         const pctCh = meta.chats > 0 ? Math.min(100, (s.chats / meta.chats) * 100) : 0;
         
+        // Obtención de colores dinámicos por columna según semáforo solicitado
+        const colorT = getBarColor(s.tickets, expT);
+        const colorC = getBarColor(s.calls, expC);
+        const colorCh = getBarColor(s.chats, expCh);
+        
         const sumReal = s.tickets + s.calls + s.chats;
         const sumMeta = meta.tickets + meta.calls + meta.chats;
         const sumExp = expT + expC + expCh;
@@ -507,17 +547,17 @@ function buildLeaderboardRows(scoresArr) {
             </td>
             <td class="col-metric">
                 <div class="metric-val">${s.tickets}</div>
-                <div class="rubro-bar-wrap" title="Meta Mensual: ${meta.tickets}"><div class="rubro-bar" style="width:${pctT}%"></div></div>
+                <div class="rubro-bar-wrap" title="Meta: ${meta.tickets}"><div class="rubro-bar" style="width:${pctT}%; background-color:${colorT};"></div></div>
                 <div class="metric-sub">Real: ${Math.round(pctT)}% | Exp: ${Math.round((expT/meta.tickets)*100 || 0)}%</div>
             </td>
             <td class="col-metric">
                 <div class="metric-val">${s.calls}</div>
-                <div class="rubro-bar-wrap" title="Meta Mensual: ${meta.calls}"><div class="rubro-bar" style="width:${pctC}%"></div></div>
+                <div class="rubro-bar-wrap" title="Meta: ${meta.calls}"><div class="rubro-bar" style="width:${pctC}%; background-color:${colorC};"></div></div>
                 <div class="metric-sub">Real: ${Math.round(pctC)}% | Exp: ${Math.round((expC/meta.calls)*100 || 0)}%</div>
             </td>
             <td class="col-metric">
                 <div class="metric-val">${s.chats}</div>
-                <div class="rubro-bar-wrap" title="Meta Mensual: ${meta.chats}"><div class="rubro-bar" style="width:${pctCh}%"></div></div>
+                <div class="rubro-bar-wrap" title="Meta: ${meta.chats}"><div class="rubro-bar" style="width:${pctCh}%; background-color:${colorCh};"></div></div>
                 <div class="metric-sub">Real: ${Math.round(pctCh)}% | Exp: ${Math.round((expCh/meta.chats)*100 || 0)}%</div>
             </td>
             <td style="text-align: right;">
@@ -525,22 +565,16 @@ function buildLeaderboardRows(scoresArr) {
                 <br><span class="status-pill ${statusClass}">${Math.round(pctRealOverall)}% Meta</span>
             </td>
         `;
-        
         tbody.appendChild(tr);
 
-        // Disparador de gráfica modal
         const link = tr.querySelector('.advisor-name-link');
-        if(link){
-            link.addEventListener('click', () => {
-                openChartModal(s.name);
-            });
-        }
+        if(link) link.addEventListener('click', () => openChartModal(s.name));
     });
 }
 
-/* ----------------- Lógica de la Gráfica Modal ----------------- */
+/* ----------------- Lógica Gráfica Individual ----------------- */
 function getDailyChartData(advisorName, start, end) {
-    const labels=[]; const series=[]; const dates=[];
+    const labels=[]; const dates=[];
     let curr=new Date(start);
     while(curr<=end){ 
         const ds=curr.getFullYear()+'-'+String(curr.getMonth()+1).padStart(2,'0')+'-'+String(curr.getDate()).padStart(2,'0'); 
@@ -551,45 +585,39 @@ function getDailyChartData(advisorName, start, end) {
     
     const dailyCounts={}; dates.forEach(d=>dailyCounts[d]={t:0,c:0,ch:0});
     
-    function addCount(dateStr,adv,type){ 
-        if(!dailyCounts[dateStr]) return; 
-        if(!dailyCounts[dateStr][adv]) dailyCounts[dateStr][adv]={t:0,c:0,ch:0}; 
-        dailyCounts[dateStr][adv][type]++; 
+    function addCount(dateStr, type){ 
+        if(dailyCounts[dateStr]) dailyCounts[dateStr][type]++; 
     }
     
-    // Scan Cache for tickets
-    for(let r=1;r<cache.tickets.length;r++){ 
-        const row=cache.tickets[r]; const canonical=mapAdvisorToCanonical(row[COL.tickets.advisor]); 
-        if(canonical !== advisorName) continue; 
-        if(String(row[COL.tickets.status]||'').trim().toUpperCase()!=='CANALIZADO') continue; 
-        const parsed=parseDateFlexible(row[COL.tickets.date]); 
-        if(parsed && parsed>=start && parsed<=end){ 
-            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), canonical, 't'); 
-        } 
-    }
-    // Scan Cache for chats
-    for(let r=1;r<cache.chats.length;r++){ 
-        const row=cache.chats[r]; const canonical=mapAdvisorToCanonical(row[COL.chats.advisor]); 
-        if(canonical !== advisorName) continue; 
-        if(String(row[COL.chats.agentFlag]||'').trim().toUpperCase()!=='AGENT') continue; 
-        const parsed=parseDateFlexible(row[COL.chats.date]); 
-        if(parsed && parsed>=start && parsed<=end){ 
-            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), canonical, 'ch'); 
-        } 
-    }
-    // Scan Cache for calls
-    for(let r=1;r<cache.calls.length;r++){ 
-        const row=cache.calls[r]; const canonical=mapAdvisorToCanonical(row[COL.calls.advisor]); 
-        if(canonical !== advisorName) continue; 
-        if(String(row[COL.calls.status]||'').trim().toLowerCase()!=='completed') continue; 
-        const parsed=parseDateFlexible(row[COL.calls.date]); 
-        if(parsed && parsed>=start && parsed<=end){ 
-            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), canonical, 'c'); 
-        } 
-    }
+    cache.tickets.forEach(row => {
+        if(mapAdvisorToCanonical(row[COL.tickets.advisor]) !== advisorName) return;
+        if(String(row[COL.tickets.status]||'').toUpperCase()!=='CANALIZADO') return;
+        const parsed=parseDateFlexible(row[COL.tickets.date]);
+        if(parsed && parsed>=start && parsed<=end){
+            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 't');
+        }
+    });
+
+    cache.chats.forEach(row => {
+        if(mapAdvisorToCanonical(row[COL.chats.advisor]) !== advisorName) return;
+        if(String(row[COL.chats.agentFlag]||'').toUpperCase()!=='AGENT') return;
+        const parsed=parseDateFlexible(row[COL.chats.date]);
+        if(parsed && parsed>=start && parsed<=end){
+            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 'ch');
+        }
+    });
+
+    cache.calls.forEach(row => {
+        if(mapAdvisorToCanonical(row[COL.calls.advisor]) !== advisorName) return;
+        if(String(row[COL.calls.status]||'').toLowerCase()!=='completed') return;
+        const parsed=parseDateFlexible(row[COL.calls.date]);
+        if(parsed && parsed>=start && parsed<=end){
+            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 'c');
+        }
+    });
     
     const seriesData = dates.map(d => {
-        const v = dailyCounts[d] && dailyCounts[d][advisorName] ? dailyCounts[d][advisorName] : {t:0,c:0,ch:0};
+        const v = dailyCounts[d] ? dailyCounts[d] : {t:0,c:0,ch:0};
         return v.t + v.c + v.ch;
     });
     
@@ -601,9 +629,7 @@ function openChartModal(advisorName) {
     document.getElementById('chartTitle').textContent = `Rendimiento de ${advisorName}`;
     modal.style.display = 'flex';
     
-    // Configurar fechas (Últimos 15 días)
-    const end = new Date();
-    const start = new Date();
+    const end = new Date(); const start = new Date();
     start.setDate(end.getDate() - 14);
     
     const data = getDailyChartData(advisorName, start, end);
@@ -616,14 +642,14 @@ function openChartModal(advisorName) {
         data: {
             labels: data.labels,
             datasets: [{
-                label: 'Volumen de Interacciones',
+                label: 'Interacciones Válidas Totales',
                 data: data.series,
-                borderColor: '#F28F17', // Naranja corporativo
+                borderColor: '#F28F17',
                 backgroundColor: 'rgba(242, 143, 23, 0.15)',
                 borderWidth: 3,
-                tension: 0.3,
+                tension: 0.2,
                 fill: true,
-                pointBackgroundColor: '#231F20', // Negro
+                pointBackgroundColor: '#231F20',
                 pointRadius: 4
             }]
         },
@@ -643,13 +669,49 @@ document.getElementById('closeModal').addEventListener('click', () => {
     document.getElementById('chartModal').style.display = 'none';
 });
 
-/* ----------------- Motor de Análisis Principal ----------------- */
+/* ----------------- Descarga de Archivos CSV ----------------- */
+function downloadCSV(csvContent, fileName) {
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function exportFilteredTable() {
+    if(!currentFilteredData.length) { alert("No hay registros en la vista actual para descargar."); return; }
+    let csv = "Posicion,Asesor,Grupo,Supervisor,Modalidad,Tickets,Llamadas,Chats,Puntaje\n";
+    currentFilteredData.forEach((s, idx) => {
+        csv += `${idx + 1},"${s.name}","${s.group}","${s.supervisor}","${s.modality}",${s.tickets},${s.calls},${s.chats},${s.total.toFixed(0)}\n`;
+    });
+    downloadCSV(csv, `Reporte_Vista_Filtrada_${new Date().toISOString().split('T')[0]}.csv`);
+}
+
+function exportRawBase(type) {
+    const data = cache[type];
+    if (!data || data.length === 0) { alert("Base de datos vacía o no sincronizada."); return; }
+    let csv = "";
+    data.forEach(row => {
+        const escaped = row.map(v => `"${String(v).replace(/"/g, '""')}"`);
+        csv += escaped.join(",") + "\n";
+    });
+    downloadCSV(csv, `Base_Completa_${type.toUpperCase()}_${new Date().toISOString().split('T')[0]}.csv`);
+}
+
+document.getElementById('downloadFilteredBtn').addEventListener('click', exportFilteredTable);
+document.getElementById('downloadRawSelect').addEventListener('change', function() {
+    if (this.value) { exportRawBase(this.value); this.value = ""; }
+});
+
+/* ----------------- Motor de Análisis ----------------- */
 function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervisor){
     const counts={};
     function ensure(name){ if(!counts[name]) counts[name]={tickets:0,chats:0,calls:0}; }
     
-    // Sumarizaciones omitidas por longitud... operan igual filtrando validaciones
-    // Tickets
     cache.tickets.forEach(row => {
         const adv=mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!adv) return;
         const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
@@ -661,7 +723,7 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
             ensure(adv); counts[adv].tickets++;
         }
     });
-    // Chats
+
     cache.chats.forEach(row => {
         const adv=mapAdvisorToCanonical(row[COL.chats.advisor]); if(!adv) return;
         const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
@@ -673,7 +735,7 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
             ensure(adv); counts[adv].chats++;
         }
     });
-    // Calls
+
     cache.calls.forEach(row => {
         const adv=mapAdvisorToCanonical(row[COL.calls.advisor]); if(!adv) return;
         const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
@@ -705,6 +767,7 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
     });
     
     arr.sort((a,b)=>b.total-a.total);
+    currentFilteredData = arr; // Resguardo global para exportación
     
     document.getElementById('statAdvisors').textContent = arr.length;
     document.getElementById('statTickets').textContent = Object.values(counts).reduce((s,c)=>s+c.tickets,0);
@@ -714,14 +777,19 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
     buildLeaderboardRows(arr);
 }
 
-/* ----------------- Flujo de Ejecución ----------------- */
+function applyAllFilters() {
+    let from = null, to = null;
+    if(document.getElementById('dateFrom').value) from = new Date(document.getElementById('dateFrom').value + 'T00:00:00');
+    if(document.getElementById('dateTo').value) to = new Date(document.getElementById('dateTo').value + 'T23:59:59');
+    aggregateAndScore(from, to, activeGroup, document.getElementById('filterSupervisor').value);
+}
+
+/* ----------------- Flujo de Ejecución e Inicialización ----------------- */
 async function loadAllAndRender() {
     try {
         document.getElementById('loadingOverlay').style.display = 'flex';
-        
         await buildAliasAndMetaMaps();
         
-        // Simulación de Fetch o Fetch real (Asegúrate de ajustar los permisos CORS del Spreadsheet)
         const [t, ch, c] = await Promise.all([
             fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.tickets).catch(()=>[]),
             fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.chats).catch(()=>[]),
@@ -730,30 +798,10 @@ async function loadAllAndRender() {
         cache.tickets = t; cache.chats = ch; cache.calls = c;
         
         applyAllFilters();
-        
-        document.getElementById('lastSync').textContent = new Date().toLocaleString('es-MX', {hour: '2-digit', minute:'2-digit'});
+        document.getElementById('lastSync').textContent = new Date().toLocaleString('es-MX', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
     } catch(e) { console.error(e); } finally { document.getElementById('loadingOverlay').style.display = 'none'; }
 }
 
-function applyAllFilters() {
-    const period = document.getElementById('periodSelector').value;
-    let from = null, to = null;
-    const today = new Date();
-    
-    if (period === 'today') {
-        from = new Date(today.getFullYear(), today.getMonth(), today.getDate()); to = from;
-    } else if (period === 'thisMonth') {
-        from = new Date(today.getFullYear(), today.getMonth(), 1); 
-        to = new Date(today.getFullYear(), today.getMonth()+1, 0);
-    } else {
-        if(document.getElementById('dateFrom').value) from = new Date(document.getElementById('dateFrom').value + 'T00:00:00');
-        if(document.getElementById('dateTo').value) to = new Date(document.getElementById('dateTo').value + 'T23:59:59');
-    }
-    
-    aggregateAndScore(from, to, activeGroup, document.getElementById('filterSupervisor').value);
-}
-
-/* ----------------- Listeners ----------------- */
 document.getElementById('applyFilters').addEventListener('click', applyAllFilters);
 document.getElementById('refreshBtn').addEventListener('click', loadAllAndRender);
 
@@ -766,7 +814,8 @@ document.querySelectorAll('.tab').forEach(t => {
     });
 });
 
-// Initialization
+// Inicialización por defecto del selector "Este Mes"
+document.getElementById('periodSelector').dispatchEvent(new Event('change'));
 loadAllAndRender();
 setInterval(loadAllAndRender, AUTO_REFRESH_MS);
 </script>
