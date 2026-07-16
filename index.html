@@ -3,230 +3,316 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Dashboard Asesores — Barras por Rubro (Nombres completos)</title>
+<title>Dashboard Asesores — Progreso por Rubro</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root{--bg:#F7FAFC;--card:#FFFFFF;--muted:#6B7280;--text:#0F172A;--accent:#0EA5A4;--accent-2:#F59E0B;--success:#10B981;--warning:#F59E0B;--danger:#EF4444;--border:rgba(15,23,42,0.06);--radius:10px;--shadow-sm:0 6px 18px rgba(15,23,42,0.06);--gold:linear-gradient(90deg,#FFD54A,#FFC107);--silver:linear-gradient(90deg,#E6EEF8,#C7D2E8);--bronze:linear-gradient(90deg,#FFD8B5,#F59E0B);}
+/* ----------------- Paleta e identidad (Vento) ----------------- */
+:root{
+  --bg: #F6F8FA;
+  --card: #FFFFFF;
+  --muted: #6B7280;
+  --text: #0F172A;
+  --vento-primary: #0B6FAF;   /* color institucional principal (azul) */
+  --vento-accent: #F28F17;    /* acento naranja */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --border: rgba(15,23,42,0.06);
+  --radius: 12px;
+  --shadow-sm: 0 8px 28px rgba(15,23,42,0.06);
+  --gold: linear-gradient(90deg,#FFD54A,#FFC107);
+  --silver: linear-gradient(90deg,#E6EEF8,#C7D2E8);
+  --bronze: linear-gradient(90deg,#FFD8B5,#F59E0B);
+  --top3-text: #0B1220;
+}
+
+/* ----------------- Reset y tipografía ----------------- */
 *{box-sizing:border-box}
-body{margin:0;font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
-.container{max-width:1200px;margin:20px auto;padding:16px;display:flex;flex-direction:column;gap:16px;}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--card);padding:12px 16px;border-radius:var(--radius);box-shadow:var(--shadow-sm);}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#0EA5A4,#06B6D4);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;border:2px solid rgba(255,255,255,0.12);box-shadow:0 6px 18px rgba(14,165,164,0.12);}
-h1{font-size:18px;margin:0;font-weight:800}
-.subtitle{font-size:12px;color:var(--muted);margin-top:4px;font-weight:600}
-.top-bar{display:flex;gap:12px;align-items:flex-start;background:transparent;flex-wrap:wrap;}
-.top-card{background:var(--card);border-radius:10px;padding:12px;border:1px solid var(--border);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:8px;min-width:220px;max-width:420px;}
-.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;background:var(--card);padding:12px;border-radius:var(--radius);box-shadow:var(--shadow-sm);}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: "Segoe UI", Inter, Roboto, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  line-height:1.35;
+  font-size:14px;
+}
+
+/* ----------------- Contenedor principal ----------------- */
+.container{
+  max-width:1280px;
+  margin:22px auto;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* ----------------- Header ----------------- */
+header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95));
+  padding:14px 18px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{
+  width:56px;height:56px;border-radius:12px;
+  background:linear-gradient(135deg,var(--vento-primary),#06B6D4);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:20px;border:2px solid rgba(255,255,255,0.12);
+  box-shadow:0 10px 30px rgba(11,111,175,0.08);
+}
+h1{font-size:20px;margin:0;font-weight:800}
+.subtitle{font-size:13px;color:var(--muted);margin-top:4px;font-weight:600}
+
+/* ----------------- Top bar (metas + métricas) ----------------- */
+.top-bar{
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+/* Card pequeño */
+.top-card{
+  background:var(--card);
+  border-radius:12px;
+  padding:14px;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-width:260px;
+}
+
+/* Metas estilo */
+.goal-title{font-weight:900;font-size:12px;color:var(--muted);text-transform:uppercase}
+.goal-item{font-size:14px;display:flex;justify-content:space-between;align-items:center;padding:6px 0}
+.goal-item strong{color:var(--vento-accent);font-size:15px}
+
+/* Métricas generales */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat{display:flex;flex-direction:column;padding:10px;border-radius:10px;background:#FBFDFF;border:1px solid var(--border);text-align:center}
+.stat .label{color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase}
+.stat .value{font-weight:900;font-size:18px;color:var(--vento-primary)}
+
+/* ----------------- Controles ----------------- */
+.controls{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:flex-end;
+  background:transparent;
+}
 .control{flex:1;min-width:160px}
-.control label{display:block;font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
-select,input[type="date"]{width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);font-size:13px;background:#FBFDFF;transition:all .12s ease;}
-select:focus,input[type="date"]:focus{outline:none;border-color:var(--accent);box-shadow:0 6px 18px rgba(14,165,164,0.06)}
-.actions{display:flex;gap:8px;align-items:center}
-button{transition:all .12s ease;font-family:inherit}
-button.primary{background:var(--accent);border:none;color:#fff;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(14,165,164,0.10);}
-button.ghost{background:transparent;border:2px solid var(--text);color:var(--text);padding:6px 12px;border-radius:8px;font-weight:700}
-.small-btn{padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600;font-size:13px}
-.tabs{display:flex;gap:8px;margin:4px 0;flex-wrap:wrap}
-.tab{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700;color:var(--muted);font-size:13px}
-.tab.active{background:linear-gradient(90deg,#E6F6F5,#F7FEFF);border-color:var(--accent);color:var(--text);box-shadow:var(--shadow-sm)}
+.control label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase}
+select,input[type="date"]{width:100%;padding:9px;border-radius:10px;border:1px solid var(--border);font-size:13px;background:#fff}
+button.primary{background:var(--vento-primary);border:none;color:#fff;padding:9px 14px;border-radius:10px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(11,111,175,0.08)}
+button.ghost{background:transparent;border:2px solid var(--vento-primary);color:var(--vento-primary);padding:8px 12px;border-radius:10px;font-weight:700}
+
+/* ----------------- Tabs ----------------- */
+.tabs{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap}
+.tab{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700;color:var(--muted);font-size:13px}
+.tab.active{background:linear-gradient(90deg,#E6F6FF,#F7FDFF);border-color:var(--vento-primary);color:var(--text);box-shadow:var(--shadow-sm)}
+
+/* ----------------- Main grid y cards ----------------- */
 .main-grid{display:grid;grid-template-columns:1fr;gap:16px}
-.card{background:var(--card);border-radius:var(--radius);padding:14px;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
-.card h2{margin:0 0 12px 0;font-size:16px;color:var(--text);font-weight:800;text-transform:uppercase;letter-spacing:-0.5px}
-.table-wrap { overflow: auto; border-radius: 8px; border: 1px solid var(--border); background: #FFF; }
-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 0; table-layout: auto; }
-thead th { text-align: left; padding: 14px 12px; background: #FAFAFA; color: #000; font-size: 12px; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid #EAEAEA; vertical-align: middle; }
-tbody td { padding: 14px 12px; border-bottom: 1px solid #F0F0F0; vertical-align: middle; transition: background 0.2s ease; }
+.card{background:var(--card);border-radius:14px;padding:16px;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.card h2{margin:0 0 12px 0;font-size:16px;color:var(--text);font-weight:900;letter-spacing:-0.4px}
+
+/* Tabla */
+.table-wrap { overflow: auto; border-radius: 12px; border: 1px solid var(--border); background: #FFF; padding:8px; }
+table { width: 100%; border-collapse: collapse; font-size:14px; min-width: 0; table-layout: auto; }
+thead th { text-align: left; padding: 14px 12px; background: #FAFAFB; color: #000; font-size:12px; font-weight:800; text-transform:uppercase; border-bottom:2px solid #EAEAEA; vertical-align: middle; }
+tbody td { padding: 12px; border-bottom: 1px solid #F0F0F0; vertical-align: middle; transition: background 0.2s ease; }
 tbody td.number, thead th.number { white-space: nowrap; text-align: right; font-weight:800; }
-.advisor-name-link{font-weight:800;font-size:15px;color:var(--text);cursor:pointer;text-decoration:none;display:block;white-space:normal;word-break:break-word;line-height:1.05;}
-.meta-small{font-size:11px;color:var(--muted);margin-top:4px}
-.score{font-size:15px;padding:6px 10px;border-radius:8px;background:linear-gradient(90deg, rgba(245,158,11,0.06), rgba(14,165,164,0.02));color:var(--accent-2);font-weight:900;}
-.top-highlight-1 td{background:var(--gold);color:#0B1220}
-.top-highlight-2 td{background:var(--silver);color:#0B1220}
-.top-highlight-3 td{background:var(--bronze);color:#0B1220}
-.badge-top{display:inline-block;background:rgba(11,17,32,0.06);color:var(--text);padding:4px 8px;border-radius:999px;font-size:11px;margin-left:8px;font-weight:800;text-transform:uppercase}
-.rubro-wrap{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
-.rubro-label{font-weight:800;font-size:12px;color:var(--muted)}
-.rubro-progress{width:100%;max-width:240px;background:#F3F4F6;border-radius:999px;padding:3px;border:1px solid var(--border);display:flex;align-items:center;gap:8px}
-.rubro-bar{height:10px;border-radius:999px;width:0%;transition:width .35s ease;background:linear-gradient(90deg,#06B6D4,#0EA5A4)}
-.rubro-percent{font-weight:800;font-size:12px;margin-left:6px;color:var(--text)}
+
+/* Nombre asesor */
+.advisor-name-link{font-weight:800;font-size:15px;color:var(--vento-primary);cursor:pointer;text-decoration:none;display:block;white-space:normal;word-break:break-word;line-height:1.05}
+.meta-small{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* Score */
+.score{font-size:15px;padding:6px 10px;border-radius:10px;background:linear-gradient(90deg, rgba(242,143,23,0.06), rgba(11,111,175,0.02));color:var(--vento-accent);font-weight:900}
+
+/* Top highlights (mantener colores) */
+.top-highlight-1 td{background:var(--gold);color:var(--top3-text)}
+.top-highlight-2 td{background:var(--silver);color:var(--top3-text)}
+.top-highlight-3 td{background:var(--bronze);color:var(--top3-text)}
+
+/* Progreso por rubro: contenedor y barras */
+.rubros-grid{display:flex;flex-direction:column;gap:8px}
+.rubro-row{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.rubro-label{font-weight:800;font-size:12px;color:var(--muted);min-width:70px}
+.rubro-progress{flex:1;display:flex;align-items:center;gap:10px}
+.rubro-bar-wrap{width:100%;background:#F3F4F6;border-radius:999px;padding:4px;border:1px solid var(--border)}
+.rubro-bar{height:10px;border-radius:999px;width:0%;transition:width .45s ease;background:linear-gradient(90deg,var(--vento-primary),#06B6D4)}
+.rubro-percent{font-weight:800;font-size:12px;color:var(--text);min-width:110px;text-align:right}
+
+/* status pill */
 .status-pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px;color:#fff}
 .status-cumplido{background:var(--success)}
 .status-cerca{background:var(--warning);color:#0B1220}
 .status-lejos{background:var(--danger)}
-.goals{margin-top:8px;display:flex;flex-direction:column;gap:10px}
-.goal-block{padding:12px;border-radius:8px;background:#FBFDFF;border-left:4px solid rgba(14,165,164,0.12);transition:transform .12s ease}
-.goal-block:hover{transform:translateX(4px);box-shadow:var(--shadow-sm)}
-.goal-title{font-weight:900;margin-bottom:6px;font-size:12px;color:var(--text);text-transform:uppercase}
-.goal-item{font-size:13px;margin:6px 0;display:flex;justify-content:space-between;border-bottom:1px dashed var(--border);padding-bottom:6px}
-.goal-item strong{color:var(--accent-2);font-size:14px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.stat{display:flex;flex-direction:column;padding:10px;border-radius:8px;background:#fff;border:1px solid var(--border);text-align:center}
-.stat .label{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:4px}
-.stat .value{font-weight:900;font-size:18px;color:var(--accent)}
-.loading-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);z-index:9999;flex-direction:column;gap:12px}
-.spinner{width:44px;height:44px;border-radius:50%;border:6px solid #E6EEF8;border-top-color:var(--accent);animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-weight:800;color:var(--text);font-size:14px}
-.modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:none;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(4px)}
-.modal{background:#fff;border-radius:12px;padding:18px;max-width:420px;width:94%;box-shadow:0 18px 40px rgba(15,23,42,0.08);text-align:center}
-.chart-modal{max-width:900px !important;width:95%;padding:20px 24px !important;text-align:left}
-.modal h3{margin:0 0 8px 0;font-weight:900;font-size:18px}
-.modal .close{position:absolute;right:12px;top:12px;background:transparent;border:none;font-weight:900;font-size:20px;cursor:pointer;color:var(--muted)}
-.modal input[type="password"]{padding:10px;border-radius:8px;border:2px solid var(--border);font-size:14px;text-align:center;font-weight:700}
-.modal button.primary{width:100%;padding:10px;font-size:14px}
-@media(max-width:1000px){.top-bar{flex-direction:column;gap:10px}.main-grid{grid-template-columns:1fr}.table-wrap{overflow:auto}}
-@media(max-width:720px){.rubro-progress{width:110px}.logo{width:44px;height:44px;font-size:16px}}
-.col-fit { white-space: nowrap; width: 1%; }
-.col-flex { width: auto; min-width: 140px; }
-.skeleton-row td { height:56px; }
+
+/* Footer */
+footer{font-size:12px;color:var(--muted);text-align:center;margin-top:6px;font-weight:600;padding-bottom:12px}
+
+/* Responsive */
+@media(max-width:1000px){
+  .top-bar{flex-direction:column}
+  .stats{grid-template-columns:1fr 1fr}
+}
+@media(max-width:720px){
+  .rubro-percent{min-width:80px;font-size:11px}
+  .logo{width:48px;height:48px}
+}
 </style>
 </head>
 <body>
 <div class="container">
-<header>
-<div class="brand">
-<div class="logo">AS</div>
-<div>
-<h1>Indicadores Asesores</h1>
-<div class="subtitle">Rendimiento · Puntos · Metas</div>
-</div>
-</div>
-<div style="text-align:right;background:#FBFDFF;padding:8px 12px;border-radius:8px;border:1px solid var(--border)">
-<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Última sincronización</div>
-<div id="lastSync" style="font-weight:900;color:var(--text);font-size:14px;margin-top:2px">--:--</div>
-</div>
-</header>
+  <header>
+    <div class="brand">
+      <div class="logo">AS</div>
+      <div>
+        <h1>Indicadores Asesores</h1>
+        <div class="subtitle">Rendimiento · Puntos · Metas</div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Última sincronización</div>
+      <div id="lastSync" style="font-weight:900;color:var(--text);font-size:14px;margin-top:6px">--:--</div>
+    </div>
+  </header>
 
-<div class="top-bar" aria-hidden="false">
-<div class="top-card" style="flex:1;min-width:260px;max-width:520px">
-<h3 style="margin:0;font-size:13px;color:var(--text);font-weight:900;text-transform:uppercase">Metas del Mes</h3>
-<div class="goals" aria-live="polite" style="margin-top:8px">
-<div class="goal-block" aria-label="Meta general" style="padding:10px">
-<div class="goal-title">🎯 META GENERAL</div>
-<div class="goal-item"><span>Total de Tickets:</span> <strong id="goal_general">&lt; 415</strong></div>
-</div>
-<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-<div style="flex:1;min-width:140px">
-<div class="goal-title" style="font-size:12px">🏢 Presencial</div>
-<div class="goal-item"><span>Tickets:</span> <strong id="goal_pres_tickets">374</strong></div>
-<div class="goal-item"><span>Chats:</span> <strong id="goal_pres_chats">384</strong></div>
-<div class="goal-item"><span>Llamadas:</span> <strong id="goal_pres_calls">393</strong></div>
-</div>
-<div style="flex:1;min-width:140px">
-<div class="goal-title" style="font-size:12px">🏡 Home Office</div>
-<div class="goal-item"><span>Tickets:</span> <strong id="goal_ho_tickets">524</strong></div>
-<div class="goal-item"><span>Chats:</span> <strong id="goal_ho_chats">1727</strong></div>
-</div>
-</div>
-</div>
-</div>
+  <!-- TOP BAR -->
+  <div class="top-bar" aria-hidden="false">
+    <div class="top-card" style="flex:1;min-width:300px;max-width:640px">
+      <h3 style="margin:0;font-size:13px;color:var(--text);font-weight:900;text-transform:uppercase">Metas del Mes</h3>
+      <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <div class="goal-title">🏢 Presencial</div>
+          <div class="goal-item"><span>Tickets</span><strong id="goal_pres_tickets">374</strong></div>
+          <div class="goal-item"><span>Chats</span><strong id="goal_pres_chats">384</strong></div>
+          <div class="goal-item"><span>Llamadas</span><strong id="goal_pres_calls">393</strong></div>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <div class="goal-title">🏡 Home Office</div>
+          <div class="goal-item"><span>Tickets</span><strong id="goal_ho_tickets">524</strong></div>
+          <div class="goal-item"><span>Chats</span><strong id="goal_ho_chats">1727</strong></div>
+        </div>
+      </div>
+    </div>
 
-<div class="top-card" style="width:320px;min-width:260px">
-<h3 style="margin:0;font-size:13px;color:var(--text);font-weight:900;text-transform:uppercase">Métricas Generales</h3>
-<div class="stats" style="margin-top:10px">
-<div class="stat"><div class="label">Asesores</div><div class="value" id="statAdvisors">--</div></div>
-<div class="stat"><div class="label">Tickets</div><div class="value" id="statTickets">--</div></div>
-<div class="stat"><div class="label">Llamadas</div><div class="value" id="statCalls">--</div></div>
-<div class="stat"><div class="label">Chats</div><div class="value" id="statChats">--</div></div>
-</div>
-<div style="margin-top:10px">
-<h4 style="margin:8px 0 6px 0;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase">Exportación</h4>
-<div style="display:flex;flex-direction:column;gap:8px">
-<button class="small-btn" id="exportTickets">Exportar Tickets_BD (CSV)</button>
-<button class="small-btn" id="exportChats">Exportar Chats_BD (CSV)</button>
-<button class="small-btn" id="exportCalls">Exportar Llamadas_BD (CSV)</button>
-</div>
-</div>
-</div>
+    <div class="top-card" style="width:320px;min-width:260px">
+      <h3 style="margin:0;font-size:13px;color:var(--text);font-weight:900;text-transform:uppercase">Métricas Generales</h3>
+      <div class="stats" style="margin-top:10px">
+        <div class="stat"><div class="label">Asesores</div><div class="value" id="statAdvisors">--</div></div>
+        <div class="stat"><div class="label">Tickets</div><div class="value" id="statTickets">--</div></div>
+        <div class="stat"><div class="label">Llamadas</div><div class="value" id="statCalls">--</div></div>
+        <div class="stat"><div class="label">Chats</div><div class="value" id="statChats">--</div></div>
+      </div>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+        <button class="small-btn" id="exportTickets">Exportar Tickets_BD (CSV)</button>
+        <button class="small-btn" id="exportChats">Exportar Chats_BD (CSV)</button>
+      </div>
+    </div>
 
-<div style="display:flex;align-items:flex-start;gap:8px">
-<button class="small-btn" id="downloadFiltered">↓ Descargar Filtrados</button>
-</div>
-</div>
+    <div style="display:flex;align-items:flex-start;gap:8px">
+      <button class="small-btn" id="downloadFiltered">↓ Descargar Filtrados</button>
+    </div>
+  </div>
 
-<div class="controls" aria-label="Controles de filtro">
-<div class="control">
-<label>Periodo</label>
-<select id="periodSelector" aria-label="Periodo">
-<option value="custom">Personalizado</option>
-<option value="today">Hoy</option>
-<option value="thisMonth">Este Mes</option>
-<!-- Se eliminó la opción Mes pasado -->
-</select>
-</div>
-<div class="control">
-<label>Fecha inicio</label>
-<input type="date" id="dateFrom" aria-label="Fecha inicio">
-</div>
-<div class="control">
-<label>Fecha fin</label>
-<input type="date" id="dateTo" aria-label="Fecha fin">
-</div>
-<div class="control" style="min-width:200px">
-<label>Supervisor</label>
-<select id="filterSupervisor" aria-label="Supervisor">
-<option value="">Todos los supervisores</option>
-</select>
-</div>
-<div class="actions" style="margin-bottom:2px">
-<button class="primary" id="applyFilters">Aplicar Filtros</button>
-<button class="ghost" id="refreshBtn" title="Refrescar datos">↻ Refrescar</button>
-</div>
-</div>
+  <!-- CONTROLS -->
+  <div class="controls" aria-label="Controles de filtro">
+    <div class="control">
+      <label>Periodo</label>
+      <select id="periodSelector" aria-label="Periodo">
+        <option value="custom">Personalizado</option>
+        <option value="today">Hoy</option>
+        <option value="thisMonth">Este Mes</option>
+      </select>
+    </div>
+    <div class="control">
+      <label>Fecha inicio</label>
+      <input type="date" id="dateFrom" aria-label="Fecha inicio">
+    </div>
+    <div class="control">
+      <label>Fecha fin</label>
+      <input type="date" id="dateTo" aria-label="Fecha fin">
+    </div>
+    <div class="control" style="min-width:220px">
+      <label>Supervisor</label>
+      <select id="filterSupervisor" aria-label="Supervisor">
+        <option value="">Todos los supervisores</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="primary" id="applyFilters">Aplicar Filtros</button>
+      <button class="ghost" id="refreshBtn" title="Refrescar datos">↻ Refrescar</button>
+    </div>
+  </div>
 
-<div class="tabs" role="tablist" aria-label="Grupos">
-<div class="tab active" data-group="All">Todos</div>
-<div class="tab" data-group="Vento">Vento</div>
-<div class="tab" data-group="Piston">Piston</div>
-<div class="tab" data-group="Home Office">Home Office</div>
-<div class="tab" data-group="Nuevo ingreso">Nuevo ingreso</div>
-<div class="tab" data-group="OTROS">OTROS</div>
-</div>
+  <div class="tabs" role="tablist" aria-label="Grupos">
+    <div class="tab active" data-group="All">Todos</div>
+    <div class="tab" data-group="Vento">Vento</div>
+    <div class="tab" data-group="Piston">Piston</div>
+    <div class="tab" data-group="Home Office">Home Office</div>
+    <div class="tab" data-group="Nuevo ingreso">Nuevo ingreso</div>
+    <div class="tab" data-group="OTROS">OTROS</div>
+  </div>
 
-<div class="main-grid">
-<section class="card">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-<h2 style="margin:0">Leaderboard de Puntos</h2>
-</div>
+  <!-- MAIN -->
+  <div class="main-grid">
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h2>Leaderboard de Puntos</h2>
+      </div>
 
-<div class="table-wrap" role="table" aria-label="Leaderboard">
-<table id="leaderboardTable" role="grid" aria-live="polite">
-<thead>
-<tr>
-<th class="col-fit">Pos</th>
-<th style="min-width:220px">Asesor</th>
-<th class="col-fit number">Tickets<br><span class="meta-small" style="color:var(--muted)">Vol / Pts</span></th>
-<th class="col-fit number">Llamadas<br><span class="meta-small" style="color:var(--muted)">Vol / Pts</span></th>
-<th class="col-fit number">Chats<br><span class="meta-small" style="color:var(--muted)">Vol / Pts</span></th>
-<th class="col-flex">Puntaje / Progreso</th>
-</tr>
-</thead>
-<tbody id="leaderboardBody"></tbody>
-</table>
-</div>
+      <div class="table-wrap" role="table" aria-label="Leaderboard">
+        <table id="leaderboardTable" role="grid" aria-live="polite">
+          <thead>
+            <tr>
+              <th class="col-fit">Pos</th>
+              <th style="min-width:220px">Asesor</th>
+              <th class="col-fit number">Tickets</th>
+              <th class="col-fit number">Llamadas</th>
+              <th class="col-fit number">Chats</th>
+              <th class="col-flex">Puntaje / Progreso por Rubro</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+      </div>
 
-<div style="margin-top:12px;color:var(--muted);font-size:12px;font-weight:500;background:#FBFDFF;padding:10px;border-radius:8px;border:1px solid var(--border)">
-<strong>💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para ver su rendimiento por día en una gráfica detallada.
-<div style="margin-top:6px"><strong>Reglas de medición:</strong> Tickets canalizados (col M = CANALIZADO). Llamadas completadas y duración &gt;60s. Chats duración ≤5min y agent flag = AGENT.</div>
-</div>
-</section>
+      <div style="margin-top:12px;color:var(--muted);font-size:12px;font-weight:500;background:#FBFDFF;padding:12px;border-radius:10px;border:1px solid var(--border)">
+        <strong>💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para ver su rendimiento por día en una gráfica detallada.
+        <div style="margin-top:6px"><strong>Reglas de medición:</strong> Tickets canalizados (col M = CANALIZADO). Llamadas completadas y duración &gt;60s. Chats duración ≤5min y agent flag = AGENT.</div>
+      </div>
+    </section>
+  </div>
+
+  <footer>Interfaz optimizada · Actualización automática (15 min) · Descargas con autenticación requerida</footer>
 </div>
 
-<footer style="font-size:12px;color:var(--muted);text-align:center;margin-top:12px;font-weight:600;padding-bottom:12px">
-Interfaz optimizada · Actualización automática (15 min) · Descargas con autenticación requerida
-</footer>
+<!-- Loader -->
+<div id="loadingOverlay" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);z-index:9999">
+  <div style="text-align:center">
+    <div style="width:48px;height:48px;border-radius:50%;border:6px solid #E6EEF8;border-top-color:var(--vento-primary);animation:spin .8s linear infinite;margin:0 auto"></div>
+    <div style="margin-top:12px;font-weight:800;color:var(--text)">Sincronizando datos...</div>
+  </div>
 </div>
-
-<div id="loadingOverlay" class="loading-overlay" aria-hidden="true" style="display:none">
-<div class="spinner" role="status" aria-live="polite"></div>
-<div class="loading-text">Sincronizando datos...</div>
-</div>
-
-<!-- Modal y chart modal omitidos para brevedad en el ejemplo -->
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
 <script>
-/* ---------- Config y constantes ---------- */
+/* ----------------- Config y constantes ----------------- */
 const SPREADSHEET_ID = '1JBre4cLAbYiOJuYye_FGcsk5U_BIStDoAiCbV-B8WoA';
 const ASSESSORS_SPREADSHEET_ID = '1GBcoYjw-mziCA30F2CgqGM9kKWjJjeSiTGfHN6XM8rE';
 const SHEETS = { tickets: 'Tickets_BD', chats: 'Chats_BD', calls: 'Llamadas_BD', asesoresSheet: 'Asesores' };
@@ -240,11 +326,11 @@ const COL = {
   asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') }
 };
 
-/* ---------- Estado ---------- */
+/* ----------------- Estado ----------------- */
 let aliasMap = {}; let metaMap = {}; let cache = { tickets:[], chats:[], calls:[] };
 let activeGroup = 'All'; let autoRefreshTimer = null; let currentMonthKey = null;
 
-/* ---------- Utilidades ---------- */
+/* ----------------- Utilidades ----------------- */
 function parseCSV(text){
   const rows=[]; let cur='', row=[], inQuotes=false;
   for(let i=0;i<text.length;i++){ const ch=text[i], next=text[i+1];
@@ -281,7 +367,7 @@ function parseDateFlexible(v){ if(v===null||v===undefined) return null; const s=
   const m2=s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/); if(m2){ return new Date(+m2[1], +m2[2]-1, +m2[3]); } return null;
 }
 
-/* ---------- Alias y meta maps ---------- */
+/* ----------------- Alias y meta maps ----------------- */
 async function buildAliasAndMetaMaps(){
   aliasMap={}; metaMap={};
   try{
@@ -296,7 +382,9 @@ async function buildAliasAndMetaMaps(){
       const canonical=titleCase(keyNorm);
       const group=rawGroup?rawGroup:'OTROS';
       const supervisor=rawSupervisor?rawSupervisor.toUpperCase():'OTROS';
-      metaMap[canonical]={group,supervisor,modality: group && group.toLowerCase().includes('home') ? 'Home Office' : 'Presencial'};
+      // Inferir modalidad por nombre de grupo (si contiene 'home' -> Home Office), fallback Presencial
+      const modality = group && group.toLowerCase().includes('home') ? 'Home Office' : 'Presencial';
+      metaMap[canonical]={group,supervisor,modality};
       aliasMap[keyNorm]=canonical;
       aliasMap[normalizeForKey(rawUser.replace(/\s+/g,' '))]=canonical;
     }
@@ -313,7 +401,7 @@ function mapAdvisorToCanonical(raw){
   aliasMap[norm]=canonical; return canonical;
 }
 
-/* ---------- Conteos ---------- */
+/* ----------------- Conteos ----------------- */
 function aggregateCountsOnly(ticketsRows, chatsRows, callsRows, filterFrom, filterTo, selectedGroup, selectedSupervisor){
   const counts={};
   function ensure(name){ if(!counts[name]) counts[name]={tickets:0,chats:0,calls:0}; }
@@ -367,7 +455,7 @@ function aggregateCountsOnly(ticketsRows, chatsRows, callsRows, filterFrom, filt
   return counts;
 }
 
-/* ---------- Puntajes ---------- */
+/* ----------------- Puntajes ----------------- */
 function calculateScoresFromCountsSum(countsObj){
   const counts=countsObj; const advisors=Object.keys(counts);
   if(advisors.length===0) return [];
@@ -397,13 +485,7 @@ function calculateScoresFromCountsSum(countsObj){
   return arr;
 }
 
-/* ---------- Días hábiles y meta esperada ---------- */
-/**
- * Devuelve array de Date que son días laborales según modalidad.
- * Presencial: domingos off, solo N sábados trabajados (por defecto 2: primeros 2 sábados).
- * Home Office: jueves y viernes off.
- * Opcional: feriados o excepciones pueden pasarse como array de strings 'YYYY-MM-DD' en excludeDates.
- */
+/* ----------------- Días hábiles y meta esperada por rubro ----------------- */
 function getWorkingDaysForMonth(modality, year, month, options = {}) {
   const { presencialSaturdays = 2, excludeDates = [] } = options;
   const total = new Date(year, month + 1, 0).getDate();
@@ -416,15 +498,15 @@ function getWorkingDaysForMonth(modality, year, month, options = {}) {
   const result = [];
   for (let d = 1; d <= total; d++) {
     const dt = new Date(year, month, d);
-    const dow = dt.getDay(); // 0=Dom,1=Lun,...,6=Sáb
+    const dow = dt.getDay();
     const iso = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
     if (excludeDates.includes(iso)) continue;
     if (modality === 'Home Office') {
-      if (dow === 4 || dow === 5) continue; // jueves(4), viernes(5) descanso
+      if (dow === 4 || dow === 5) continue;
       result.push(dt);
     } else if (modality === 'Presencial') {
-      if (dow === 0) continue; // domingo descanso
-      if (dow === 6 && !allowedSaturdays.includes(d)) continue; // solo N sábados
+      if (dow === 0) continue;
+      if (dow === 6 && !allowedSaturdays.includes(d)) continue;
       result.push(dt);
     } else {
       if (dow === 0) continue;
@@ -433,10 +515,6 @@ function getWorkingDaysForMonth(modality, year, month, options = {}) {
   }
   return result;
 }
-
-/**
- * Calcula la meta esperada hasta 'today' dado monthlyMeta y array de workingDays.
- */
 function expectedUntilToday(monthlyMeta, workingDaysArray, today = new Date()) {
   const total = workingDaysArray.length;
   const passed = workingDaysArray.filter(d => {
@@ -448,13 +526,14 @@ function expectedUntilToday(monthlyMeta, workingDaysArray, today = new Date()) {
   return (monthlyMeta / total) * passed;
 }
 
-/* ---------- Renderizado del leaderboard con barras dinámicas ---------- */
+/* ----------------- Renderizado: filas con 3 barras por rubro ----------------- */
 function buildLeaderboardRows(scoresArr) {
   const tbody = document.getElementById('leaderboardBody');
   tbody.innerHTML = '';
   const year = (new Date()).getFullYear();
   const month = (new Date()).getMonth();
-  // Leer metas globales desde DOM (puedes adaptar para metas por asesor si las tienes en otra fuente)
+
+  // Metas globales por canal (top-card)
   const presTickets = Number(document.getElementById('goal_pres_tickets').textContent || 0);
   const presChats = Number(document.getElementById('goal_pres_chats').textContent || 0);
   const presCalls = Number(document.getElementById('goal_pres_calls').textContent || 0);
@@ -462,25 +541,44 @@ function buildLeaderboardRows(scoresArr) {
   const hoChats = Number(document.getElementById('goal_ho_chats').textContent || 0);
 
   scoresArr.forEach((s, idx) => {
-    // Definir meta mensual por modalidad (suma de canales disponibles)
-    let monthlyMeta = 0;
-    if (s.modality === 'Home Office') {
-      monthlyMeta = (hoTickets || 0) + (hoChats || 0); // Home Office no tiene llamadas en top-card por defecto
-    } else {
-      monthlyMeta = (presTickets || 0) + (presChats || 0) + (presCalls || 0);
-    }
-    // Actual real: suma de volúmenes
-    const actualValue = (s.tickets || 0) + (s.calls || 0) + (s.chats || 0);
-    // Días hábiles y esperado
-    const workingDays = getWorkingDaysForMonth(s.modality, year, month);
-    const expectedValue = expectedUntilToday(monthlyMeta, workingDays, new Date());
-    const percentReal = monthlyMeta > 0 ? Math.min(100, (actualValue / monthlyMeta) * 100) : 0;
-    const percentExpected = monthlyMeta > 0 ? Math.min(100, (expectedValue / monthlyMeta) * 100) : 0;
+    // metas por canal según modalidad
+    const metaByChannel = {
+      tickets: s.modality === 'Home Office' ? hoTickets : presTickets,
+      calls: s.modality === 'Home Office' ? 0 : presCalls,
+      chats: s.modality === 'Home Office' ? hoChats : presChats
+    };
 
-    // Estado visual
+    // valores reales por canal
+    const actualTickets = s.tickets || 0;
+    const actualCalls = s.calls || 0;
+    const actualChats = s.chats || 0;
+
+    // días hábiles para calcular esperado por canal (usamos la misma base de días hábiles)
+    const workingDays = getWorkingDaysForMonth(s.modality, year, month);
+
+    const expectedTickets = expectedUntilToday(metaByChannel.tickets, workingDays, new Date());
+    const expectedCalls = expectedUntilToday(metaByChannel.calls, workingDays, new Date());
+    const expectedChats = expectedUntilToday(metaByChannel.chats, workingDays, new Date());
+
+    const pctTicketsReal = metaByChannel.tickets > 0 ? Math.min(100, (actualTickets / metaByChannel.tickets) * 100) : 0;
+    const pctTicketsExp = metaByChannel.tickets > 0 ? Math.min(100, (expectedTickets / metaByChannel.tickets) * 100) : 0;
+
+    const pctCallsReal = metaByChannel.calls > 0 ? Math.min(100, (actualCalls / metaByChannel.calls) * 100) : 0;
+    const pctCallsExp = metaByChannel.calls > 0 ? Math.min(100, (expectedCalls / metaByChannel.calls) * 100) : 0;
+
+    const pctChatsReal = metaByChannel.chats > 0 ? Math.min(100, (actualChats / metaByChannel.chats) * 100) : 0;
+    const pctChatsExp = metaByChannel.chats > 0 ? Math.min(100, (expectedChats / metaByChannel.chats) * 100) : 0;
+
+    // estado general (comparando suma real vs suma esperada)
+    const sumReal = actualTickets + actualCalls + actualChats;
+    const sumMeta = (metaByChannel.tickets||0) + (metaByChannel.calls||0) + (metaByChannel.chats||0);
+    const sumExpected = expectedTickets + expectedCalls + expectedChats;
+    const pctSumReal = sumMeta>0 ? (sumReal/sumMeta)*100 : 0;
+    const pctSumExp = sumMeta>0 ? (sumExpected/sumMeta)*100 : 0;
+
     let statusClass = 'status-lejos';
-    if (percentReal >= percentExpected) statusClass = 'status-cumplido';
-    else if (percentReal >= percentExpected * 0.8) statusClass = 'status-cerca';
+    if (pctSumReal >= pctSumExp) statusClass = 'status-cumplido';
+    else if (pctSumReal >= pctSumExp * 0.8) statusClass = 'status-cerca';
 
     const tr = document.createElement('tr');
     if (idx === 0) tr.classList.add('top-highlight-1');
@@ -491,49 +589,70 @@ function buildLeaderboardRows(scoresArr) {
       <td class="col-fit">${idx+1}</td>
       <td>
         <a class="advisor-name-link" data-advisor="${s.name}">${s.name}</a>
-        <div class="meta-small">${s.group} · ${s.supervisor}</div>
+        <div class="meta-small">${s.group} · ${s.supervisor} · ${s.modality}</div>
       </td>
-      <td class="col-fit number">${s.tickets}</td>
-      <td class="col-fit number">${s.calls}</td>
-      <td class="col-fit number">${s.chats}</td>
+      <td class="col-fit number">${actualTickets}</td>
+      <td class="col-fit number">${actualCalls}</td>
+      <td class="col-fit number">${actualChats}</td>
       <td class="col-flex">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px;justify-content:space-between">
           <div style="flex:1">
-            <div class="rubro-wrap">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div class="rubro-label">Progreso mensual</div>
-                <div class="rubro-percent">Real ${Math.round(percentReal)}% · Esperado ${Math.round(percentExpected)}%</div>
+            <div class="rubros-grid">
+              <!-- Tickets -->
+              <div class="rubro-row">
+                <div class="rubro-label">Tickets</div>
+                <div class="rubro-progress">
+                  <div class="rubro-bar-wrap" aria-hidden="true">
+                    <div class="rubro-bar" data-type="tickets" style="width:${pctTicketsReal}%;"></div>
+                  </div>
+                  <div class="rubro-percent">Real ${Math.round(pctTicketsReal)}% · Exp ${Math.round(pctTicketsExp)}%</div>
+                </div>
               </div>
-              <div class="rubro-progress" aria-hidden="true">
-                <div class="rubro-bar" style="width:${percentReal}%;"></div>
+              <!-- Llamadas -->
+              <div class="rubro-row">
+                <div class="rubro-label">Llamadas</div>
+                <div class="rubro-progress">
+                  <div class="rubro-bar-wrap" aria-hidden="true">
+                    <div class="rubro-bar" data-type="calls" style="width:${pctCallsReal}%;"></div>
+                  </div>
+                  <div class="rubro-percent">Real ${Math.round(pctCallsReal)}% · Exp ${Math.round(pctCallsExp)}%</div>
+                </div>
+              </div>
+              <!-- Chats -->
+              <div class="rubro-row">
+                <div class="rubro-label">Chats</div>
+                <div class="rubro-progress">
+                  <div class="rubro-bar-wrap" aria-hidden="true">
+                    <div class="rubro-bar" data-type="chats" style="width:${pctChatsReal}%;"></div>
+                  </div>
+                  <div class="rubro-percent">Real ${Math.round(pctChatsReal)}% · Exp ${Math.round(pctChatsExp)}%</div>
+                </div>
               </div>
             </div>
           </div>
-          <div style="min-width:90px;text-align:right">
+
+          <div style="min-width:110px;text-align:right">
             <div class="score">${s.total.toFixed(0)}</div>
-            <div style="margin-top:6px"><span class="status-pill ${statusClass}">${Math.round(percentReal)}%</span></div>
+            <div style="margin-top:8px"><span class="status-pill ${statusClass}">${Math.round(pctSumReal)}%</span></div>
           </div>
         </div>
       </td>
     `;
     tbody.appendChild(tr);
 
-    // Click en nombre para abrir gráfica (si tienes modal)
+    // Click en nombre para abrir gráfica (placeholder)
     const nameLink = tr.querySelector('.advisor-name-link');
     if (nameLink) {
       nameLink.addEventListener('click', () => {
-        // Aquí puedes abrir modal y dibujar gráfica diaria usando getDailyChartData
-        // Por simplicidad, mostramos alert con nombre
-        // Reemplaza por tu lógica de modal/chart
         alert('Mostrar gráfica diaria de ' + s.name);
       });
     }
   });
 }
 
-/* ---------- Cálculo diario para modal (opcional) ---------- */
+/* ----------------- Cálculo diario (opcional) ----------------- */
 function getDailyChartData(advisorName, start, end) {
-  const labels=[]; const pointsData=[]; const dates=[];
+  const labels=[]; const series=[]; const dates=[];
   let curr=new Date(start);
   while(curr<=end){ const ds=curr.getFullYear()+'-'+String(curr.getMonth()+1).padStart(2,'0')+'-'+String(curr.getDate()).padStart(2,'0'); dates.push(ds); labels.push(String(curr.getDate()).padStart(2,'0')+'/'+String(curr.getMonth()+1).padStart(2,'0')); curr.setDate(curr.getDate()+1); }
   const dailyCounts={}; dates.forEach(d=>dailyCounts[d]={t:0,c:0,ch:0});
@@ -541,28 +660,24 @@ function getDailyChartData(advisorName, start, end) {
   for(let r=1;r<cache.tickets.length;r++){ const row=cache.tickets[r]; const canonical=mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!canonical) continue; const status=String(row[COL.tickets.status]||'').trim().toUpperCase(); if(status!=='CANALIZADO') continue; const parsed=parseDateFlexible(row[COL.tickets.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'t'); } } }
   for(let r=1;r<cache.chats.length;r++){ const row=cache.chats[r]; const canonical=mapAdvisorToCanonical(row[COL.chats.advisor]); if(!canonical) continue; const seconds=durationToSeconds(row[COL.chats.duration]); if(seconds===0 && String(row[COL.chats.duration]||'').trim()==='') continue; if(seconds>300) continue; const agentFlag=String(row[COL.chats.agentFlag]||'').trim().toUpperCase(); if(agentFlag!=='AGENT') continue; const parsed=parseDateFlexible(row[COL.chats.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'ch'); } } }
   for(let r=1;r<cache.calls.length;r++){ const row=cache.calls[r]; const canonical=mapAdvisorToCanonical(row[COL.calls.advisor]); if(!canonical) continue; const status=String(row[COL.calls.status]||'').trim().toLowerCase(); if(status!=='completed') continue; const seconds=durationToSeconds(row[COL.calls.duration]); if(seconds<=35) continue; const parsed=parseDateFlexible(row[COL.calls.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'c'); } } }
-  // Construir series para advisorName
-  const series = dates.map(d => {
+  const seriesData = dates.map(d => {
     const v = dailyCounts[d] && dailyCounts[d][advisorName] ? dailyCounts[d][advisorName] : {t:0,c:0,ch:0};
     return v.t + v.c + v.ch;
   });
-  return { labels, series };
+  return { labels, series: seriesData };
 }
 
-/* ---------- Flujo principal: carga y refresco ---------- */
+/* ----------------- Flujo principal: carga y refresco ----------------- */
 async function loadAllAndRender(force=false) {
   try {
     document.getElementById('loadingOverlay').style.display = 'flex';
-    // Detectar cambio de mes
     const now = new Date();
     const monthKey = now.getFullYear() + '-' + (now.getMonth()+1);
     if (currentMonthKey && currentMonthKey !== monthKey) {
-      // mes cambió: limpiar cache para forzar recarga
       cache = { tickets:[], chats:[], calls:[] };
     }
     currentMonthKey = monthKey;
 
-    // Cargar asesores y hojas
     await buildAliasAndMetaMaps();
     const [ticketsRows, chatsRows, callsRows] = await Promise.all([
       fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.tickets).catch(e=>{console.warn(e); return [];}),
@@ -573,7 +688,6 @@ async function loadAllAndRender(force=false) {
     cache.chats = chatsRows;
     cache.calls = callsRows;
 
-    // Aplicar filtros actuales
     const period = document.getElementById('periodSelector').value;
     let filterFrom = null, filterTo = null;
     if (period === 'today') {
@@ -610,7 +724,7 @@ async function loadAllAndRender(force=false) {
   }
 }
 
-/* ---------- Eventos UI ---------- */
+/* ----------------- Eventos UI ----------------- */
 document.getElementById('applyFilters').addEventListener('click', () => loadAllAndRender(true));
 document.getElementById('refreshBtn').addEventListener('click', () => loadAllAndRender(true));
 document.querySelectorAll('.tab').forEach(tab => {
