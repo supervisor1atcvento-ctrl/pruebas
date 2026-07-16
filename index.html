@@ -20,10 +20,6 @@
             --border: #E5E7EB;
             --radius: 12px;
             --shadow-sm: 0 4px 20px rgba(35, 31, 32, 0.08);
-            
-            --gold: linear-gradient(90deg, #FFD54A, #FFC107);
-            --silver: linear-gradient(90deg, #E6EEF8, #C7D2E8);
-            --bronze: linear-gradient(90deg, #FFD8B5, #F59E0B);
         }
 
         /* ----------------- Reset y Tipografía ----------------- */
@@ -50,42 +46,27 @@
 
         /* ----------------- Header ----------------- */
         header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--card);
-            padding: 16px 24px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--card); padding: 16px 24px;
+            border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
         }
         .brand { display: flex; align-items: center; gap: 16px; }
         .logo {
             width: 52px; height: 52px; border-radius: 10px;
-            background: var(--vento-primary);
-            color: #fff; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 20px;
-            box-shadow: 0 4px 12px rgba(35, 31, 32, 0.15);
+            background: var(--vento-primary); color: #fff; 
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 20px; box-shadow: 0 4px 12px rgba(35, 31, 32, 0.15);
         }
         h1 { font-size: 24px; margin: 0; font-weight: 700; color: var(--vento-primary); letter-spacing: -0.5px; }
         .subtitle { font-size: 14px; color: var(--muted); font-weight: 600; margin-top: 2px; }
 
         /* ----------------- Top Cards ----------------- */
-        .top-bar {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
+        .top-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         .top-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 20px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
+            background: var(--card); border-radius: var(--radius); padding: 20px;
+            border: 1px solid var(--border); box-shadow: var(--shadow-sm);
         }
-        .card-header {
-            font-size: 14px; color: var(--vento-primary); font-weight: 700; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;
-        }
+        .card-header { font-size: 14px; color: var(--vento-primary); font-weight: 700; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px; }
         .goals-wrapper { display: flex; gap: 24px; flex-wrap: wrap; }
         .goal-col { flex: 1; min-width: 200px; }
         .goal-title { font-weight: 700; font-size: 13px; color: var(--muted); text-transform: uppercase; border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; }
@@ -99,14 +80,8 @@
 
         /* ----------------- Controles y Filtros ----------------- */
         .controls-wrapper {
-            background: var(--card);
-            padding: 16px 20px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            background: var(--card); padding: 16px 20px; border-radius: var(--radius);
+            border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px;
         }
         .filters { display: flex; gap: 16px; flex-wrap: wrap; }
         .control { display: flex; flex-direction: column; min-width: 160px; flex: 1; }
@@ -114,7 +89,19 @@
         select, input[type="date"] { padding: 10px; border-radius: 8px; border: 1px solid #CCC; font-size: 14px; font-family: "Segoe UI", sans-serif; outline: none; width: 100%; }
         select:focus, input[type="date"]:focus { border-color: var(--vento-accent); }
         
-        .actions-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 14px; }
+        /* Tema de Reglas */
+        .rules-bar {
+            background: #FFF4E5;
+            border-left: 4px solid var(--vento-accent);
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--vento-primary);
+        }
+        .rules-bar ul { margin: 6px 0 0 20px; padding: 0; }
+        .rules-bar li { margin-bottom: 4px; }
+
+        .actions-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 14px; }
         button { font-family: "Segoe UI", sans-serif; cursor: pointer; transition: all 0.2s; }
         button.primary { background: var(--vento-accent); border: none; color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 10px rgba(242, 143, 23, 0.3); }
         button.primary:hover { background: #D97D12; }
@@ -173,9 +160,7 @@
 
         footer { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; padding-bottom: 20px; font-weight: 600; }
 
-        @media(max-width: 1000px) {
-            .top-bar { grid-template-columns: 1fr; }
-        }
+        @media(max-width: 1000px) { .top-bar { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -195,6 +180,7 @@
         </div>
     </header>
 
+    <!-- TOP BAR -->
     <div class="top-bar">
         <div class="top-card">
             <div class="card-header">Metas del Mes Activas</div>
@@ -215,16 +201,17 @@
         </div>
         
         <div class="top-card">
-            <div class="card-header">Métricas Generales del Periodo</div>
+            <div class="card-header">Métricas Generales del Periodo (Válidas)</div>
             <div class="stats">
                 <div class="stat"><div class="label">Asesores Activos</div><div class="value" id="statAdvisors">--</div></div>
-                <div class="stat"><div class="label">Total Tickets</div><div class="value" id="statTickets">--</div></div>
-                <div class="stat"><div class="label">Total Llamadas</div><div class="value" id="statCalls">--</div></div>
-                <div class="stat"><div class="label">Total Chats</div><div class="value" id="statChats">--</div></div>
+                <div class="stat"><div class="label">Tickets Válidos</div><div class="value" id="statTickets">--</div></div>
+                <div class="stat"><div class="label">Llamadas Válidas</div><div class="value" id="statCalls">--</div></div>
+                <div class="stat"><div class="label">Chats Válidos</div><div class="value" id="statChats">--</div></div>
             </div>
         </div>
     </div>
 
+    <!-- CONTROLES -->
     <div class="controls-wrapper">
         <div class="filters">
             <div class="control">
@@ -251,15 +238,27 @@
             </div>
         </div>
         
+        <!-- Módulo de Reglas -->
+        <div class="rules-bar">
+            <strong>📌 Reglas de Negocio (Filtros de validación para metas):</strong>
+            <ul>
+                <li><strong>Tickets:</strong> Únicamente se contabilizan los que cuentan con estatus <em>CANALIZADO</em>.</li>
+                <li><strong>Llamadas:</strong> Se cuentan con estatus <em>COMPLETED</em> y una duración <em>mayor a 35 segundos</em>.</li>
+                <li><strong>Chats:</strong> Se cuentan los atendidos por <em>AGENT</em> y con una duración <em>menor o igual a 5 minutos (300 segundos)</em>.</li>
+            </ul>
+        </div>
+        
+        <!-- Fila de Descargas -->
         <div class="actions-row">
-            <button class="ghost" id="refreshBtn">↻ Refrescar Datos</button>
+            <button class="ghost" id="refreshBtn">↻ Refrescar</button>
             <button class="primary" id="applyFilters">Aplicar Filtros</button>
-            <button class="download-btn" id="downloadFilteredBtn">📥 Descargar Vista</button>
-            <select id="downloadRawSelect" style="max-width: 230px; border: 2px solid var(--muted); font-weight: 600;">
-                <option value="">📥 Descargar Base Completa...</option>
-                <option value="tickets">Base completa: Tickets</option>
-                <option value="chats">Base completa: Chats</option>
-                <option value="calls">Base completa: Llamadas</option>
+            <button class="download-btn" id="downloadFilteredBtn" title="Descarga la tabla resumen que ves en pantalla">📊 Resumen Leaderboard</button>
+            <button class="download-btn" id="downloadDetailBtn" title="Descarga todas las interacciones individuales que cumplieron las reglas en el periodo">🔍 Detalle Válido</button>
+            <select id="downloadRawSelect" style="max-width: 200px; border: 2px solid var(--muted); font-weight: 600; border-radius:8px; padding:8px;">
+                <option value="">📁 Base en Crudo...</option>
+                <option value="tickets">Crudo: Tickets</option>
+                <option value="chats">Crudo: Chats</option>
+                <option value="calls">Crudo: Llamadas</option>
             </select>
         </div>
     </div>
@@ -273,6 +272,7 @@
         <div class="tab" data-group="OTROS">Otros</div>
     </div>
 
+    <!-- MAIN LEADERBOARD -->
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h2 style="margin: 0; font-size: 18px; color: var(--vento-primary); font-weight: 700;">Leaderboard de Rendimiento</h2>
@@ -296,13 +296,14 @@
         
         <div style="margin-top: 16px; color: var(--muted); font-size: 12px; background: var(--bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border);">
             <strong style="color: var(--vento-accent);">💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para visualizar la gráfica de constancia diaria.<br>
-            <div style="margin-top: 4px;"><strong>Indicadores de color:</strong> <span style="color: var(--success); font-weight: bold;">■ Verde</span> (Igual o superior a lo esperado a la fecha), <span style="color: var(--warning); font-weight: bold;">■ Amarillo</span> (Cerca de la meta, &ge;80%), <span style="color: var(--danger); font-weight: bold;">■ Rojo</span> (Rezago, &lt;80%).</div>
+            <div style="margin-top: 4px;"><strong>Indicadores de color:</strong> <span style="color: var(--success); font-weight: bold;">■ Verde</span> (En meta), <span style="color: var(--warning); font-weight: bold;">■ Amarillo</span> (Cerca, &ge;80%), <span style="color: var(--danger); font-weight: bold;">■ Rojo</span> (Rezago, &lt;80%).</div>
         </div>
     </div>
 
     <footer>Dashboard Privado · Actualización automática programada (15 min)</footer>
 </div>
 
+<!-- Modal de Gráfica -->
 <div id="chartModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" id="closeModal">&times;</span>
@@ -314,6 +315,7 @@
     </div>
 </div>
 
+<!-- Loader -->
 <div id="loadingOverlay" style="position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(255,255,255,0.85); z-index: 9999;">
     <div style="text-align: center;">
         <div style="width: 50px; height: 50px; border-radius: 50%; border: 4px solid var(--border); border-top-color: var(--vento-accent); animation: spin 0.8s linear infinite; margin: 0 auto;"></div>
@@ -419,11 +421,8 @@ function getWorkingDaysForMonth(modality, year, month) {
     for (let d = 1; d <= total; d++) {
         const dt = new Date(year, month, d);
         const dow = dt.getDay();
-        if (modality === 'Home Office') {
-            if (dow !== 4 && dow !== 5) result.push(dt);
-        } else {
-            if (dow !== 0) result.push(dt); 
-        }
+        if (modality === 'Home Office') { if (dow !== 4 && dow !== 5) result.push(dt); } 
+        else { if (dow !== 0) result.push(dt); }
     }
     return result;
 }
@@ -435,13 +434,12 @@ function expectedUntilToday(monthlyMeta, workingDaysArray, today = new Date()) {
     return (monthlyMeta / total) * passed;
 }
 
-// Devuelve el color del semáforo contrastando lo real contra lo esperado a la fecha
 function getBarColor(real, expected) {
     if (expected <= 0) return 'var(--success)';
     const ratio = real / expected;
-    if (ratio >= 1.0) return 'var(--success)';  // Verde (En meta)
-    if (ratio >= 0.8) return 'var(--warning)';  // Amarillo (Cerca)
-    return 'var(--danger)';                     // Rojo (Alejado)
+    if (ratio >= 1.0) return 'var(--success)';
+    if (ratio >= 0.8) return 'var(--warning)';
+    return 'var(--danger)';
 }
 
 /* ----------------- Mapeo de Usuarios ----------------- */
@@ -518,7 +516,6 @@ function buildLeaderboardRows(scoresArr) {
         const pctC = meta.calls > 0 ? Math.min(100, (s.calls / meta.calls) * 100) : 0;
         const pctCh = meta.chats > 0 ? Math.min(100, (s.chats / meta.chats) * 100) : 0;
         
-        // Obtención de colores dinámicos por columna según semáforo solicitado
         const colorT = getBarColor(s.tickets, expT);
         const colorC = getBarColor(s.calls, expC);
         const colorCh = getBarColor(s.chats, expCh);
@@ -584,10 +581,7 @@ function getDailyChartData(advisorName, start, end) {
     }
     
     const dailyCounts={}; dates.forEach(d=>dailyCounts[d]={t:0,c:0,ch:0});
-    
-    function addCount(dateStr, type){ 
-        if(dailyCounts[dateStr]) dailyCounts[dateStr][type]++; 
-    }
+    function addCount(dateStr, type){ if(dailyCounts[dateStr]) dailyCounts[dateStr][type]++; }
     
     cache.tickets.forEach(row => {
         if(mapAdvisorToCanonical(row[COL.tickets.advisor]) !== advisorName) return;
@@ -601,6 +595,7 @@ function getDailyChartData(advisorName, start, end) {
     cache.chats.forEach(row => {
         if(mapAdvisorToCanonical(row[COL.chats.advisor]) !== advisorName) return;
         if(String(row[COL.chats.agentFlag]||'').toUpperCase()!=='AGENT') return;
+        if(durationToSeconds(row[COL.chats.duration])>300) return;
         const parsed=parseDateFlexible(row[COL.chats.date]);
         if(parsed && parsed>=start && parsed<=end){
             addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 'ch');
@@ -610,17 +605,14 @@ function getDailyChartData(advisorName, start, end) {
     cache.calls.forEach(row => {
         if(mapAdvisorToCanonical(row[COL.calls.advisor]) !== advisorName) return;
         if(String(row[COL.calls.status]||'').toLowerCase()!=='completed') return;
+        if(durationToSeconds(row[COL.calls.duration])<=35) return;
         const parsed=parseDateFlexible(row[COL.calls.date]);
         if(parsed && parsed>=start && parsed<=end){
             addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 'c');
         }
     });
     
-    const seriesData = dates.map(d => {
-        const v = dailyCounts[d] ? dailyCounts[d] : {t:0,c:0,ch:0};
-        return v.t + v.c + v.ch;
-    });
-    
+    const seriesData = dates.map(d => { const v = dailyCounts[d] ? dailyCounts[d] : {t:0,c:0,ch:0}; return v.t + v.c + v.ch; });
     return { labels, series: seriesData };
 }
 
@@ -629,9 +621,7 @@ function openChartModal(advisorName) {
     document.getElementById('chartTitle').textContent = `Rendimiento de ${advisorName}`;
     modal.style.display = 'flex';
     
-    const end = new Date(); const start = new Date();
-    start.setDate(end.getDate() - 14);
-    
+    const end = new Date(); const start = new Date(); start.setDate(end.getDate() - 14);
     const data = getDailyChartData(advisorName, start, end);
     const ctx = document.getElementById('advisorChart').getContext('2d');
     
@@ -643,43 +633,25 @@ function openChartModal(advisorName) {
             labels: data.labels,
             datasets: [{
                 label: 'Interacciones Válidas Totales',
-                data: data.series,
-                borderColor: '#F28F17',
-                backgroundColor: 'rgba(242, 143, 23, 0.15)',
-                borderWidth: 3,
-                tension: 0.2,
-                fill: true,
-                pointBackgroundColor: '#231F20',
-                pointRadius: 4
+                data: data.series, borderColor: '#F28F17', backgroundColor: 'rgba(242, 143, 23, 0.15)',
+                borderWidth: 3, tension: 0.2, fill: true, pointBackgroundColor: '#231F20', pointRadius: 4
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: '#E5E7EB' } },
-                x: { grid: { display: false } }
-            }
+            responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: '#E5E7EB' } }, x: { grid: { display: false } } }
         }
     });
 }
 
-document.getElementById('closeModal').addEventListener('click', () => {
-    document.getElementById('chartModal').style.display = 'none';
-});
+document.getElementById('closeModal').addEventListener('click', () => { document.getElementById('chartModal').style.display = 'none'; });
 
-/* ----------------- Descarga de Archivos CSV ----------------- */
+/* ----------------- Descargas CSV ----------------- */
 function downloadCSV(csvContent, fileName) {
     const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", fileName);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const link = document.createElement("a"); const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url); link.setAttribute("download", fileName);
+    link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 
 function exportFilteredTable() {
@@ -688,7 +660,59 @@ function exportFilteredTable() {
     currentFilteredData.forEach((s, idx) => {
         csv += `${idx + 1},"${s.name}","${s.group}","${s.supervisor}","${s.modality}",${s.tickets},${s.calls},${s.chats},${s.total.toFixed(0)}\n`;
     });
-    downloadCSV(csv, `Reporte_Vista_Filtrada_${new Date().toISOString().split('T')[0]}.csv`);
+    downloadCSV(csv, `Reporte_Leaderboard_${new Date().toISOString().split('T')[0]}.csv`);
+}
+
+function exportValidInteractionsDetail() {
+    let from = null, to = null;
+    if(document.getElementById('dateFrom').value) from = new Date(document.getElementById('dateFrom').value + 'T00:00:00');
+    if(document.getElementById('dateTo').value) to = new Date(document.getElementById('dateTo').value + 'T23:59:59');
+    const selectedSupervisor = document.getElementById('filterSupervisor').value;
+
+    let csv = "Canal,Asesor,Grupo,Supervisor,Modalidad,Fecha_Registro,Estatus,Duracion_Segundos\n";
+
+    cache.tickets.forEach(row => {
+        const adv = mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!adv) return;
+        const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
+        if(activeGroup !== 'All' && meta.group !== activeGroup) return;
+        if(selectedSupervisor && meta.supervisor.toUpperCase() !== selectedSupervisor.toUpperCase()) return;
+        
+        if(String(row[COL.tickets.status]||'').toUpperCase() === 'CANALIZADO') {
+            const d = parseDateFlexible(row[COL.tickets.date]);
+            if(from && d < from) return; if(to && d > to) return;
+            csv += `Ticket,"${adv}","${meta.group}","${meta.supervisor}","${meta.modality}","${row[COL.tickets.date]||''}","${row[COL.tickets.status]||''}",N/A\n`;
+        }
+    });
+
+    cache.chats.forEach(row => {
+        const adv = mapAdvisorToCanonical(row[COL.chats.advisor]); if(!adv) return;
+        const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
+        if(activeGroup !== 'All' && meta.group !== activeGroup) return;
+        if(selectedSupervisor && meta.supervisor.toUpperCase() !== selectedSupervisor.toUpperCase()) return;
+        
+        const durSecs = durationToSeconds(row[COL.chats.duration]);
+        if(String(row[COL.chats.agentFlag]||'').toUpperCase() === 'AGENT' && durSecs <= 300) {
+            const d = parseDateFlexible(row[COL.chats.date]);
+            if(from && d < from) return; if(to && d > to) return;
+            csv += `Chat,"${adv}","${meta.group}","${meta.supervisor}","${meta.modality}","${row[COL.chats.date]||''}","${row[COL.chats.agentFlag]||''}",${durSecs}\n`;
+        }
+    });
+
+    cache.calls.forEach(row => {
+        const adv = mapAdvisorToCanonical(row[COL.calls.advisor]); if(!adv) return;
+        const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
+        if(activeGroup !== 'All' && meta.group !== activeGroup) return;
+        if(selectedSupervisor && meta.supervisor.toUpperCase() !== selectedSupervisor.toUpperCase()) return;
+        
+        const durSecs = durationToSeconds(row[COL.calls.duration]);
+        if(String(row[COL.calls.status]||'').toLowerCase() === 'completed' && durSecs > 35) {
+            const d = parseDateFlexible(row[COL.calls.date]);
+            if(from && d < from) return; if(to && d > to) return;
+            csv += `Llamada,"${adv}","${meta.group}","${meta.supervisor}","${meta.modality}","${row[COL.calls.date]||''}","${row[COL.calls.status]||''}",${durSecs}\n`;
+        }
+    });
+
+    downloadCSV(csv, `Detalle_Valido_Reglas_${new Date().toISOString().split('T')[0]}.csv`);
 }
 
 function exportRawBase(type) {
@@ -703,6 +727,7 @@ function exportRawBase(type) {
 }
 
 document.getElementById('downloadFilteredBtn').addEventListener('click', exportFilteredTable);
+document.getElementById('downloadDetailBtn').addEventListener('click', exportValidInteractionsDetail);
 document.getElementById('downloadRawSelect').addEventListener('change', function() {
     if (this.value) { exportRawBase(this.value); this.value = ""; }
 });
@@ -767,7 +792,7 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
     });
     
     arr.sort((a,b)=>b.total-a.total);
-    currentFilteredData = arr; // Resguardo global para exportación
+    currentFilteredData = arr; 
     
     document.getElementById('statAdvisors').textContent = arr.length;
     document.getElementById('statTickets').textContent = Object.values(counts).reduce((s,c)=>s+c.tickets,0);
@@ -814,7 +839,6 @@ document.querySelectorAll('.tab').forEach(t => {
     });
 });
 
-// Inicialización por defecto del selector "Este Mes"
 document.getElementById('periodSelector').dispatchEvent(new Event('change'));
 loadAllAndRender();
 setInterval(loadAllAndRender, AUTO_REFRESH_MS);
