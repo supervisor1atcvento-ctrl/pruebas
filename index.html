@@ -1,315 +1,320 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Dashboard Asesores — Progreso por Rubro</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-/* ----------------- Paleta e identidad (Vento) ----------------- */
-:root{
-  --bg: #F6F8FA;
-  --card: #FFFFFF;
-  --muted: #6B7280;
-  --text: #0F172A;
-  --vento-primary: #0B6FAF;   /* color institucional principal (azul) */
-  --vento-accent: #F28F17;    /* acento naranja */
-  --success: #10B981;
-  --warning: #F59E0B;
-  --danger: #EF4444;
-  --border: rgba(15,23,42,0.06);
-  --radius: 12px;
-  --shadow-sm: 0 8px 28px rgba(15,23,42,0.06);
-  --gold: linear-gradient(90deg,#FFD54A,#FFC107);
-  --silver: linear-gradient(90deg,#E6EEF8,#C7D2E8);
-  --bronze: linear-gradient(90deg,#FFD8B5,#F59E0B);
-  --top3-text: #0B1220;
-}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dashboard ATC — Rendimiento de Asesores</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ----------------- Paleta e Identidad Corporativa ----------------- */
+        :root {
+            --bg: #F5F5F5;            /* Fondo general claro para dar contraste */
+            --card: #FFFFFF;          /* Blanco (50%) */
+            --vento-primary: #231F20; /* Negro Institucional (30%) */
+            --muted: #616160;         /* Gris (15%) */
+            --vento-accent: #F28F17;  /* Naranja Institucional (5%) */
+            
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --border: #E5E7EB;
+            --radius: 12px;
+            --shadow-sm: 0 4px 20px rgba(35, 31, 32, 0.08);
+            
+            --gold: linear-gradient(90deg, #FFD54A, #FFC107);
+            --silver: linear-gradient(90deg, #E6EEF8, #C7D2E8);
+            --bronze: linear-gradient(90deg, #FFD8B5, #F59E0B);
+            --top3-text: #231F20;
+        }
 
-/* ----------------- Reset y tipografía ----------------- */
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family: "Segoe UI", Inter, Roboto, Arial, sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
-  line-height:1.35;
-  font-size:14px;
-}
+        /* ----------------- Reset y Tipografía ----------------- */
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Inter, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--vento-primary);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.4;
+            font-size: 14px;
+        }
 
-/* ----------------- Contenedor principal ----------------- */
-.container{
-  max-width:1280px;
-  margin:22px auto;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-}
+        /* ----------------- Contenedor Principal ----------------- */
+        .container {
+            max-width: 1320px;
+            margin: 24px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-/* ----------------- Header ----------------- */
-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95));
-  padding:14px 18px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  box-shadow:var(--shadow-sm);
-}
-.brand{display:flex;align-items:center;gap:14px}
-.logo{
-  width:56px;height:56px;border-radius:12px;
-  background:linear-gradient(135deg,var(--vento-primary),#06B6D4);
-  color:#fff;display:flex;align-items:center;justify-content:center;
-  font-weight:900;font-size:20px;border:2px solid rgba(255,255,255,0.12);
-  box-shadow:0 10px 30px rgba(11,111,175,0.08);
-}
-h1{font-size:20px;margin:0;font-weight:800}
-.subtitle{font-size:13px;color:var(--muted);margin-top:4px;font-weight:600}
+        /* ----------------- Header ----------------- */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card);
+            padding: 16px 24px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .brand { display: flex; align-items: center; gap: 16px; }
+        .logo {
+            width: 52px; height: 52px; border-radius: 10px;
+            background: var(--vento-primary);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 20px;
+            box-shadow: 0 4px 12px rgba(35, 31, 32, 0.15);
+        }
+        h1 { font-size: 24px; margin: 0; font-weight: 700; color: var(--vento-primary); letter-spacing: -0.5px; }
+        .subtitle { font-size: 14px; color: var(--muted); font-weight: 600; margin-top: 2px; }
 
-/* ----------------- Top bar (metas + métricas) ----------------- */
-.top-bar{
-  display:flex;
-  gap:14px;
-  align-items:flex-start;
-  flex-wrap:wrap;
-}
+        /* ----------------- Top Cards ----------------- */
+        .top-bar {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        .top-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .card-header {
+            font-size: 14px; color: var(--vento-primary); font-weight: 700; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;
+        }
+        .goals-wrapper { display: flex; gap: 24px; flex-wrap: wrap; }
+        .goal-col { flex: 1; min-width: 200px; }
+        .goal-title { font-weight: 700; font-size: 13px; color: var(--muted); text-transform: uppercase; border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; }
+        .goal-item { font-size: 14px; display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+        .goal-item strong { color: var(--vento-accent); font-size: 16px; font-weight: 700; }
+        
+        .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .stat { padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); text-align: center; }
+        .stat .label { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        .stat .value { font-weight: 700; font-size: 20px; color: var(--vento-primary); margin-top: 4px; }
 
-/* Card pequeño */
-.top-card{
-  background:var(--card);
-  border-radius:12px;
-  padding:14px;
-  border:1px solid var(--border);
-  box-shadow:var(--shadow-sm);
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  min-width:260px;
-}
+        /* ----------------- Controles y Filtros ----------------- */
+        .controls-wrapper {
+            background: var(--card);
+            padding: 16px 20px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+        .filters { display: flex; gap: 16px; flex-wrap: wrap; flex: 1; }
+        .control { display: flex; flex-direction: column; min-width: 150px; }
+        .control label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; }
+        select, input[type="date"] { padding: 10px; border-radius: 8px; border: 1px solid #CCC; font-size: 14px; font-family: "Segoe UI", sans-serif; outline: none; }
+        select:focus, input[type="date"]:focus { border-color: var(--vento-accent); }
+        
+        button { font-family: "Segoe UI", sans-serif; cursor: pointer; transition: all 0.2s; }
+        button.primary { background: var(--vento-accent); border: none; color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 10px rgba(242, 143, 23, 0.3); }
+        button.primary:hover { background: #D97D12; }
+        button.ghost { background: transparent; border: 2px solid var(--vento-primary); color: var(--vento-primary); padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; }
+        button.ghost:hover { background: var(--vento-primary); color: #FFF; }
+        
+        .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+        .tab { background: var(--bg); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--muted); font-size: 14px; }
+        .tab.active { background: var(--vento-primary); border-color: var(--vento-primary); color: #FFF; }
 
-/* Metas estilo */
-.goal-title{font-weight:900;font-size:12px;color:var(--muted);text-transform:uppercase}
-.goal-item{font-size:14px;display:flex;justify-content:space-between;align-items:center;padding:6px 0}
-.goal-item strong{color:var(--vento-accent);font-size:15px}
+        /* ----------------- Tabla Leaderboard ----------------- */
+        .card { background: var(--card); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+        .table-wrap { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        thead th { text-align: left; padding: 14px 12px; background: var(--bg); color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+        tbody td { padding: 16px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        
+        .advisor-name-link { font-weight: 700; font-size: 16px; color: var(--vento-primary); cursor: pointer; text-decoration: none; transition: color 0.2s; }
+        .advisor-name-link:hover { color: var(--vento-accent); text-decoration: underline; }
+        .meta-small { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        
+        /* Layout de las columnas de métricas con barras integradas */
+        .col-metric { min-width: 130px; }
+        .metric-val { font-size: 18px; font-weight: 700; color: var(--vento-primary); margin-bottom: 4px; }
+        .rubro-bar-wrap { width: 100%; background: #E5E7EB; border-radius: 4px; height: 6px; overflow: hidden; margin-bottom: 4px; }
+        .rubro-bar { height: 100%; background: var(--vento-accent); transition: width 0.5s ease; }
+        .metric-sub { font-size: 11px; font-weight: 600; color: var(--muted); }
+        
+        .score { font-size: 18px; padding: 6px 12px; border-radius: 8px; background: #FFF4E5; color: var(--vento-accent); font-weight: 700; display: inline-block; border: 1px solid rgba(242, 143, 23, 0.2); }
+        .status-pill { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; color: #fff; margin-top: 6px;}
+        .status-cumplido { background: var(--success); }
+        .status-cerca { background: var(--warning); color: #FFF; }
+        .status-lejos { background: var(--danger); }
 
-/* Métricas generales */
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.stat{display:flex;flex-direction:column;padding:10px;border-radius:10px;background:#FBFDFF;border:1px solid var(--border);text-align:center}
-.stat .label{color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase}
-.stat .value{font-weight:900;font-size:18px;color:var(--vento-primary)}
+        .top-highlight-1 td { background: rgba(255, 213, 74, 0.1); }
+        .top-highlight-2 td { background: rgba(230, 238, 248, 0.4); }
+        .top-highlight-3 td { background: rgba(255, 216, 181, 0.2); }
 
-/* ----------------- Controles ----------------- */
-.controls{
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  align-items:flex-end;
-  background:transparent;
-}
-.control{flex:1;min-width:160px}
-.control label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase}
-select,input[type="date"]{width:100%;padding:9px;border-radius:10px;border:1px solid var(--border);font-size:13px;background:#fff}
-button.primary{background:var(--vento-primary);border:none;color:#fff;padding:9px 14px;border-radius:10px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(11,111,175,0.08)}
-button.ghost{background:transparent;border:2px solid var(--vento-primary);color:var(--vento-primary);padding:8px 12px;border-radius:10px;font-weight:700}
+        /* ----------------- Modal Gráficas ----------------- */
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(35, 31, 32, 0.7); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background-color: var(--card); padding: 24px 32px; border-radius: var(--radius);
+            width: 90%; max-width: 800px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative;
+        }
+        .close-modal {
+            position: absolute; top: 16px; right: 24px; font-size: 28px; font-weight: bold;
+            color: var(--muted); cursor: pointer; transition: color 0.2s;
+        }
+        .close-modal:hover { color: var(--vento-accent); }
+        .chart-container { position: relative; height: 350px; width: 100%; margin-top: 20px; }
 
-/* ----------------- Tabs ----------------- */
-.tabs{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap}
-.tab{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700;color:var(--muted);font-size:13px}
-.tab.active{background:linear-gradient(90deg,#E6F6FF,#F7FDFF);border-color:var(--vento-primary);color:var(--text);box-shadow:var(--shadow-sm)}
+        footer { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; padding-bottom: 20px; font-weight: 600; }
 
-/* ----------------- Main grid y cards ----------------- */
-.main-grid{display:grid;grid-template-columns:1fr;gap:16px}
-.card{background:var(--card);border-radius:14px;padding:16px;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
-.card h2{margin:0 0 12px 0;font-size:16px;color:var(--text);font-weight:900;letter-spacing:-0.4px}
-
-/* Tabla */
-.table-wrap { overflow: auto; border-radius: 12px; border: 1px solid var(--border); background: #FFF; padding:8px; }
-table { width: 100%; border-collapse: collapse; font-size:14px; min-width: 0; table-layout: auto; }
-thead th { text-align: left; padding: 14px 12px; background: #FAFAFB; color: #000; font-size:12px; font-weight:800; text-transform:uppercase; border-bottom:2px solid #EAEAEA; vertical-align: middle; }
-tbody td { padding: 12px; border-bottom: 1px solid #F0F0F0; vertical-align: middle; transition: background 0.2s ease; }
-tbody td.number, thead th.number { white-space: nowrap; text-align: right; font-weight:800; }
-
-/* Nombre asesor */
-.advisor-name-link{font-weight:800;font-size:15px;color:var(--vento-primary);cursor:pointer;text-decoration:none;display:block;white-space:normal;word-break:break-word;line-height:1.05}
-.meta-small{font-size:12px;color:var(--muted);margin-top:4px}
-
-/* Score */
-.score{font-size:15px;padding:6px 10px;border-radius:10px;background:linear-gradient(90deg, rgba(242,143,23,0.06), rgba(11,111,175,0.02));color:var(--vento-accent);font-weight:900}
-
-/* Top highlights (mantener colores) */
-.top-highlight-1 td{background:var(--gold);color:var(--top3-text)}
-.top-highlight-2 td{background:var(--silver);color:var(--top3-text)}
-.top-highlight-3 td{background:var(--bronze);color:var(--top3-text)}
-
-/* Progreso por rubro: contenedor y barras */
-.rubros-grid{display:flex;flex-direction:column;gap:8px}
-.rubro-row{display:flex;align-items:center;gap:12px;justify-content:space-between}
-.rubro-label{font-weight:800;font-size:12px;color:var(--muted);min-width:70px}
-.rubro-progress{flex:1;display:flex;align-items:center;gap:10px}
-.rubro-bar-wrap{width:100%;background:#F3F4F6;border-radius:999px;padding:4px;border:1px solid var(--border)}
-.rubro-bar{height:10px;border-radius:999px;width:0%;transition:width .45s ease;background:linear-gradient(90deg,var(--vento-primary),#06B6D4)}
-.rubro-percent{font-weight:800;font-size:12px;color:var(--text);min-width:110px;text-align:right}
-
-/* status pill */
-.status-pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px;color:#fff}
-.status-cumplido{background:var(--success)}
-.status-cerca{background:var(--warning);color:#0B1220}
-.status-lejos{background:var(--danger)}
-
-/* Footer */
-footer{font-size:12px;color:var(--muted);text-align:center;margin-top:6px;font-weight:600;padding-bottom:12px}
-
-/* Responsive */
-@media(max-width:1000px){
-  .top-bar{flex-direction:column}
-  .stats{grid-template-columns:1fr 1fr}
-}
-@media(max-width:720px){
-  .rubro-percent{min-width:80px;font-size:11px}
-  .logo{width:48px;height:48px}
-}
-</style>
+        @media(max-width: 1000px) {
+            .top-bar { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
+
 <div class="container">
-  <header>
-    <div class="brand">
-      <div class="logo">AS</div>
-      <div>
-        <h1>Indicadores Asesores</h1>
-        <div class="subtitle">Rendimiento · Puntos · Metas</div>
-      </div>
-    </div>
-    <div style="text-align:right">
-      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Última sincronización</div>
-      <div id="lastSync" style="font-weight:900;color:var(--text);font-size:14px;margin-top:6px">--:--</div>
-    </div>
-  </header>
-
-  <!-- TOP BAR -->
-  <div class="top-bar" aria-hidden="false">
-    <div class="top-card" style="flex:1;min-width:300px;max-width:640px">
-      <h3 style="margin:0;font-size:13px;color:var(--text);font-weight:900;text-transform:uppercase">Metas del Mes</h3>
-      <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
-        <div style="flex:1;min-width:180px">
-          <div class="goal-title">🏢 Presencial</div>
-          <div class="goal-item"><span>Tickets</span><strong id="goal_pres_tickets">374</strong></div>
-          <div class="goal-item"><span>Chats</span><strong id="goal_pres_chats">384</strong></div>
-          <div class="goal-item"><span>Llamadas</span><strong id="goal_pres_calls">393</strong></div>
+    <header>
+        <div class="brand">
+            <div class="logo">ATC</div>
+            <div>
+                <h1>Dashboard de Rendimiento</h1>
+                <div class="subtitle">Panel de supervisión y alcance de metas</div>
+            </div>
         </div>
-        <div style="flex:1;min-width:180px">
-          <div class="goal-title">🏡 Home Office</div>
-          <div class="goal-item"><span>Tickets</span><strong id="goal_ho_tickets">524</strong></div>
-          <div class="goal-item"><span>Chats</span><strong id="goal_ho_chats">1727</strong></div>
+        <div style="text-align: right;">
+            <div style="font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase;">Última sincronización</div>
+            <div id="lastSync" style="font-weight: 700; color: var(--vento-primary); font-size: 15px; margin-top: 4px;">--:--</div>
         </div>
-      </div>
+    </header>
+
+    <div class="top-bar">
+        <div class="top-card">
+            <div class="card-header">Metas del Mes Activas</div>
+            <div class="goals-wrapper">
+                <div class="goal-col">
+                    <div class="goal-title">🏢 Presencial</div>
+                    <div class="goal-item"><span>Tickets Resolutivos</span><strong id="goal_pres_tickets">374</strong></div>
+                    <div class="goal-item"><span>Chats Atendidos</span><strong id="goal_pres_chats">384</strong></div>
+                    <div class="goal-item"><span>Llamadas Completadas</span><strong id="goal_pres_calls">393</strong></div>
+                </div>
+                <div class="goal-col">
+                    <div class="goal-title">🏡 Home Office</div>
+                    <div class="goal-item"><span>Tickets Resolutivos</span><strong id="goal_ho_tickets">524</strong></div>
+                    <div class="goal-item"><span>Chats Atendidos</span><strong id="goal_ho_chats">1727</strong></div>
+                    <div class="goal-item"><span style="color:var(--muted)">Llamadas (N/A)</span><strong style="color:var(--muted)">0</strong></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="top-card">
+            <div class="card-header">Métricas Generales del Periodo</div>
+            <div class="stats">
+                <div class="stat"><div class="label">Asesores Activos</div><div class="value" id="statAdvisors">--</div></div>
+                <div class="stat"><div class="label">Total Tickets</div><div class="value" id="statTickets">--</div></div>
+                <div class="stat"><div class="label">Total Llamadas</div><div class="value" id="statCalls">--</div></div>
+                <div class="stat"><div class="label">Total Chats</div><div class="value" id="statChats">--</div></div>
+            </div>
+        </div>
     </div>
 
-    <div class="top-card" style="width:320px;min-width:260px">
-      <h3 style="margin:0;font-size:13px;color:var(--text);font-weight:900;text-transform:uppercase">Métricas Generales</h3>
-      <div class="stats" style="margin-top:10px">
-        <div class="stat"><div class="label">Asesores</div><div class="value" id="statAdvisors">--</div></div>
-        <div class="stat"><div class="label">Tickets</div><div class="value" id="statTickets">--</div></div>
-        <div class="stat"><div class="label">Llamadas</div><div class="value" id="statCalls">--</div></div>
-        <div class="stat"><div class="label">Chats</div><div class="value" id="statChats">--</div></div>
-      </div>
-      <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
-        <button class="small-btn" id="exportTickets">Exportar Tickets_BD (CSV)</button>
-        <button class="small-btn" id="exportChats">Exportar Chats_BD (CSV)</button>
-      </div>
+    <div class="controls-wrapper">
+        <div class="filters">
+            <div class="control">
+                <label>Periodo</label>
+                <select id="periodSelector">
+                    <option value="custom">Personalizado</option>
+                    <option value="today">Hoy</option>
+                    <option value="thisMonth" selected>Este Mes</option>
+                </select>
+            </div>
+            <div class="control">
+                <label>Fecha inicio</label>
+                <input type="date" id="dateFrom">
+            </div>
+            <div class="control">
+                <label>Fecha fin</label>
+                <input type="date" id="dateTo">
+            </div>
+            <div class="control" style="min-width: 200px;">
+                <label>Filtrar Supervisor</label>
+                <select id="filterSupervisor">
+                    <option value="">Todos los supervisores</option>
+                </select>
+            </div>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="ghost" id="refreshBtn">↻ Refrescar Datos</button>
+            <button class="primary" id="applyFilters">Aplicar Filtros</button>
+        </div>
     </div>
 
-    <div style="display:flex;align-items:flex-start;gap:8px">
-      <button class="small-btn" id="downloadFiltered">↓ Descargar Filtrados</button>
+    <div class="tabs" role="tablist">
+        <div class="tab active" data-group="All">Visualizar Todos</div>
+        <div class="tab" data-group="Vento">Vento</div>
+        <div class="tab" data-group="Piston">Piston</div>
+        <div class="tab" data-group="Home Office">Home Office</div>
+        <div class="tab" data-group="Nuevo ingreso">Nuevo Ingreso</div>
+        <div class="tab" data-group="OTROS">Otros</div>
     </div>
-  </div>
 
-  <!-- CONTROLS -->
-  <div class="controls" aria-label="Controles de filtro">
-    <div class="control">
-      <label>Periodo</label>
-      <select id="periodSelector" aria-label="Periodo">
-        <option value="custom">Personalizado</option>
-        <option value="today">Hoy</option>
-        <option value="thisMonth">Este Mes</option>
-      </select>
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0; font-size: 18px; color: var(--vento-primary); font-weight: 700;">Leaderboard de Rendimiento</h2>
+        </div>
+        
+        <div class="table-wrap">
+            <table id="leaderboardTable">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">Pos</th>
+                        <th style="min-width: 200px;">Asesor / Grupo</th>
+                        <th>Tickets (Canalizados)</th>
+                        <th>Llamadas (Completadas)</th>
+                        <th>Chats (Atendidos)</th>
+                        <th style="text-align: right;">Puntaje General</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody"></tbody>
+            </table>
+        </div>
+        
+        <div style="margin-top: 16px; color: var(--muted); font-size: 12px; background: var(--bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border);">
+            <strong style="color: var(--vento-accent);">💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para visualizar la gráfica de constancia diaria.<br>
+            <div style="margin-top: 4px;"><strong>Criterios de validación:</strong> Tickets (col M = CANALIZADO). Llamadas (status = completed, duración > 60s). Chats (duración ≤ 5min, agent flag = AGENT).</div>
+        </div>
     </div>
-    <div class="control">
-      <label>Fecha inicio</label>
-      <input type="date" id="dateFrom" aria-label="Fecha inicio">
-    </div>
-    <div class="control">
-      <label>Fecha fin</label>
-      <input type="date" id="dateTo" aria-label="Fecha fin">
-    </div>
-    <div class="control" style="min-width:220px">
-      <label>Supervisor</label>
-      <select id="filterSupervisor" aria-label="Supervisor">
-        <option value="">Todos los supervisores</option>
-      </select>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="primary" id="applyFilters">Aplicar Filtros</button>
-      <button class="ghost" id="refreshBtn" title="Refrescar datos">↻ Refrescar</button>
-    </div>
-  </div>
 
-  <div class="tabs" role="tablist" aria-label="Grupos">
-    <div class="tab active" data-group="All">Todos</div>
-    <div class="tab" data-group="Vento">Vento</div>
-    <div class="tab" data-group="Piston">Piston</div>
-    <div class="tab" data-group="Home Office">Home Office</div>
-    <div class="tab" data-group="Nuevo ingreso">Nuevo ingreso</div>
-    <div class="tab" data-group="OTROS">OTROS</div>
-  </div>
-
-  <!-- MAIN -->
-  <div class="main-grid">
-    <section class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h2>Leaderboard de Puntos</h2>
-      </div>
-
-      <div class="table-wrap" role="table" aria-label="Leaderboard">
-        <table id="leaderboardTable" role="grid" aria-live="polite">
-          <thead>
-            <tr>
-              <th class="col-fit">Pos</th>
-              <th style="min-width:220px">Asesor</th>
-              <th class="col-fit number">Tickets</th>
-              <th class="col-fit number">Llamadas</th>
-              <th class="col-fit number">Chats</th>
-              <th class="col-flex">Puntaje / Progreso por Rubro</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboardBody"></tbody>
-        </table>
-      </div>
-
-      <div style="margin-top:12px;color:var(--muted);font-size:12px;font-weight:500;background:#FBFDFF;padding:12px;border-radius:10px;border:1px solid var(--border)">
-        <strong>💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para ver su rendimiento por día en una gráfica detallada.
-        <div style="margin-top:6px"><strong>Reglas de medición:</strong> Tickets canalizados (col M = CANALIZADO). Llamadas completadas y duración &gt;60s. Chats duración ≤5min y agent flag = AGENT.</div>
-      </div>
-    </section>
-  </div>
-
-  <footer>Interfaz optimizada · Actualización automática (15 min) · Descargas con autenticación requerida</footer>
+    <footer>Dashboard Privado · Actualización automática programada (15 min)</footer>
 </div>
 
-<!-- Loader -->
-<div id="loadingOverlay" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);z-index:9999">
-  <div style="text-align:center">
-    <div style="width:48px;height:48px;border-radius:50%;border:6px solid #E6EEF8;border-top-color:var(--vento-primary);animation:spin .8s linear infinite;margin:0 auto"></div>
-    <div style="margin-top:12px;font-weight:800;color:var(--text)">Sincronizando datos...</div>
-  </div>
+<div id="chartModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" id="closeModal">&times;</span>
+        <h2 id="chartTitle" style="margin-top: 0; font-size: 20px; color: var(--vento-primary);">Rendimiento Diario</h2>
+        <div style="font-size: 13px; color: var(--muted); margin-bottom: 10px;">Comportamiento de interacciones válidas en los últimos 15 días.</div>
+        <div class="chart-container">
+            <canvas id="advisorChart"></canvas>
+        </div>
+    </div>
 </div>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<div id="loadingOverlay" style="position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(255,255,255,0.85); z-index: 9999;">
+    <div style="text-align: center;">
+        <div style="width: 50px; height: 50px; border-radius: 50%; border: 4px solid var(--border); border-top-color: var(--vento-accent); animation: spin 0.8s linear infinite; margin: 0 auto;"></div>
+        <div style="margin-top: 16px; font-weight: 700; color: var(--vento-primary);">Procesando base de datos...</div>
+    </div>
+</div>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
 <script>
 /* ----------------- Config y constantes ----------------- */
@@ -320,429 +325,450 @@ const AUTO_REFRESH_MS = 15 * 60 * 1000;
 
 function letterToIndex(letter){ return letter.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0); }
 const COL = {
-  tickets: { advisor: letterToIndex('E'), date: letterToIndex('H'), status: letterToIndex('M') },
-  chats: { advisor: letterToIndex('B'), duration: letterToIndex('C'), date: letterToIndex('I'), agentFlag: letterToIndex('M') },
-  calls: { advisor: letterToIndex('B'), date: letterToIndex('C'), status: letterToIndex('D'), duration: letterToIndex('K') },
-  asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') }
+    tickets: { advisor: letterToIndex('E'), date: letterToIndex('H'), status: letterToIndex('M') },
+    chats: { advisor: letterToIndex('B'), duration: letterToIndex('C'), date: letterToIndex('I'), agentFlag: letterToIndex('M') },
+    calls: { advisor: letterToIndex('B'), date: letterToIndex('C'), status: letterToIndex('D'), duration: letterToIndex('K') },
+    asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') }
 };
 
 /* ----------------- Estado ----------------- */
 let aliasMap = {}; let metaMap = {}; let cache = { tickets:[], chats:[], calls:[] };
 let activeGroup = 'All'; let autoRefreshTimer = null; let currentMonthKey = null;
+let currentChartInstance = null; // Instancia global para la gráfica
 
 /* ----------------- Utilidades ----------------- */
 function parseCSV(text){
-  const rows=[]; let cur='', row=[], inQuotes=false;
-  for(let i=0;i<text.length;i++){ const ch=text[i], next=text[i+1];
-    if(ch==='"'){ if(inQuotes && next==='"'){ cur+='"'; i++; continue; } inQuotes=!inQuotes; continue; }
-    if(ch===',' && !inQuotes){ row.push(cur); cur=''; continue; }
-    if((ch==='\n' || ch==='\r') && !inQuotes){ if(ch==='\r' && next==='\n'){ i++; } row.push(cur); rows.push(row); row=[]; cur=''; continue; }
-    cur+=ch;
-  }
-  if(cur!=='' || row.length){ row.push(cur); rows.push(row); }
-  return rows;
+    const rows=[]; let cur='', row=[], inQuotes=false;
+    for(let i=0;i<text.length;i++){ 
+        const ch=text[i], next=text[i+1];
+        if(ch==='"'){ if(inQuotes && next==='"'){ cur+='"'; i++; continue; } inQuotes=!inQuotes; continue; }
+        if(ch===',' && !inQuotes){ row.push(cur); cur=''; continue; }
+        if((ch==='\n' || ch==='\r') && !inQuotes){ if(ch==='\r' && next==='\n'){ i++; } row.push(cur); rows.push(row); row=[]; cur=''; continue; }
+        cur+=ch;
+    }
+    if(cur!=='' || row.length){ row.push(cur); rows.push(row); }
+    return rows;
 }
+
 function fetchSheetCSVRowsById(spreadsheetId, sheetName){
-  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-  return fetch(url).then(res => { if(!res.ok) throw new Error('Error al leer hoja ' + sheetName + ' (' + res.status + ')'); return res.text(); }).then(parseCSV);
-}
-function normalizeForKey(s){ if(s===null||s===undefined) return ''; let t=String(s).replace(/\u00A0/g,' ').replace(/\t/g,' ').trim(); t=t.replace(/[\\\.,]/g,''); t=t.toUpperCase();
-  const tokens=['ATC PISTON','ATC SUP','ATC','SUP','CORD','COORD','ANL','CAP','AGT','AGENTE','SR','SRA'];
-  for(const tk of tokens){ const reStart=new RegExp('^\\s*'+tk+'[\\s\\-\\_\\.]*','i'); t=t.replace(reStart,''); const reEnd=new RegExp('[\\s\\-\\_\\.]+'+tk+'\\s*$','i'); t=t.replace(reEnd,''); }
-  if(t.includes(',')){ const parts=t.split(','); if(parts.length>=2){ t=(parts[1]+' '+parts[0]).trim(); } }
-  t=t.replace(/\s+/g,' ').trim(); return t;
-}
-function titleCase(s){ if(!s) return s; return s.toLowerCase().split(' ').map(w=>w?(w[0].toUpperCase()+w.slice(1)):'').join(' '); }
-function durationToSeconds(s){ if(s===null||s===undefined) return 0; const str=String(s).trim().toLowerCase(); if(!str) return 0; let total=0;
-  const mD=str.match(/(\d+)\s*d/); if(mD) total+=parseInt(mD[1],10)*86400;
-  const mH=str.match(/(\d+)\s*h/); if(mH) total+=parseInt(mH[1],10)*3600;
-  const mM=str.match(/(\d+)\s*m/); if(mM) total+=parseInt(mM[1],10)*60;
-  const mS=str.match(/(\d+)\s*s/); if(mS) total+=parseInt(mS[1],10);
-  if(total===0){ const onlyNum=str.match(/^(\d+)$/); if(onlyNum) total=parseInt(onlyNum[1],10); }
-  return total;
-}
-function parseDateFlexible(v){ if(v===null||v===undefined) return null; const s=String(v).trim(); if(s===''||s==='0'||s==='-'||s.toLowerCase()==='null') return null;
-  const d1=new Date(s); if(!isNaN(d1.getTime())) return d1;
-  const m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/); if(m){ const day=+m[1], mon=+m[2]-1, yr=+m[3]; return new Date(yr<100?2000+yr:yr,mon,day); }
-  const m2=s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/); if(m2){ return new Date(+m2[1], +m2[2]-1, +m2[3]); } return null;
+    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+    return fetch(url).then(res => { if(!res.ok) throw new Error('Error al leer hoja (' + res.status + ')'); return res.text(); }).then(parseCSV);
 }
 
-/* ----------------- Alias y meta maps ----------------- */
+function normalizeForKey(s){ 
+    if(!s) return ''; 
+    let t=String(s).replace(/\u00A0/g,' ').replace(/\t/g,' ').trim(); t=t.replace(/[\\\.,]/g,''); t=t.toUpperCase();
+    const tokens=['ATC PISTON','ATC SUP','ATC','SUP','CORD','COORD','ANL','CAP','AGT','AGENTE','SR','SRA'];
+    for(const tk of tokens){ const reStart=new RegExp('^\\s*'+tk+'[\\s\\-\\_\\.]*','i'); t=t.replace(reStart,''); const reEnd=new RegExp('[\\s\\-\\_\\.]+'+tk+'\\s*$','i'); t=t.replace(reEnd,''); }
+    if(t.includes(',')){ const parts=t.split(','); if(parts.length>=2){ t=(parts[1]+' '+parts[0]).trim(); } }
+    t=t.replace(/\s+/g,' ').trim(); return t;
+}
+
+function titleCase(s){ return !s ? s : s.toLowerCase().split(' ').map(w=>w?(w[0].toUpperCase()+w.slice(1)):'').join(' '); }
+
+function durationToSeconds(s){ 
+    if(!s) return 0; const str=String(s).trim().toLowerCase(); if(!str) return 0; let total=0;
+    const mD=str.match(/(\d+)\s*d/); if(mD) total+=parseInt(mD[1],10)*86400;
+    const mH=str.match(/(\d+)\s*h/); if(mH) total+=parseInt(mH[1],10)*3600;
+    const mM=str.match(/(\d+)\s*m/); if(mM) total+=parseInt(mM[1],10)*60;
+    const mS=str.match(/(\d+)\s*s/); if(mS) total+=parseInt(mS[1],10);
+    if(total===0){ const onlyNum=str.match(/^(\d+)$/); if(onlyNum) total=parseInt(onlyNum[1],10); }
+    return total;
+}
+
+function parseDateFlexible(v){ 
+    if(!v) return null; const s=String(v).trim(); if(s===''||s==='0'||s==='-'||s.toLowerCase()==='null') return null;
+    const d1=new Date(s); if(!isNaN(d1.getTime())) return d1;
+    const m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/); if(m){ const day=+m[1], mon=+m[2]-1, yr=+m[3]; return new Date(yr<100?2000+yr:yr,mon,day); }
+    const m2=s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/); if(m2){ return new Date(+m2[1], +m2[2]-1, +m2[3]); } return null;
+}
+
+/* ----------------- Data Loading ----------------- */
 async function buildAliasAndMetaMaps(){
-  aliasMap={}; metaMap={};
-  try{
-    const rows = await fetchSheetCSVRowsById(ASSESSORS_SPREADSHEET_ID, SHEETS.asesoresSheet);
-    for(let r=0;r<rows.length;r++){
-      const row=rows[r];
-      const rawUser=(row[COL.asesores.username]||'').trim();
-      const rawGroup=(row[COL.asesores.group]||'').trim();
-      const rawSupervisor=(row[COL.asesores.supervisor]||'').trim();
-      if(!rawUser) continue;
-      const keyNorm=normalizeForKey(rawUser);
-      const canonical=titleCase(keyNorm);
-      const group=rawGroup?rawGroup:'OTROS';
-      const supervisor=rawSupervisor?rawSupervisor.toUpperCase():'OTROS';
-      // Inferir modalidad por nombre de grupo (si contiene 'home' -> Home Office), fallback Presencial
-      const modality = group && group.toLowerCase().includes('home') ? 'Home Office' : 'Presencial';
-      metaMap[canonical]={group,supervisor,modality};
-      aliasMap[keyNorm]=canonical;
-      aliasMap[normalizeForKey(rawUser.replace(/\s+/g,' '))]=canonical;
-    }
-  }catch(err){ console.warn('No se pudo cargar Asesores sheet:', err.message); }
+    aliasMap={}; metaMap={};
+    try{
+        const rows = await fetchSheetCSVRowsById(ASSESSORS_SPREADSHEET_ID, SHEETS.asesoresSheet);
+        const supervisorSet = new Set();
+        for(let r=0;r<rows.length;r++){
+            const row=rows[r];
+            const rawUser=(row[COL.asesores.username]||'').trim();
+            const rawGroup=(row[COL.asesores.group]||'').trim();
+            const rawSupervisor=(row[COL.asesores.supervisor]||'').trim();
+            if(!rawUser) continue;
+            
+            const keyNorm=normalizeForKey(rawUser);
+            const canonical=titleCase(keyNorm);
+            const group=rawGroup?rawGroup:'OTROS';
+            const supervisor=rawSupervisor?rawSupervisor.toUpperCase():'OTROS';
+            const modality = group && group.toLowerCase().includes('home') ? 'Home Office' : 'Presencial';
+            
+            metaMap[canonical]={group,supervisor,modality};
+            aliasMap[keyNorm]=canonical;
+            
+            if(supervisor !== 'OTROS') supervisorSet.add(supervisor);
+        }
+        
+        // Populate supervisor filter dropdown
+        const supSelect = document.getElementById('filterSupervisor');
+        const currentVal = supSelect.value;
+        supSelect.innerHTML = '<option value="">Todos los supervisores</option>';
+        Array.from(supervisorSet).sort().forEach(sup => {
+            const opt = document.createElement('option'); opt.value = sup; opt.textContent = sup;
+            supSelect.appendChild(opt);
+        });
+        supSelect.value = currentVal;
+        
+    }catch(err){ console.warn('Error Asesores:', err.message); }
 }
+
 function mapAdvisorToCanonical(raw){
-  const norm=normalizeForKey(raw); if(!norm) return '';
-  if(aliasMap[norm]) return aliasMap[norm];
-  const candidates=Object.keys(metaMap);
-  const found=candidates.find(c=>c.toUpperCase()===norm.toUpperCase());
-  if(found) return found;
-  const canonical=titleCase(norm);
-  if(!metaMap[canonical]) metaMap[canonical]={group:'OTROS',supervisor:'OTROS',modality:'Presencial'};
-  aliasMap[norm]=canonical; return canonical;
+    const norm=normalizeForKey(raw); if(!norm) return '';
+    if(aliasMap[norm]) return aliasMap[norm];
+    const found=Object.keys(metaMap).find(c=>c.toUpperCase()===norm.toUpperCase());
+    if(found) return found;
+    const canonical=titleCase(norm);
+    if(!metaMap[canonical]) metaMap[canonical]={group:'OTROS',supervisor:'OTROS',modality:'Presencial'};
+    aliasMap[norm]=canonical; return canonical;
 }
 
-/* ----------------- Conteos ----------------- */
-function aggregateCountsOnly(ticketsRows, chatsRows, callsRows, filterFrom, filterTo, selectedGroup, selectedSupervisor){
-  const counts={};
-  function ensure(name){ if(!counts[name]) counts[name]={tickets:0,chats:0,calls:0}; }
-  function inRangeDate(d,from,to){ if(!d) return false; const dd=new Date(d.getFullYear(),d.getMonth(),d.getDate()); if(from && dd<from) return false; if(to && dd>to) return false; return true; }
-  function cell(row,idx){ return (row && idx>=0 && idx<row.length)?row[idx]:''; }
-
-  for(let r=1;r<ticketsRows.length;r++){
-    const row=ticketsRows[r]; const rawAdvisor=cell(row,COL.tickets.advisor); const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
-    if(!advisorCanonical) continue;
-    const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
-    if(selectedGroup!=='All' && meta.group!==selectedGroup) continue;
-    if(selectedSupervisor){ if(String(meta.supervisor||'').toUpperCase()!==String(selectedSupervisor||'').toUpperCase()) continue; }
-    const rawStatus=cell(row,COL.tickets.status); const status=String(rawStatus||'').trim().toUpperCase();
-    if(status!=='CANALIZADO') continue;
-    const rawDate=cell(row,COL.tickets.date); const parsed=parseDateFlexible(rawDate);
-    if((filterFrom||filterTo) && parsed){ if(!inRangeDate(parsed,filterFrom,filterTo)) continue; }
-    ensure(advisorCanonical); counts[advisorCanonical].tickets += 1;
-  }
-
-  for(let r=1;r<chatsRows.length;r++){
-    const row=chatsRows[r]; const rawAdvisor=cell(row,COL.chats.advisor); const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
-    if(!advisorCanonical) continue;
-    const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
-    if(selectedGroup!=='All' && meta.group!==selectedGroup) continue;
-    if(selectedSupervisor){ if(String(meta.supervisor||'').toUpperCase()!==String(selectedSupervisor||'').toUpperCase()) continue; }
-    const rawDuration=cell(row,COL.chats.duration); const seconds=durationToSeconds(rawDuration);
-    if(seconds===0 && String(rawDuration||'').trim()==='') continue;
-    if(seconds>300) continue;
-    const rawAgent=cell(row,COL.chats.agentFlag); const agentFlag=String(rawAgent||'').trim().toUpperCase();
-    if(agentFlag!=='AGENT') continue;
-    const rawDate=cell(row,COL.chats.date); const parsed=parseDateFlexible(rawDate);
-    if(filterFrom||filterTo){ if(!parsed) continue; if(!inRangeDate(parsed,filterFrom,filterTo)) continue; }
-    ensure(advisorCanonical); counts[advisorCanonical].chats += 1;
-  }
-
-  for(let r=1;r<callsRows.length;r++){
-    const row=callsRows[r]; const rawAdvisor=cell(row,COL.calls.advisor); const advisorCanonical=mapAdvisorToCanonical(rawAdvisor);
-    if(!advisorCanonical) continue;
-    const meta=metaMap[advisorCanonical]||{group:'OTROS',supervisor:'OTROS'};
-    if(selectedGroup!=='All' && meta.group!==selectedGroup) continue;
-    if(selectedSupervisor){ if(String(meta.supervisor||'').toUpperCase()!==String(selectedSupervisor||'').toUpperCase()) continue; }
-    const rawStatus=cell(row,COL.calls.status); const status=String(rawStatus||'').trim().toLowerCase();
-    if(status!=='completed') continue;
-    const rawDuration=cell(row,COL.calls.duration); const seconds=durationToSeconds(rawDuration);
-    if(seconds<=35) continue;
-    const rawDate=cell(row,COL.calls.date); const parsed=parseDateFlexible(rawDate);
-    if(filterFrom||filterTo){ if(!parsed) continue; if(!inRangeDate(parsed,filterFrom,filterTo)) continue; }
-    ensure(advisorCanonical); counts[advisorCanonical].calls += 1;
-  }
-
-  return counts;
-}
-
-/* ----------------- Puntajes ----------------- */
-function calculateScoresFromCountsSum(countsObj){
-  const counts=countsObj; const advisors=Object.keys(counts);
-  if(advisors.length===0) return [];
-  let maxTickets=0, maxCalls=0, maxChats=0;
-  advisors.forEach(name=>{ const c=counts[name]; if(c.tickets>maxTickets) maxTickets=c.tickets; if(c.calls>maxCalls) maxCalls=c.calls; if(c.chats>maxChats) maxChats=c.chats; });
-  const arr=advisors.map(name=>{
-    const c=counts[name];
-    const ticketPts = maxTickets ? (c.tickets / maxTickets) * 100 : 0;
-    const callPts = maxCalls ? (c.calls / maxCalls) * 100 : 0;
-    const chatPts = maxChats ? (c.chats / maxChats) * 100 : 0;
-    const total = ticketPts + callPts + chatPts;
-    return {
-      name,
-      tickets: c.tickets,
-      ticketPts: Number(ticketPts.toFixed(2)),
-      calls: c.calls,
-      callPts: Number(callPts.toFixed(2)),
-      chats: c.chats,
-      chatPts: Number(chatPts.toFixed(2)),
-      total: Number(total.toFixed(2)),
-      group: metaMap[name] ? metaMap[name].group : 'OTROS',
-      supervisor: metaMap[name] ? metaMap[name].supervisor : 'OTROS',
-      modality: metaMap[name] ? (metaMap[name].modality || (metaMap[name].group && metaMap[name].group.toLowerCase().includes('home') ? 'Home Office' : 'Presencial')) : 'Presencial'
-    };
-  });
-  arr.sort((a,b)=>b.total-a.total);
-  return arr;
-}
-
-/* ----------------- Días hábiles y meta esperada por rubro ----------------- */
-function getWorkingDaysForMonth(modality, year, month, options = {}) {
-  const { presencialSaturdays = 2, excludeDates = [] } = options;
-  const total = new Date(year, month + 1, 0).getDate();
-  const saturdayDays = [];
-  for (let d = 1; d <= total; d++) {
-    const dt = new Date(year, month, d);
-    if (dt.getDay() === 6) saturdayDays.push(d);
-  }
-  const allowedSaturdays = saturdayDays.slice(0, presencialSaturdays);
-  const result = [];
-  for (let d = 1; d <= total; d++) {
-    const dt = new Date(year, month, d);
-    const dow = dt.getDay();
-    const iso = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
-    if (excludeDates.includes(iso)) continue;
-    if (modality === 'Home Office') {
-      if (dow === 4 || dow === 5) continue;
-      result.push(dt);
-    } else if (modality === 'Presencial') {
-      if (dow === 0) continue;
-      if (dow === 6 && !allowedSaturdays.includes(d)) continue;
-      result.push(dt);
-    } else {
-      if (dow === 0) continue;
-      result.push(dt);
+/* ----------------- Cálculo de Puntuaciones y Días ----------------- */
+function getWorkingDaysForMonth(modality, year, month) {
+    const total = new Date(year, month + 1, 0).getDate();
+    const result = [];
+    for (let d = 1; d <= total; d++) {
+        const dt = new Date(year, month, d);
+        const dow = dt.getDay();
+        if (modality === 'Home Office') {
+            if (dow !== 4 && dow !== 5) result.push(dt);
+        } else {
+            if (dow !== 0) result.push(dt); // Simplificado: L-S presencial
+        }
     }
-  }
-  return result;
+    return result;
 }
+
 function expectedUntilToday(monthlyMeta, workingDaysArray, today = new Date()) {
-  const total = workingDaysArray.length;
-  const passed = workingDaysArray.filter(d => {
-    const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    return dd <= t;
-  }).length;
-  if (total === 0) return 0;
-  return (monthlyMeta / total) * passed;
+    const total = workingDaysArray.length;
+    const passed = workingDaysArray.filter(d => d <= today).length;
+    if (total === 0) return 0;
+    return (monthlyMeta / total) * passed;
 }
 
-/* ----------------- Renderizado: filas con 3 barras por rubro ----------------- */
+/* ----------------- Render de la Tabla Principal ----------------- */
 function buildLeaderboardRows(scoresArr) {
-  const tbody = document.getElementById('leaderboardBody');
-  tbody.innerHTML = '';
-  const year = (new Date()).getFullYear();
-  const month = (new Date()).getMonth();
+    const tbody = document.getElementById('leaderboardBody');
+    tbody.innerHTML = '';
+    const year = (new Date()).getFullYear();
+    const month = (new Date()).getMonth();
+    
+    const presTickets = Number(document.getElementById('goal_pres_tickets').textContent);
+    const presChats = Number(document.getElementById('goal_pres_chats').textContent);
+    const presCalls = Number(document.getElementById('goal_pres_calls').textContent);
+    const hoTickets = Number(document.getElementById('goal_ho_tickets').textContent);
+    const hoChats = Number(document.getElementById('goal_ho_chats').textContent);
 
-  // Metas globales por canal (top-card)
-  const presTickets = Number(document.getElementById('goal_pres_tickets').textContent || 0);
-  const presChats = Number(document.getElementById('goal_pres_chats').textContent || 0);
-  const presCalls = Number(document.getElementById('goal_pres_calls').textContent || 0);
-  const hoTickets = Number(document.getElementById('goal_ho_tickets').textContent || 0);
-  const hoChats = Number(document.getElementById('goal_ho_chats').textContent || 0);
+    scoresArr.forEach((s, idx) => {
+        const meta = {
+            tickets: s.modality === 'Home Office' ? hoTickets : presTickets,
+            calls: s.modality === 'Home Office' ? 0 : presCalls,
+            chats: s.modality === 'Home Office' ? hoChats : presChats
+        };
+        
+        const workingDays = getWorkingDaysForMonth(s.modality, year, month);
+        const expT = expectedUntilToday(meta.tickets, workingDays);
+        const expC = expectedUntilToday(meta.calls, workingDays);
+        const expCh = expectedUntilToday(meta.chats, workingDays);
+        
+        const pctT = meta.tickets > 0 ? Math.min(100, (s.tickets / meta.tickets) * 100) : 0;
+        const pctC = meta.calls > 0 ? Math.min(100, (s.calls / meta.calls) * 100) : 0;
+        const pctCh = meta.chats > 0 ? Math.min(100, (s.chats / meta.chats) * 100) : 0;
+        
+        const sumReal = s.tickets + s.calls + s.chats;
+        const sumMeta = meta.tickets + meta.calls + meta.chats;
+        const sumExp = expT + expC + expCh;
+        
+        const pctRealOverall = sumMeta > 0 ? (sumReal / sumMeta) * 100 : 0;
+        const pctExpOverall = sumMeta > 0 ? (sumExp / sumMeta) * 100 : 0;
+        
+        let statusClass = 'status-lejos';
+        if (pctRealOverall >= pctExpOverall) statusClass = 'status-cumplido';
+        else if (pctRealOverall >= pctExpOverall * 0.8) statusClass = 'status-cerca';
 
-  scoresArr.forEach((s, idx) => {
-    // metas por canal según modalidad
-    const metaByChannel = {
-      tickets: s.modality === 'Home Office' ? hoTickets : presTickets,
-      calls: s.modality === 'Home Office' ? 0 : presCalls,
-      chats: s.modality === 'Home Office' ? hoChats : presChats
-    };
+        const tr = document.createElement('tr');
+        if(idx === 0) tr.classList.add('top-highlight-1');
+        else if(idx === 1) tr.classList.add('top-highlight-2');
+        else if(idx === 2) tr.classList.add('top-highlight-3');
 
-    // valores reales por canal
-    const actualTickets = s.tickets || 0;
-    const actualCalls = s.calls || 0;
-    const actualChats = s.chats || 0;
+        tr.innerHTML = `
+            <td style="font-weight: 700; color: var(--muted);">${idx + 1}</td>
+            <td>
+                <a class="advisor-name-link" data-advisor="${s.name}">${s.name}</a>
+                <div class="meta-small">${s.group} • ${s.supervisor} • ${s.modality}</div>
+            </td>
+            <td class="col-metric">
+                <div class="metric-val">${s.tickets}</div>
+                <div class="rubro-bar-wrap" title="Meta Mensual: ${meta.tickets}"><div class="rubro-bar" style="width:${pctT}%"></div></div>
+                <div class="metric-sub">Real: ${Math.round(pctT)}% | Exp: ${Math.round((expT/meta.tickets)*100 || 0)}%</div>
+            </td>
+            <td class="col-metric">
+                <div class="metric-val">${s.calls}</div>
+                <div class="rubro-bar-wrap" title="Meta Mensual: ${meta.calls}"><div class="rubro-bar" style="width:${pctC}%"></div></div>
+                <div class="metric-sub">Real: ${Math.round(pctC)}% | Exp: ${Math.round((expC/meta.calls)*100 || 0)}%</div>
+            </td>
+            <td class="col-metric">
+                <div class="metric-val">${s.chats}</div>
+                <div class="rubro-bar-wrap" title="Meta Mensual: ${meta.chats}"><div class="rubro-bar" style="width:${pctCh}%"></div></div>
+                <div class="metric-sub">Real: ${Math.round(pctCh)}% | Exp: ${Math.round((expCh/meta.chats)*100 || 0)}%</div>
+            </td>
+            <td style="text-align: right;">
+                <div class="score">${s.total.toFixed(0)} Pts</div>
+                <br><span class="status-pill ${statusClass}">${Math.round(pctRealOverall)}% Meta</span>
+            </td>
+        `;
+        
+        tbody.appendChild(tr);
 
-    // días hábiles para calcular esperado por canal (usamos la misma base de días hábiles)
-    const workingDays = getWorkingDaysForMonth(s.modality, year, month);
-
-    const expectedTickets = expectedUntilToday(metaByChannel.tickets, workingDays, new Date());
-    const expectedCalls = expectedUntilToday(metaByChannel.calls, workingDays, new Date());
-    const expectedChats = expectedUntilToday(metaByChannel.chats, workingDays, new Date());
-
-    const pctTicketsReal = metaByChannel.tickets > 0 ? Math.min(100, (actualTickets / metaByChannel.tickets) * 100) : 0;
-    const pctTicketsExp = metaByChannel.tickets > 0 ? Math.min(100, (expectedTickets / metaByChannel.tickets) * 100) : 0;
-
-    const pctCallsReal = metaByChannel.calls > 0 ? Math.min(100, (actualCalls / metaByChannel.calls) * 100) : 0;
-    const pctCallsExp = metaByChannel.calls > 0 ? Math.min(100, (expectedCalls / metaByChannel.calls) * 100) : 0;
-
-    const pctChatsReal = metaByChannel.chats > 0 ? Math.min(100, (actualChats / metaByChannel.chats) * 100) : 0;
-    const pctChatsExp = metaByChannel.chats > 0 ? Math.min(100, (expectedChats / metaByChannel.chats) * 100) : 0;
-
-    // estado general (comparando suma real vs suma esperada)
-    const sumReal = actualTickets + actualCalls + actualChats;
-    const sumMeta = (metaByChannel.tickets||0) + (metaByChannel.calls||0) + (metaByChannel.chats||0);
-    const sumExpected = expectedTickets + expectedCalls + expectedChats;
-    const pctSumReal = sumMeta>0 ? (sumReal/sumMeta)*100 : 0;
-    const pctSumExp = sumMeta>0 ? (sumExpected/sumMeta)*100 : 0;
-
-    let statusClass = 'status-lejos';
-    if (pctSumReal >= pctSumExp) statusClass = 'status-cumplido';
-    else if (pctSumReal >= pctSumExp * 0.8) statusClass = 'status-cerca';
-
-    const tr = document.createElement('tr');
-    if (idx === 0) tr.classList.add('top-highlight-1');
-    else if (idx === 1) tr.classList.add('top-highlight-2');
-    else if (idx === 2) tr.classList.add('top-highlight-3');
-
-    tr.innerHTML = `
-      <td class="col-fit">${idx+1}</td>
-      <td>
-        <a class="advisor-name-link" data-advisor="${s.name}">${s.name}</a>
-        <div class="meta-small">${s.group} · ${s.supervisor} · ${s.modality}</div>
-      </td>
-      <td class="col-fit number">${actualTickets}</td>
-      <td class="col-fit number">${actualCalls}</td>
-      <td class="col-fit number">${actualChats}</td>
-      <td class="col-flex">
-        <div style="display:flex;align-items:center;gap:12px;justify-content:space-between">
-          <div style="flex:1">
-            <div class="rubros-grid">
-              <!-- Tickets -->
-              <div class="rubro-row">
-                <div class="rubro-label">Tickets</div>
-                <div class="rubro-progress">
-                  <div class="rubro-bar-wrap" aria-hidden="true">
-                    <div class="rubro-bar" data-type="tickets" style="width:${pctTicketsReal}%;"></div>
-                  </div>
-                  <div class="rubro-percent">Real ${Math.round(pctTicketsReal)}% · Exp ${Math.round(pctTicketsExp)}%</div>
-                </div>
-              </div>
-              <!-- Llamadas -->
-              <div class="rubro-row">
-                <div class="rubro-label">Llamadas</div>
-                <div class="rubro-progress">
-                  <div class="rubro-bar-wrap" aria-hidden="true">
-                    <div class="rubro-bar" data-type="calls" style="width:${pctCallsReal}%;"></div>
-                  </div>
-                  <div class="rubro-percent">Real ${Math.round(pctCallsReal)}% · Exp ${Math.round(pctCallsExp)}%</div>
-                </div>
-              </div>
-              <!-- Chats -->
-              <div class="rubro-row">
-                <div class="rubro-label">Chats</div>
-                <div class="rubro-progress">
-                  <div class="rubro-bar-wrap" aria-hidden="true">
-                    <div class="rubro-bar" data-type="chats" style="width:${pctChatsReal}%;"></div>
-                  </div>
-                  <div class="rubro-percent">Real ${Math.round(pctChatsReal)}% · Exp ${Math.round(pctChatsExp)}%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style="min-width:110px;text-align:right">
-            <div class="score">${s.total.toFixed(0)}</div>
-            <div style="margin-top:8px"><span class="status-pill ${statusClass}">${Math.round(pctSumReal)}%</span></div>
-          </div>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
-
-    // Click en nombre para abrir gráfica (placeholder)
-    const nameLink = tr.querySelector('.advisor-name-link');
-    if (nameLink) {
-      nameLink.addEventListener('click', () => {
-        alert('Mostrar gráfica diaria de ' + s.name);
-      });
-    }
-  });
+        // Disparador de gráfica modal
+        const link = tr.querySelector('.advisor-name-link');
+        if(link){
+            link.addEventListener('click', () => {
+                openChartModal(s.name);
+            });
+        }
+    });
 }
 
-/* ----------------- Cálculo diario (opcional) ----------------- */
+/* ----------------- Lógica de la Gráfica Modal ----------------- */
 function getDailyChartData(advisorName, start, end) {
-  const labels=[]; const series=[]; const dates=[];
-  let curr=new Date(start);
-  while(curr<=end){ const ds=curr.getFullYear()+'-'+String(curr.getMonth()+1).padStart(2,'0')+'-'+String(curr.getDate()).padStart(2,'0'); dates.push(ds); labels.push(String(curr.getDate()).padStart(2,'0')+'/'+String(curr.getMonth()+1).padStart(2,'0')); curr.setDate(curr.getDate()+1); }
-  const dailyCounts={}; dates.forEach(d=>dailyCounts[d]={t:0,c:0,ch:0});
-  function addCount(dateStr,adv,type){ if(!dailyCounts[dateStr]) return; if(!dailyCounts[dateStr][adv]) dailyCounts[dateStr][adv]={t:0,c:0,ch:0}; dailyCounts[dateStr][adv][type]++; }
-  for(let r=1;r<cache.tickets.length;r++){ const row=cache.tickets[r]; const canonical=mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!canonical) continue; const status=String(row[COL.tickets.status]||'').trim().toUpperCase(); if(status!=='CANALIZADO') continue; const parsed=parseDateFlexible(row[COL.tickets.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'t'); } } }
-  for(let r=1;r<cache.chats.length;r++){ const row=cache.chats[r]; const canonical=mapAdvisorToCanonical(row[COL.chats.advisor]); if(!canonical) continue; const seconds=durationToSeconds(row[COL.chats.duration]); if(seconds===0 && String(row[COL.chats.duration]||'').trim()==='') continue; if(seconds>300) continue; const agentFlag=String(row[COL.chats.agentFlag]||'').trim().toUpperCase(); if(agentFlag!=='AGENT') continue; const parsed=parseDateFlexible(row[COL.chats.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'ch'); } } }
-  for(let r=1;r<cache.calls.length;r++){ const row=cache.calls[r]; const canonical=mapAdvisorToCanonical(row[COL.calls.advisor]); if(!canonical) continue; const status=String(row[COL.calls.status]||'').trim().toLowerCase(); if(status!=='completed') continue; const seconds=durationToSeconds(row[COL.calls.duration]); if(seconds<=35) continue; const parsed=parseDateFlexible(row[COL.calls.date]); if(parsed){ const dd=new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()); if(dd>=start && dd<=end){ const ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); addCount(ds,canonical,'c'); } } }
-  const seriesData = dates.map(d => {
-    const v = dailyCounts[d] && dailyCounts[d][advisorName] ? dailyCounts[d][advisorName] : {t:0,c:0,ch:0};
-    return v.t + v.c + v.ch;
-  });
-  return { labels, series: seriesData };
+    const labels=[]; const series=[]; const dates=[];
+    let curr=new Date(start);
+    while(curr<=end){ 
+        const ds=curr.getFullYear()+'-'+String(curr.getMonth()+1).padStart(2,'0')+'-'+String(curr.getDate()).padStart(2,'0'); 
+        dates.push(ds); 
+        labels.push(String(curr.getDate()).padStart(2,'0')+'/'+String(curr.getMonth()+1).padStart(2,'0')); 
+        curr.setDate(curr.getDate()+1); 
+    }
+    
+    const dailyCounts={}; dates.forEach(d=>dailyCounts[d]={t:0,c:0,ch:0});
+    
+    function addCount(dateStr,adv,type){ 
+        if(!dailyCounts[dateStr]) return; 
+        if(!dailyCounts[dateStr][adv]) dailyCounts[dateStr][adv]={t:0,c:0,ch:0}; 
+        dailyCounts[dateStr][adv][type]++; 
+    }
+    
+    // Scan Cache for tickets
+    for(let r=1;r<cache.tickets.length;r++){ 
+        const row=cache.tickets[r]; const canonical=mapAdvisorToCanonical(row[COL.tickets.advisor]); 
+        if(canonical !== advisorName) continue; 
+        if(String(row[COL.tickets.status]||'').trim().toUpperCase()!=='CANALIZADO') continue; 
+        const parsed=parseDateFlexible(row[COL.tickets.date]); 
+        if(parsed && parsed>=start && parsed<=end){ 
+            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), canonical, 't'); 
+        } 
+    }
+    // Scan Cache for chats
+    for(let r=1;r<cache.chats.length;r++){ 
+        const row=cache.chats[r]; const canonical=mapAdvisorToCanonical(row[COL.chats.advisor]); 
+        if(canonical !== advisorName) continue; 
+        if(String(row[COL.chats.agentFlag]||'').trim().toUpperCase()!=='AGENT') continue; 
+        const parsed=parseDateFlexible(row[COL.chats.date]); 
+        if(parsed && parsed>=start && parsed<=end){ 
+            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), canonical, 'ch'); 
+        } 
+    }
+    // Scan Cache for calls
+    for(let r=1;r<cache.calls.length;r++){ 
+        const row=cache.calls[r]; const canonical=mapAdvisorToCanonical(row[COL.calls.advisor]); 
+        if(canonical !== advisorName) continue; 
+        if(String(row[COL.calls.status]||'').trim().toLowerCase()!=='completed') continue; 
+        const parsed=parseDateFlexible(row[COL.calls.date]); 
+        if(parsed && parsed>=start && parsed<=end){ 
+            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), canonical, 'c'); 
+        } 
+    }
+    
+    const seriesData = dates.map(d => {
+        const v = dailyCounts[d] && dailyCounts[d][advisorName] ? dailyCounts[d][advisorName] : {t:0,c:0,ch:0};
+        return v.t + v.c + v.ch;
+    });
+    
+    return { labels, series: seriesData };
 }
 
-/* ----------------- Flujo principal: carga y refresco ----------------- */
-async function loadAllAndRender(force=false) {
-  try {
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    const now = new Date();
-    const monthKey = now.getFullYear() + '-' + (now.getMonth()+1);
-    if (currentMonthKey && currentMonthKey !== monthKey) {
-      cache = { tickets:[], chats:[], calls:[] };
-    }
-    currentMonthKey = monthKey;
-
-    await buildAliasAndMetaMaps();
-    const [ticketsRows, chatsRows, callsRows] = await Promise.all([
-      fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.tickets).catch(e=>{console.warn(e); return [];}),
-      fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.chats).catch(e=>{console.warn(e); return [];}),
-      fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.calls).catch(e=>{console.warn(e); return [];})
-    ]);
-    cache.tickets = ticketsRows;
-    cache.chats = chatsRows;
-    cache.calls = callsRows;
-
-    const period = document.getElementById('periodSelector').value;
-    let filterFrom = null, filterTo = null;
-    if (period === 'today') {
-      const t = new Date(); filterFrom = new Date(t.getFullYear(), t.getMonth(), t.getDate()); filterTo = filterFrom;
-    } else if (period === 'thisMonth') {
-      const t = new Date(); filterFrom = new Date(t.getFullYear(), t.getMonth(), 1); filterTo = new Date(t.getFullYear(), t.getMonth(), new Date(t.getFullYear(), t.getMonth()+1, 0).getDate());
-    } else {
-      const df = document.getElementById('dateFrom').value;
-      const dt = document.getElementById('dateTo').value;
-      if (df) filterFrom = new Date(df);
-      if (dt) filterTo = new Date(dt);
-    }
-    const selectedSupervisor = document.getElementById('filterSupervisor').value || null;
-
-    const counts = aggregateCountsOnly(cache.tickets, cache.chats, cache.calls, filterFrom, filterTo, activeGroup, selectedSupervisor);
-    const scores = calculateScoresFromCountsSum(counts);
-
-    // Actualizar métricas generales
-    document.getElementById('statAdvisors').textContent = Object.keys(metaMap).length || '--';
-    const totalTickets = Object.values(counts).reduce((s,c)=>s+(c.tickets||0),0);
-    const totalCalls = Object.values(counts).reduce((s,c)=>s+(c.calls||0),0);
-    const totalChats = Object.values(counts).reduce((s,c)=>s+(c.chats||0),0);
-    document.getElementById('statTickets').textContent = totalTickets;
-    document.getElementById('statCalls').textContent = totalCalls;
-    document.getElementById('statChats').textContent = totalChats;
-
-    buildLeaderboardRows(scores);
-
-    document.getElementById('lastSync').textContent = new Date().toLocaleString();
-  } catch (err) {
-    console.error('Error en carga:', err);
-  } finally {
-    document.getElementById('loadingOverlay').style.display = 'none';
-  }
+function openChartModal(advisorName) {
+    const modal = document.getElementById('chartModal');
+    document.getElementById('chartTitle').textContent = `Rendimiento de ${advisorName}`;
+    modal.style.display = 'flex';
+    
+    // Configurar fechas (Últimos 15 días)
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 14);
+    
+    const data = getDailyChartData(advisorName, start, end);
+    const ctx = document.getElementById('advisorChart').getContext('2d');
+    
+    if (currentChartInstance) currentChartInstance.destroy();
+    
+    currentChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Volumen de Interacciones',
+                data: data.series,
+                borderColor: '#F28F17', // Naranja corporativo
+                backgroundColor: 'rgba(242, 143, 23, 0.15)',
+                borderWidth: 3,
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#231F20', // Negro
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#E5E7EB' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
 }
 
-/* ----------------- Eventos UI ----------------- */
-document.getElementById('applyFilters').addEventListener('click', () => loadAllAndRender(true));
-document.getElementById('refreshBtn').addEventListener('click', () => loadAllAndRender(true));
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', (e) => {
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    tab.classList.add('active');
-    activeGroup = tab.dataset.group || 'All';
-    loadAllAndRender(true);
-  });
+document.getElementById('closeModal').addEventListener('click', () => {
+    document.getElementById('chartModal').style.display = 'none';
 });
 
-/* Auto refresh y carga inicial */
-loadAllAndRender();
-if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-autoRefreshTimer = setInterval(() => {
-  loadAllAndRender();
-}, AUTO_REFRESH_MS);
+/* ----------------- Motor de Análisis Principal ----------------- */
+function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervisor){
+    const counts={};
+    function ensure(name){ if(!counts[name]) counts[name]={tickets:0,chats:0,calls:0}; }
+    
+    // Sumarizaciones omitidas por longitud... operan igual filtrando validaciones
+    // Tickets
+    cache.tickets.forEach(row => {
+        const adv=mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!adv) return;
+        const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
+        if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
+        if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
+        if(String(row[COL.tickets.status]||'').toUpperCase()==='CANALIZADO'){
+            const d=parseDateFlexible(row[COL.tickets.date]);
+            if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
+            ensure(adv); counts[adv].tickets++;
+        }
+    });
+    // Chats
+    cache.chats.forEach(row => {
+        const adv=mapAdvisorToCanonical(row[COL.chats.advisor]); if(!adv) return;
+        const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
+        if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
+        if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
+        if(String(row[COL.chats.agentFlag]||'').toUpperCase()==='AGENT' && durationToSeconds(row[COL.chats.duration])<=300){
+            const d=parseDateFlexible(row[COL.chats.date]);
+            if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
+            ensure(adv); counts[adv].chats++;
+        }
+    });
+    // Calls
+    cache.calls.forEach(row => {
+        const adv=mapAdvisorToCanonical(row[COL.calls.advisor]); if(!adv) return;
+        const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
+        if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
+        if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
+        if(String(row[COL.calls.status]||'').toLowerCase()==='completed' && durationToSeconds(row[COL.calls.duration])>35){
+            const d=parseDateFlexible(row[COL.calls.date]);
+            if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
+            ensure(adv); counts[adv].calls++;
+        }
+    });
 
+    let maxT=0, maxC=0, maxCh=0;
+    Object.values(counts).forEach(c => {
+        if(c.tickets>maxT) maxT=c.tickets; if(c.calls>maxC) maxC=c.calls; if(c.chats>maxCh) maxCh=c.chats;
+    });
+
+    const arr = Object.keys(counts).map(name => {
+        const c=counts[name];
+        const tPts = maxT ? (c.tickets/maxT)*100 : 0;
+        const cPts = maxC ? (c.calls/maxC)*100 : 0;
+        const chPts = maxCh ? (c.chats/maxCh)*100 : 0;
+        return {
+            name, tickets: c.tickets, calls: c.calls, chats: c.chats,
+            total: tPts + cPts + chPts,
+            group: metaMap[name]?.group||'OTROS', supervisor: metaMap[name]?.supervisor||'OTROS',
+            modality: metaMap[name]?.modality||'Presencial'
+        };
+    });
+    
+    arr.sort((a,b)=>b.total-a.total);
+    
+    document.getElementById('statAdvisors').textContent = arr.length;
+    document.getElementById('statTickets').textContent = Object.values(counts).reduce((s,c)=>s+c.tickets,0);
+    document.getElementById('statCalls').textContent = Object.values(counts).reduce((s,c)=>s+c.calls,0);
+    document.getElementById('statChats').textContent = Object.values(counts).reduce((s,c)=>s+c.chats,0);
+    
+    buildLeaderboardRows(arr);
+}
+
+/* ----------------- Flujo de Ejecución ----------------- */
+async function loadAllAndRender() {
+    try {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        
+        await buildAliasAndMetaMaps();
+        
+        // Simulación de Fetch o Fetch real (Asegúrate de ajustar los permisos CORS del Spreadsheet)
+        const [t, ch, c] = await Promise.all([
+            fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.tickets).catch(()=>[]),
+            fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.chats).catch(()=>[]),
+            fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.calls).catch(()=>[])
+        ]);
+        cache.tickets = t; cache.chats = ch; cache.calls = c;
+        
+        applyAllFilters();
+        
+        document.getElementById('lastSync').textContent = new Date().toLocaleString('es-MX', {hour: '2-digit', minute:'2-digit'});
+    } catch(e) { console.error(e); } finally { document.getElementById('loadingOverlay').style.display = 'none'; }
+}
+
+function applyAllFilters() {
+    const period = document.getElementById('periodSelector').value;
+    let from = null, to = null;
+    const today = new Date();
+    
+    if (period === 'today') {
+        from = new Date(today.getFullYear(), today.getMonth(), today.getDate()); to = from;
+    } else if (period === 'thisMonth') {
+        from = new Date(today.getFullYear(), today.getMonth(), 1); 
+        to = new Date(today.getFullYear(), today.getMonth()+1, 0);
+    } else {
+        if(document.getElementById('dateFrom').value) from = new Date(document.getElementById('dateFrom').value + 'T00:00:00');
+        if(document.getElementById('dateTo').value) to = new Date(document.getElementById('dateTo').value + 'T23:59:59');
+    }
+    
+    aggregateAndScore(from, to, activeGroup, document.getElementById('filterSupervisor').value);
+}
+
+/* ----------------- Listeners ----------------- */
+document.getElementById('applyFilters').addEventListener('click', applyAllFilters);
+document.getElementById('refreshBtn').addEventListener('click', loadAllAndRender);
+
+document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        activeGroup = t.dataset.group;
+        applyAllFilters();
+    });
+});
+
+// Initialization
+loadAllAndRender();
+setInterval(loadAllAndRender, AUTO_REFRESH_MS);
 </script>
 </body>
 </html>
