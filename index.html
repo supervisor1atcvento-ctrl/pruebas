@@ -57,6 +57,29 @@ header{
 h1{font-size:18px;margin:0;font-weight:800}
 .subtitle{font-size:12px;color:var(--muted);margin-top:4px;font-weight:600}
 
+/* Top bar: metas y métricas colocadas horizontalmente encima de los filtros */
+.top-bar{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  background:transparent;
+  flex-wrap:wrap;
+}
+
+/* Card-like small blocks inside top bar */
+.top-card{
+  background:var(--card);
+  border-radius:10px;
+  padding:12px;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-width:220px;
+  max-width:420px;
+}
+
 /* Controls */
 .controls{
   display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
@@ -86,9 +109,8 @@ button.ghost{background:transparent;border:2px solid var(--text);color:var(--tex
 .tab{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700;color:var(--muted);font-size:13px}
 .tab.active{background:linear-gradient(90deg,#E6F6F5,#F7FEFF);border-color:var(--accent);color:var(--text);box-shadow:var(--shadow-sm)}
 
-/* Grid */
-.main-grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
-@media(max-width:1000px){.main-grid{grid-template-columns:1fr}}
+/* Grid: ahora solo columna principal para evitar desplazamiento horizontal */
+.main-grid{display:grid;grid-template-columns:1fr;gap:16px}
 
 /* Cards */
 .card{background:var(--card);border-radius:var(--radius);padding:14px;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
@@ -198,6 +220,11 @@ tbody td.number, thead th.number {
 .modal button.primary{width:100%;padding:10px;font-size:14px}
 
 /* Responsive tweaks */
+@media(max-width:1000px){
+  .top-bar{flex-direction:column;gap:10px}
+  .main-grid{grid-template-columns:1fr}
+  .table-wrap{overflow:auto}
+}
 @media(max-width:720px){
   .rubro-progress{width:110px}
   .logo{width:44px;height:44px;font-size:16px}
@@ -243,71 +270,103 @@ tbody td.number, thead th.number {
 
 </header>
 
-<div class="controls">
+<!-- TOP BAR: metas y métricas colocadas horizontalmente encima de los filtros -->
+<div class="top-bar" aria-hidden="false">
 
-<div class="control">
+  <!-- Metas del Mes (compact card) -->
+  <div class="top-card" style="flex:1;min-width:260px;max-width:520px">
+    <h3 style="margin:0;font-size:13px;color:var(--text);font-weight:900;text-transform:uppercase">Metas del Mes</h3>
+    <div class="goals" aria-live="polite" style="margin-top:8px">
+      <div class="goal-block" aria-label="Meta general" style="padding:10px">
+        <div class="goal-title">🎯 META GENERAL</div>
+        <div class="goal-item"><span>Total de Tickets:</span> <strong id="goal_general">&lt; 415</strong></div>
+      </div>
 
-<label>Periodo</label>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px">
+          <div class="goal-title" style="font-size:12px">🏢 Presencial</div>
+          <div class="goal-item"><span>Tickets:</span> <strong id="goal_pres_tickets">374</strong></div>
+          <div class="goal-item"><span>Chats:</span> <strong id="goal_pres_chats">384</strong></div>
+          <div class="goal-item"><span>Llamadas:</span> <strong id="goal_pres_calls">393</strong></div>
+        </div>
+        <div style="flex:1;min-width:140px">
+          <div class="goal-title" style="font-size:12px">🏡 Home Office</div>
+          <div class="goal-item"><span>Tickets:</span> <strong id="goal_ho_tickets">524</strong></div>
+          <div class="goal-item"><span>Chats:</span> <strong id="goal_ho_chats">1727</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<select id="periodSelector" aria-label="Periodo">
-<option value="custom">Personalizado</option>
-<option value="today">Hoy</option>
-<option value="thisMonth">Este Mes</option>
-<option value="lastMonth">Mes Pasado</option>
-</select>
+  <!-- Métricas Generales (compact card) -->
+  <div class="top-card" style="width:320px;min-width:260px">
+    <h3 style="margin:0;font-size:13px;color:var(--text);font-weight:900;text-transform:uppercase">Métricas Generales</h3>
+    <div class="stats" style="margin-top:10px">
+      <div class="stat"><div class="label">Asesores</div><div class="value" id="statAdvisors">--</div></div>
+      <div class="stat"><div class="label">Tickets</div><div class="value" id="statTickets">--</div></div>
+      <div class="stat"><div class="label">Llamadas</div><div class="value" id="statCalls">--</div></div>
+      <div class="stat"><div class="label">Chats</div><div class="value" id="statChats">--</div></div>
+    </div>
+
+    <div style="margin-top:10px">
+      <h4 style="margin:8px 0 6px 0;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase">Exportación</h4>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="small-btn" id="exportTickets">Exportar Tickets_BD (CSV)</button>
+        <button class="small-btn" id="exportChats">Exportar Chats_BD (CSV)</button>
+        <button class="small-btn" id="exportCalls">Exportar Llamadas_BD (CSV)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Espacio para acciones rápidas (opcional) -->
+  <div style="display:flex;align-items:flex-start;gap:8px">
+    <button class="small-btn" id="downloadFiltered">↓ Descargar Filtrados</button>
+  </div>
 
 </div>
 
-<div class="control">
+<!-- CONTROLS: filtros debajo del top-bar -->
+<div class="controls" aria-label="Controles de filtro">
+  <div class="control">
+    <label>Periodo</label>
+    <select id="periodSelector" aria-label="Periodo">
+      <option value="custom">Personalizado</option>
+      <option value="today">Hoy</option>
+      <option value="thisMonth">Este Mes</option>
+      <option value="lastMonth">Mes Pasado</option>
+    </select>
+  </div>
 
-<label>Fecha inicio</label>
+  <div class="control">
+    <label>Fecha inicio</label>
+    <input type="date" id="dateFrom" aria-label="Fecha inicio">
+  </div>
 
-<input type="date" id="dateFrom" aria-label="Fecha inicio">
+  <div class="control">
+    <label>Fecha fin</label>
+    <input type="date" id="dateTo" aria-label="Fecha fin">
+  </div>
 
-</div>
+  <div class="control" style="min-width:200px">
+    <label>Supervisor</label>
+    <select id="filterSupervisor" aria-label="Supervisor">
+      <option value="">Todos los supervisores</option>
+    </select>
+  </div>
 
-<div class="control">
-
-<label>Fecha fin</label>
-
-<input type="date" id="dateTo" aria-label="Fecha fin">
-
-</div>
-
-<div class="control" style="min-width:200px">
-
-<label>Supervisor</label>
-
-<select id="filterSupervisor" aria-label="Supervisor">
-<option value="">Todos los supervisores</option>
-</select>
-
-</div>
-
-<div class="actions" style="margin-bottom:2px">
-
-<button class="primary" id="applyFilters">Aplicar Filtros</button>
-
-<button class="ghost" id="refreshBtn" title="Refrescar datos">↻ Refrescar</button>
-
-</div>
-
+  <div class="actions" style="margin-bottom:2px">
+    <button class="primary" id="applyFilters">Aplicar Filtros</button>
+    <button class="ghost" id="refreshBtn" title="Refrescar datos">↻ Refrescar</button>
+  </div>
 </div>
 
 <div class="tabs" role="tablist" aria-label="Grupos">
-
-<div class="tab active" data-group="All">Todos</div>
-
-<div class="tab" data-group="Vento">Vento</div>
-
-<div class="tab" data-group="Piston">Piston</div>
-
-<div class="tab" data-group="Home Office">Home Office</div>
-
-<div class="tab" data-group="Nuevo ingreso">Nuevo ingreso</div>
-
-<div class="tab" data-group="OTROS">OTROS</div>
-
+  <div class="tab active" data-group="All">Todos</div>
+  <div class="tab" data-group="Vento">Vento</div>
+  <div class="tab" data-group="Piston">Piston</div>
+  <div class="tab" data-group="Home Office">Home Office</div>
+  <div class="tab" data-group="Nuevo ingreso">Nuevo ingreso</div>
+  <div class="tab" data-group="OTROS">OTROS</div>
 </div>
 
 <div class="main-grid">
@@ -315,19 +374,13 @@ tbody td.number, thead th.number {
 <section class="card">
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-
-<h2 style="margin:0">Leaderboard de Puntos</h2>
-
-<div style="display:flex;gap:8px;align-items:center">
-
-<button class="small-btn" id="downloadFiltered" style="width:auto">↓ Descargar Filtrados</button>
-
-</div>
-
+  <h2 style="margin:0">Leaderboard de Puntos</h2>
+  <div style="display:flex;gap:8px;align-items:center">
+    <!-- botón duplicado opcional: ya hay uno en top-bar -->
+  </div>
 </div>
 
 <div class="table-wrap" role="table" aria-label="Leaderboard">
-
 <table id="leaderboardTable" role="grid" aria-live="polite">
 <thead>
 <tr>
@@ -341,92 +394,14 @@ tbody td.number, thead th.number {
 </thead>
 <tbody id="leaderboardBody"></tbody>
 </table>
-
 </div>
 
 <div style="margin-top:12px;color:var(--muted);font-size:12px;font-weight:500;background:#FBFDFF;padding:10px;border-radius:8px;border:1px solid var(--border)">
-
-<strong>💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para ver su rendimiento por día en una gráfica detallada.
-
-<div style="margin-top:6px"><strong>Reglas de medición:</strong> Tickets canalizados (col M = CANALIZADO). Llamadas completadas y duración &gt;60s. Chats duración ≤5min y agent flag = AGENT.</div>
-
+  <strong>💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para ver su rendimiento por día en una gráfica detallada.
+  <div style="margin-top:6px"><strong>Reglas de medición:</strong> Tickets canalizados (col M = CANALIZADO). Llamadas completadas y duración &gt;60s. Chats duración ≤5min y agent flag = AGENT.</div>
 </div>
 
 </section>
-
-<aside class="card">
-
-<h2>Metas del Mes</h2>
-
-<div class="goals" aria-live="polite">
-
-<div class="goal-block" aria-label="Meta general">
-
-<div class="goal-title">🎯 META GENERAL</div>
-
-<div class="goal-item"><span>Total de Tickets:</span> <strong id="goal_general">&lt; 415</strong></div>
-
-</div>
-
-<div class="goal-block" aria-label="Modalidad Presencial">
-
-<div class="goal-title">🏢 MODALIDAD PRESENCIAL</div>
-
-<div class="goal-item"><span>Tickets:</span> <strong id="goal_pres_tickets">374</strong></div>
-
-<div class="goal-item"><span>Chats:</span> <strong id="goal_pres_chats">384</strong></div>
-
-<div class="goal-item"><span>Llamadas:</span> <strong id="goal_pres_calls">393</strong></div>
-
-</div>
-
-<div class="goal-block" aria-label="Modalidad Home Office">
-
-<div class="goal-title">🏡 MODALIDAD HOME OFFICE</div>
-
-<div class="goal-item"><span>Tickets:</span> <strong id="goal_ho_tickets">524</strong></div>
-
-<div class="goal-item"><span>Chats:</span> <strong id="goal_ho_chats">1727</strong></div>
-
-</div>
-
-</div>
-
-<div style="margin-top:12px;border-top:2px solid var(--border);padding-top:12px">
-
-<h3 style="margin:0 0 8px 0;font-size:13px;color:var(--text);font-weight:800;text-transform:uppercase">Métricas Generales</h3>
-
-<div class="stats" aria-hidden="false">
-
-<div class="stat"><div class="label">Asesores</div><div class="value" id="statAdvisors">--</div></div>
-
-<div class="stat"><div class="label">Tickets</div><div class="value" id="statTickets">--</div></div>
-
-<div class="stat"><div class="label">Llamadas</div><div class="value" id="statCalls">--</div></div>
-
-<div class="stat"><div class="label">Chats</div><div class="value" id="statChats">--</div></div>
-
-</div>
-
-<div style="margin-top:10px">
-
-<h3 style="margin:0 0 6px 0;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase">Exportación de Bases (Protegidas)</h3>
-
-<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-
-<button class="small-btn" id="exportTickets">Exportar Tickets_BD (CSV)</button>
-
-<button class="small-btn" id="exportChats">Exportar Chats_BD (CSV)</button>
-
-<button class="small-btn" id="exportCalls">Exportar Llamadas_BD (CSV)</button>
-
-</div>
-
-</div>
-
-</div>
-
-</aside>
 
 </div>
 
@@ -437,12 +412,12 @@ Interfaz optimizada · Actualización automática (15 min) · Descargas con aute
 </div>
 
 <!-- Loaders & Modals -->
-<div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+<div id="loadingOverlay" class="loading-overlay" aria-hidden="true" style="display:none">
   <div class="spinner" role="status" aria-live="polite"></div>
   <div class="loading-text">Sincronizando datos...</div>
 </div>
 
-<div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+<div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none">
   <div class="modal" role="document" aria-labelledby="modalTitle" style="position:relative">
     <button class="close" id="modalClose" aria-label="Cerrar">&times;</button>
     <h3 id="modalTitle">Autorización Requerida</h3>
@@ -455,7 +430,7 @@ Interfaz optimizada · Actualización automática (15 min) · Descargas con aute
   </div>
 </div>
 
-<div id="chartModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+<div id="chartModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none">
   <div class="modal chart-modal" role="document" style="position:relative">
     <button class="close" id="chartModalClose" aria-label="Cerrar">&times;</button>
     <h3 id="chartModalTitle">Rendimiento por Día</h3>
@@ -469,11 +444,8 @@ Interfaz optimizada · Actualización automática (15 min) · Descargas con aute
 <script>
 
 /******************************************************************
- * Código JS (sin cambios funcionales respecto a la versión previa)
- * - Muestra nombres completos (sin truncar)
- * - Barras por rubro dentro de Tickets/Calls/Chats
- * - Home Office: columna Llamadas muestra N/A
- * - Puntaje muestra solo score + etiqueta de progreso
+ * Código JS (integrado con la misma lógica que compartiste)
+ * - Mantiene la lógica original y adapta la UI para la top-bar
  ******************************************************************/
 
 const SPREADSHEET_ID = '1JBre4cLAbYiOJuYye_FGcsk5U_BIStDoAiCbV-B8WoA';
@@ -493,8 +465,7 @@ const COL = {
 let aliasMap = {}; let metaMap = {}; let cache = { tickets:[], chats:[], calls:[] };
 let activeGroup = 'All'; let autoRefreshTimer = null; let pendingDownload = null; let advisorChartInstance = null;
 
-/* UTILIDADES */
-
+/* UTILIDADES (parseCSV, normalizeForKey, etc.) */
 function parseCSV(text){
   const rows=[]; let cur='', row=[], inQuotes=false;
   for(let i=0;i<text.length;i++){ const ch=text[i], next=text[i+1];
@@ -1042,7 +1013,6 @@ function compactLeaderboardRows() {
       }
     });
 
-    // Aplicar un min-width razonable para la columna Asesor (no exceder ancho de diseño)
     headerAdvisor.style.minWidth = Math.min(maxWidth, 520) + 'px';
   }
 
@@ -1054,7 +1024,6 @@ function compactLeaderboardRows() {
     obs.observe(tbody, { childList:true, subtree:true, characterData:true });
   }
 
-  // Ajustar al redimensionar ventana
   window.addEventListener('resize', ()=>{ setTimeout(adjustAdvisorColumn, 80); });
 })();
 
