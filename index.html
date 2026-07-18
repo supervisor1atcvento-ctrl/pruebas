@@ -222,39 +222,57 @@
     }
 
     function renderResults(filteredRows) {
-      resultsContainer.innerHTML = '';
-      if (!filteredRows.length) {
-        resultsContainer.innerHTML = '<div class="empty-state"><h2>No se encontraron resultados</h2></div>';
-        return;
-      }
-      
-      filteredRows.forEach((record) => {
-        const card = resultTemplate.content.firstElementChild.cloneNode(true);
-        const title = record['RAZON SOCIAL'] || record['NOMBRE COMERCIAL'] || 'CESVE';
-        const subtitle = record['NOMBRE COMERCIAL'] && record['NOMBRE COMERCIAL'] !== record['RAZON SOCIAL']
-          ? record['NOMBRE COMERCIAL'] : 'Sin nombre comercial registrado';
+        resultsContainer.innerHTML = '';
+        if (!filteredRows.length) {
+          resultsContainer.innerHTML = '<div class="empty-state"><h2>No se encontraron resultados</h2></div>';
+          return;
+        }
+        
+        filteredRows.forEach((record) => {
+          const card = resultTemplate.content.firstElementChild.cloneNode(true);
+          const title = record['RAZON SOCIAL'] || record['NOMBRE COMERCIAL'] || 'CESVE';
+          const subtitle = record['NOMBRE COMERCIAL'] && record['NOMBRE COMERCIAL'] !== record['RAZON SOCIAL']
+            ? record['NOMBRE COMERCIAL'] : 'Sin nombre comercial registrado';
+            
+          card.querySelector('.result-id').textContent = `ID CESVE: ${record['ID CESVE'] || 'No disponible'}`;
+          card.querySelector('.result-tag').textContent = `${record['ESTADO'] || 'Sin estado'} • ${record['CIUDAD / MUNICIPIO'] || 'Sin ciudad'}`;
+          card.querySelector('.result-title').textContent = title;
+          card.querySelector('.result-subtitle').textContent = subtitle;
           
-        card.querySelector('.result-id').textContent = `ID CESVE: ${record['ID CESVE'] || 'No disponible'}`;
-        card.querySelector('.result-tag').textContent = `${record['ESTADO'] || 'Sin estado'} • ${record['CIUDAD / MUNICIPIO'] || 'Sin ciudad'}`;
-        card.querySelector('.result-title').textContent = title;
-        card.querySelector('.result-subtitle').textContent = subtitle;
-        
-        card.querySelector('.result-meta').innerHTML = `
-          <p><strong><i class="fa-solid fa-location-dot" style="color:var(--orange);"></i> Dirección:</strong> ${[record['CALLE'], record['NÚMERO (EXT / INT)'], record['COLONIA'], record['C.P.']].filter(Boolean).join(', ') || 'Sin dirección'}</p>
-          <p><strong><i class="fa-solid fa-user-tie"></i> Regional:</strong> ${record['REGIONAL VENTO'] || 'N/A'}</p>
-        `;
-        
-        card.querySelector('.result-contact').innerHTML = `
-          <p><strong><i class="fa-solid fa-envelope"></i> Correo:</strong> ${record['MAIL'] || 'N/A'}</p>
-          <p><strong><i class="fa-solid fa-phone"></i> Teléfono:</strong> ${record['TELEFONO'] || 'N/A'}</p>
-        `;
-
-        const deleteBtn = card.querySelector('.btn-delete');
-        deleteBtn.onclick = () => deleteRecord(record['ID CESVE'], deleteBtn);
-        
-        resultsContainer.appendChild(card);
-      });
-    }
+          // BLOQUE 1: DATOS DEL CESVE
+          card.querySelector('.result-meta').innerHTML = `
+            <div style="margin-bottom: 8px; border-bottom: 1px dashed var(--border); padding-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 800; color: var(--orange);">DATOS DEL CESVE</span>
+            </div>
+            <p><strong><i class="fa-solid fa-location-dot" style="color:var(--orange);"></i> Dirección:</strong> ${[record['CALLE'], record['NÚMERO (EXT / INT)'], record['COLONIA'], record['C.P.']].filter(Boolean).join(', ') || 'Sin dirección'}</p>
+            <p><strong><i class="fa-solid fa-envelope"></i> Correo:</strong> ${record['MAIL'] || 'N/A'}</p>
+            <p><strong><i class="fa-solid fa-phone"></i> Teléfono / Celular:</strong> ${[record['TELEFONO'], record['CELULAR']].filter(Boolean).join(' / ') || 'N/A'}</p>
+          `;
+          
+          // BLOQUES 2 Y 3: DATOS REGIONAL Y TERRITORIAL VENTO
+          card.querySelector('.result-contact').innerHTML = `
+            <!-- INFORMACIÓN REGIONAL -->
+            <div style="margin: 10px 0 8px 0; border-bottom: 1px dashed var(--border); padding-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 800; color: var(--dark-blue);">INFORMACIÓN REGIONAL</span>
+            </div>
+            <p><strong><i class="fa-solid fa-user-tie"></i> Regional:</strong> ${record['REGIONAL VENTO'] || 'N/A'}</p>
+            <p><strong><i class="fa-solid fa-envelope"></i> Correo Reg:</strong> ${record['MAIL REGIONAL'] || record['CORREO REGIONAL'] || 'N/A'}</p>
+            <p><strong><i class="fa-solid fa-phone"></i> Teléfono Reg:</strong> ${record['TEL REGIONAL'] || record['TELEFONO REGIONAL'] || 'N/A'}</p>
+  
+            <!-- INFORMACIÓN TERRITORIAL -->
+            <div style="margin: 10px 0 8px 0; border-bottom: 1px dashed var(--border); padding-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 800; color: var(--gray);">INFORMACIÓN TERRITORIAL</span>
+            </div>
+            <p><strong><i class="fa-solid fa-map-location-dot"></i> Territorial:</strong> ${record['TERRITORIAL VENTO'] || 'N/A'}</p>
+            <p><strong><i class="fa-solid fa-envelope"></i> Correo Terr:</strong> ${record['MAIL TERRITORIAL'] || record['CORREO TERRITORIAL'] || 'N/A'}</p>
+          `;
+  
+          const deleteBtn = card.querySelector('.btn-delete');
+          deleteBtn.onclick = () => deleteRecord(record['ID CESVE'], deleteBtn);
+          
+          resultsContainer.appendChild(card);
+        });
+      }
 
     function filterRecords() {
       const searchTerm = normalize(searchInput.value);
