@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Directorio Post Venta - Profesional (Sin copiar, Sin paginación)</title>
+<title>Directorio Post Venta - Subáreas omitidas</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
 :root{
@@ -78,8 +78,8 @@ tr:hover{background:#fbfbfb}
 
   <div class="table-wrap">
     <div class="table-actions">
-      <div class="small">Resultados mostrados</div>
-      <div class="small" id="info-note">Vista completa (sin paginación)</div>
+      <div class="small">Vista completa (sin paginación)</div>
+      <div class="small" id="info-note">Las filas que actúan como subárea se omiten</div>
     </div>
 
     <div id="loader" class="small">Conectando y descargando datos desde Google Sheets...</div>
@@ -134,46 +134,40 @@ function fillMergedCells(rawData) {
 
 /**
  * Detecta filas que funcionan como "subárea" y las aplica a las filas siguientes.
- * Heurística:
- * - Si una fila tiene exactamente 1 o 2 celdas no vacías y ese texto está en MAYÚSCULAS (y es largo),
- *   se considera una fila de subárea.
- * - Se añade la propiedad 'SUBAREA' a las filas siguientes hasta encontrar otra subárea.
+ * Ahora: las filas detectadas como subárea se OMITEN del resultado final.
  */
 function applySubareaNormalization(parsedRows, headers) {
   const normalized = [];
   let currentSubarea = '';
+  // Palabras clave para identificar subáreas
+  const keywords = ['SOPORTE','ESPECIALISTAS','GARANTIA','GARANTÍAS','GARANTIAS','REPARACIONES','MOTOR','TRANSMISION','BATERIAS','TÉCNICO','TECNICO','SOPORTE TECNICO','SOPORTE TECNCO'];
   for (let i = 0; i < parsedRows.length; i++) {
     const row = parsedRows[i];
-    // contar valores no vacíos y obtener el texto concatenado
     const nonEmptyEntries = Object.entries(row).filter(([k,v]) => v && v.toString().trim() !== '');
     const concatenated = nonEmptyEntries.map(([k,v]) => v.toString().trim()).join(' ').trim();
     const onlyOneOrTwo = nonEmptyEntries.length <= 2 && nonEmptyEntries.length >= 1;
     const isUpper = concatenated && concatenated === concatenated.toUpperCase();
-    const longEnough = concatenated.length > 6; // evita palabras cortas
-    // Heurística adicional: si la fila aparece con palabras como "SOPORTE", "ESPECIALISTAS", "GARANTIAS"
-    const keywords = ['SOPORTE','ESPECIALISTAS','GARANTIA','GARANTÍAS','GARANTIAS','REPARACIONES','MOTOR','TRANSMISION','BATERIAS','TÉCNICO','TECNICO'];
+    const longEnough = concatenated.length > 6;
     const hasKeyword = keywords.some(k => concatenated.toUpperCase().includes(k));
+    // Si cumple heurística, consideramos fila de subárea y la OMITIMOS
     if (onlyOneOrTwo && isUpper && longEnough && hasKeyword) {
-      // marcar como subárea y no agregar como registro normal
       currentSubarea = concatenated;
+      // omitimos esta fila (no la añadimos a normalized)
       continue;
     }
-    // Si la fila es normal, añadir SUBAREA si no tiene ya una columna SUBAREA
+    // Si la fila es normal, añadimos SUBAREA si aplica
     const newRow = Object.assign({}, row);
-    // Si existe alguna columna que claramente sea subárea en el CSV, respétala:
-    const possibleSubCols = headers.filter(h => h && h.toUpperCase().includes('SUB') || h.toUpperCase().includes('AREA') || h.toUpperCase().includes('DEPARTAMENTO'));
+    // Buscar columnas que puedan indicar subárea en el CSV
+    const possibleSubCols = headers.filter(h => h && (h.toUpperCase().includes('SUB') || h.toUpperCase().includes('AREA') || h.toUpperCase().includes('DEPARTAMENTO')));
     if (possibleSubCols.length > 0) {
-      // si la fila ya tiene valor en alguna de esas columnas, usarla; si no, aplicar currentSubarea
       let hasSub = false;
       for (const sc of possibleSubCols) {
         if (newRow[sc] && newRow[sc].toString().trim() !== '') { hasSub = true; break; }
       }
       if (!hasSub && currentSubarea) {
-        // crear o asignar columna 'SUBAREA' para visibilidad
         newRow['SUBAREA'] = currentSubarea;
       }
     } else {
-      // no hay columna obvia, añadimos SUBAREA
       if (!newRow['SUBAREA'] && currentSubarea) newRow['SUBAREA'] = currentSubarea;
     }
     normalized.push(newRow);
@@ -212,9 +206,8 @@ function loadData(sheetName) {
           }
           if (hasData) parsed.push(rowObj);
         }
-        // Aplicar normalización de subáreas
+        // Aplicar normalización de subáreas (las filas detectadas como subárea se omiten)
         const normalized = applySubareaNormalization(parsed, currentHeaders);
-        // Si añadimos SUBAREA como columna nueva, asegurarnos de incluirla en headers
         if (normalized.some(r => r['SUBAREA'])) {
           if (!currentHeaders.includes('SUBAREA')) currentHeaders.push('SUBAREA');
         }
@@ -238,10 +231,8 @@ function loadData(sheetName) {
 function renderTableAll() {
   thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th data-col="${h}">${h}</th>`).join('') + '</tr>';
   tbody.innerHTML = filteredData.map((row, idx) => {
-    const email = row['CORREO'] || row['EMAIL'] || row['E-MAIL'] || '';
     const nombre = row['NOMBRE'] || row['NOMBRE COMPLETO'] || row['ASESOR'] || '';
     const rol = row['ROL'] || row['PUESTO'] || '';
-    const telefono = row['TEL'] || row['TELEFONO'] || row['CELULAR'] || '';
     const subarea = row['SUBAREA'] || '';
     const roleClass = (rol.toLowerCase().includes('supervisor')) ? 'role-supervisor' : (rol.toLowerCase().includes('asesor') ? 'role-asesor' : 'role-gerente');
     return `<tr data-idx="${idx}">
@@ -253,7 +244,6 @@ function renderTableAll() {
           return `<td><span class="role-badge ${roleClass}">${display}</span></td>`;
         }
         if (h.toUpperCase().includes('NOMBRE') || h.toUpperCase().includes('ASESOR')) {
-          // mostrar subarea debajo del nombre si existe
           return `<td><strong>${display}</strong>${subarea ? `<div class="small">Subárea: ${subarea}</div>` : (rol ? `<div class="small">${rol}</div>` : '')}</td>`;
         }
         if (h.toUpperCase().includes('CORREO') || h.toUpperCase().includes('EMAIL')) {
