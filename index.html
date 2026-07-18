@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Directorio Post Venta - Zonificación completa (sin col_0, filtro actualizado)</title>
+<title>Directorio Post Venta - Zonificación completa (pestañas ampliadas)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
 :root{
@@ -67,6 +67,12 @@ tr:hover{background:#fbfbfb}
         <option value="REGIONALES">Regionales</option>
         <option value="VENTOMAN COPPEL">Ventoman Coppel</option>
         <option value="VENTOMAN VENTO">Ventoman Vento</option>
+        <!-- Pestañas adicionales solicitadas -->
+        <option value="INGENIERIA POSTVENTA">INGENIERIA POSTVENTA</option>
+        <option value="STAFF">STAFF</option>
+        <option value="AMERICAN PISTON">AMERICAN PISTON</option>
+        <option value="REFACCIONES">REFACCIONES</option>
+        <option value="STAFF - COMPLETO">STAFF - COMPLETO</option>
       </select>
     </div>
 
@@ -132,7 +138,7 @@ function fillMergedCells(rawData) {
   return rawData;
 }
 
-/* Excluir filas por nombre exacto o que contengan la frase (ahora incluye ANALISTA) */
+/* Excluir filas por nombre exacto o que contengan la frase (incluye ANALISTA) */
 function isExcludedRow(row) {
   if (!row) return false;
   const excludeList = [
