@@ -137,9 +137,9 @@ function isExcludedRow(row) {
   if (!row) return false;
   const excludeList = [
     'ESPECIALISTAS DE REPARACIONES',
-    'SOPORTE TECNCO - GARANTIAS MOTOR, TRANSMISION Y BATERIAS '
+    'SOPORTE TECNCO - GARANTIAS MOTOR, TRANSMISION Y BATERIAS'
   ];
-  const nameFields = ['NOMBRE','NOMBRE COMPLETO','ASESOR'];
+  const nameFields = ['NOMBRE','NOMBRE COMPLETO','ASESOR','ANALISTA'];
   for (const f of nameFields) {
     const v = (row[f] || '').toString().trim().toUpperCase();
     if (!v) continue;
