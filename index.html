@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Directorio Post Venta - Subáreas omitidas</title>
+<title>Directorio Post Venta - Subáreas en selector</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
 :root{
@@ -39,6 +39,7 @@ tr:hover{background:#fbfbfb}
 .small{font-size:12px;color:var(--muted)}
 .highlight{background:linear-gradient(90deg, rgba(255,235,59,0.2), transparent);padding:2px 4px;border-radius:3px}
 .details{background:#fafafa;padding:12px;border-radius:6px;margin-top:8px;border:1px solid var(--border)}
+.opt-subarea{padding-left:10px;color:#333;font-style:italic}
 @media(max-width:800px){
   .controls{flex-direction:column}
   th,td{font-size:12px;padding:8px}
@@ -79,7 +80,7 @@ tr:hover{background:#fbfbfb}
   <div class="table-wrap">
     <div class="table-actions">
       <div class="small">Vista completa (sin paginación)</div>
-      <div class="small" id="info-note">Las filas que actúan como subárea se omiten</div>
+      <div class="small" id="info-note">Las filas que actúan como subárea se omiten y se agregan al selector</div>
     </div>
 
     <div id="loader" class="small">Conectando y descargando datos desde Google Sheets...</div>
@@ -96,7 +97,6 @@ tr:hover{background:#fbfbfb}
 <script>
 const SHEET_ID = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
 let currentData = [], currentHeaders = [], filteredData = [];
-
 const areaSelect = document.getElementById('area-select');
 const searchInput = document.getElementById('search-input');
 const table = document.getElementById('data-table');
@@ -106,9 +106,7 @@ const loader = document.getElementById('loader');
 const recordCount = document.getElementById('record-count');
 const detailPanel = document.getElementById('detail-panel');
 
-/**
- * Normaliza filas y rellena celdas vacías que provienen de celdas combinadas.
- */
+/* Normaliza filas y rellena celdas vacías que provienen de celdas combinadas */
 function fillMergedCells(rawData) {
   if (!rawData || rawData.length === 0) return rawData;
   const numRows = rawData.length;
@@ -132,14 +130,12 @@ function fillMergedCells(rawData) {
   return rawData;
 }
 
-/**
- * Detecta filas que funcionan como "subárea" y las aplica a las filas siguientes.
- * Ahora: las filas detectadas como subárea se OMITEN del resultado final.
- */
-function applySubareaNormalization(parsedRows, headers) {
+/* Detecta filas que funcionan como "subárea", las omite como registros y devuelve:
+   { normalizedRows, subareas } */
+function extractSubareas(parsedRows, headers) {
   const normalized = [];
+  const subareasFound = [];
   let currentSubarea = '';
-  // Palabras clave para identificar subáreas
   const keywords = ['SOPORTE','ESPECIALISTAS','GARANTIA','GARANTÍAS','GARANTIAS','REPARACIONES','MOTOR','TRANSMISION','BATERIAS','TÉCNICO','TECNICO','SOPORTE TECNICO','SOPORTE TECNCO'];
   for (let i = 0; i < parsedRows.length; i++) {
     const row = parsedRows[i];
@@ -149,37 +145,58 @@ function applySubareaNormalization(parsedRows, headers) {
     const isUpper = concatenated && concatenated === concatenated.toUpperCase();
     const longEnough = concatenated.length > 6;
     const hasKeyword = keywords.some(k => concatenated.toUpperCase().includes(k));
-    // Si cumple heurística, consideramos fila de subárea y la OMITIMOS
+    // Si cumple heurística, consideramos fila de subárea y la OMITIMOS como registro
     if (onlyOneOrTwo && isUpper && longEnough && hasKeyword) {
       currentSubarea = concatenated;
-      // omitimos esta fila (no la añadimos a normalized)
+      if (!subareasFound.includes(currentSubarea)) subareasFound.push(currentSubarea);
       continue;
     }
     // Si la fila es normal, añadimos SUBAREA si aplica
     const newRow = Object.assign({}, row);
-    // Buscar columnas que puedan indicar subárea en el CSV
     const possibleSubCols = headers.filter(h => h && (h.toUpperCase().includes('SUB') || h.toUpperCase().includes('AREA') || h.toUpperCase().includes('DEPARTAMENTO')));
     if (possibleSubCols.length > 0) {
       let hasSub = false;
       for (const sc of possibleSubCols) {
         if (newRow[sc] && newRow[sc].toString().trim() !== '') { hasSub = true; break; }
       }
-      if (!hasSub && currentSubarea) {
-        newRow['SUBAREA'] = currentSubarea;
-      }
+      if (!hasSub && currentSubarea) newRow['SUBAREA'] = currentSubarea;
     } else {
       if (!newRow['SUBAREA'] && currentSubarea) newRow['SUBAREA'] = currentSubarea;
     }
     normalized.push(newRow);
   }
-  return normalized;
+  return { normalizedRows: normalized, subareas: subareasFound };
 }
 
+/* Inserta opciones de subárea en el selector justo después de la opción de la pestaña actual */
+function insertSubareaOptions(sheetName, subareas) {
+  // Eliminar subáreas previas
+  Array.from(areaSelect.querySelectorAll('option.subarea-option')).forEach(o => o.remove());
+  if (!subareas || subareas.length === 0) return;
+  // Encontrar la opción de la pestaña actual
+  const mainOption = Array.from(areaSelect.options).find(o => o.value === sheetName);
+  let insertIndex = mainOption ? mainOption.index + 1 : areaSelect.options.length;
+  subareas.forEach(sa => {
+    const opt = document.createElement('option');
+    opt.value = `SUBAREA::${sa}`;
+    opt.text = `— ${sa}`;
+    opt.className = 'subarea-option';
+    opt.dataset.sheet = sheetName;
+    // estilo visual para subárea
+    opt.style.fontStyle = 'italic';
+    areaSelect.add(opt, areaSelect.options[insertIndex] || null);
+    insertIndex++;
+  });
+}
+
+/* Carga datos de la pestaña y prepara subáreas */
 function loadData(sheetName) {
   loader.style.display = 'block';
   table.style.display = 'none';
   detailPanel.style.display = 'none';
   searchInput.value = '';
+  // Asegurar que el selector muestre la pestaña principal
+  areaSelect.value = sheetName;
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
   Papa.parse(url, {
     download: true, header: false, skipEmptyLines: true,
@@ -206,12 +223,14 @@ function loadData(sheetName) {
           }
           if (hasData) parsed.push(rowObj);
         }
-        // Aplicar normalización de subáreas (las filas detectadas como subárea se omiten)
-        const normalized = applySubareaNormalization(parsed, currentHeaders);
-        if (normalized.some(r => r['SUBAREA'])) {
+        // Extraer subáreas y normalizar filas (las filas de subárea se omiten)
+        const { normalizedRows, subareas } = extractSubareas(parsed, currentHeaders);
+        if (normalizedRows.some(r => r['SUBAREA'])) {
           if (!currentHeaders.includes('SUBAREA')) currentHeaders.push('SUBAREA');
         }
-        currentData = normalized;
+        currentData = normalizedRows;
+        // Insertar subáreas en selector
+        insertSubareaOptions(sheetName, subareas);
       } else { currentHeaders = []; currentData = []; }
       filteredData = currentData.slice();
       renderTableAll();
@@ -225,9 +244,7 @@ function loadData(sheetName) {
   });
 }
 
-/**
- * Renderiza toda la tabla (sin paginación).
- */
+/* Renderiza toda la tabla (sin paginación) */
 function renderTableAll() {
   thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th data-col="${h}">${h}</th>`).join('') + '</tr>';
   tbody.innerHTML = filteredData.map((row, idx) => {
@@ -264,6 +281,7 @@ function renderTableAll() {
   });
 }
 
+/* Muestra panel de detalle */
 function showDetails(row) {
   if (!row) { detailPanel.style.display='none'; detailPanel.setAttribute('aria-hidden','true'); return; }
   const email = row['CORREO'] || row['EMAIL'] || '';
@@ -283,6 +301,7 @@ function showDetails(row) {
   detailPanel.setAttribute('aria-hidden','false');
 }
 
+/* Filtrado por búsqueda */
 function applyFilter() {
   const q = (searchInput.value || '').trim().toLowerCase();
   if (!q) { filteredData = currentData.slice(); renderTableAll(); return; }
@@ -292,6 +311,22 @@ function applyFilter() {
   renderTableAll();
 }
 
+/* Manejo del cambio en el selector:
+   - Si se selecciona una subárea (value empieza con SUBAREA::), filtramos por SUBAREA
+   - Si se selecciona una pestaña principal, recargamos la pestaña */
+areaSelect.addEventListener('change', (e) => {
+  const val = e.target.value;
+  if (val && val.startsWith('SUBAREA::')) {
+    const sub = val.replace('SUBAREA::','');
+    // Filtrar currentData por SUBAREA
+    filteredData = currentData.filter(r => (r['SUBAREA']||'') === sub);
+    renderTableAll();
+  } else {
+    // valor es el nombre de la pestaña: recargar la pestaña
+    loadData(val);
+  }
+});
+
 // Search debounce
 let debounce;
 searchInput.addEventListener('input', ()=> {
@@ -299,13 +334,10 @@ searchInput.addEventListener('input', ()=> {
   debounce = setTimeout(()=> applyFilter(), 180);
 });
 
-// Area change
-areaSelect.addEventListener('change', (e)=> loadData(e.target.value));
-
 // Initial load
 loadData(areaSelect.value);
 
-// Accessibility shortcuts
+// Accessibility shortcut
 document.addEventListener('keydown', (e) => {
   if (e.altKey && e.key === 'f') { e.preventDefault(); searchInput.focus(); }
 });
