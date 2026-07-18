@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Directorio Post Venta - Subáreas en selector</title>
+<title>Directorio Post Venta - Subáreas por ausencia de correo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
 :root{
@@ -80,7 +80,7 @@ tr:hover{background:#fbfbfb}
   <div class="table-wrap">
     <div class="table-actions">
       <div class="small">Vista completa (sin paginación)</div>
-      <div class="small" id="info-note">Las filas que actúan como subárea se omiten y se agregan al selector</div>
+      <div class="small" id="info-note">Las filas sin correo se agregan como subáreas en el selector</div>
     </div>
 
     <div id="loader" class="small">Conectando y descargando datos desde Google Sheets...</div>
@@ -130,39 +130,42 @@ function fillMergedCells(rawData) {
   return rawData;
 }
 
-/* Detecta filas que funcionan como "subárea", las omite como registros y devuelve:
-   { normalizedRows, subareas } */
-function extractSubareas(parsedRows, headers) {
+/* Extrae subáreas basadas en la AUSENCIA de correo en la fila original.
+   Devuelve { normalizedRows, subareas } donde:
+   - subareas es un array de nombres de subárea en el orden que aparecen
+   - normalizedRows son los registros reales (las filas sin correo se omiten)
+*/
+function extractSubareasByNoEmail(parsedRows, headers) {
   const normalized = [];
   const subareasFound = [];
   let currentSubarea = '';
-  const keywords = ['SOPORTE','ESPECIALISTAS','GARANTIA','GARANTÍAS','GARANTIAS','REPARACIONES','MOTOR','TRANSMISION','BATERIAS','TÉCNICO','TECNICO','SOPORTE TECNICO','SOPORTE TECNCO'];
+  // Detectores de columna de correo comunes
+  const emailHeaderCandidates = headers.filter(h => h && /CORREO|EMAIL|E-MAIL|MAIL/i.test(h));
   for (let i = 0; i < parsedRows.length; i++) {
     const row = parsedRows[i];
-    const nonEmptyEntries = Object.entries(row).filter(([k,v]) => v && v.toString().trim() !== '');
-    const concatenated = nonEmptyEntries.map(([k,v]) => v.toString().trim()).join(' ').trim();
-    const onlyOneOrTwo = nonEmptyEntries.length <= 2 && nonEmptyEntries.length >= 1;
-    const isUpper = concatenated && concatenated === concatenated.toUpperCase();
-    const longEnough = concatenated.length > 6;
-    const hasKeyword = keywords.some(k => concatenated.toUpperCase().includes(k));
-    // Si cumple heurística, consideramos fila de subárea y la OMITIMOS como registro
-    if (onlyOneOrTwo && isUpper && longEnough && hasKeyword) {
-      currentSubarea = concatenated;
-      if (!subareasFound.includes(currentSubarea)) subareasFound.push(currentSubarea);
-      continue;
-    }
-    // Si la fila es normal, añadimos SUBAREA si aplica
-    const newRow = Object.assign({}, row);
-    const possibleSubCols = headers.filter(h => h && (h.toUpperCase().includes('SUB') || h.toUpperCase().includes('AREA') || h.toUpperCase().includes('DEPARTAMENTO')));
-    if (possibleSubCols.length > 0) {
-      let hasSub = false;
-      for (const sc of possibleSubCols) {
-        if (newRow[sc] && newRow[sc].toString().trim() !== '') { hasSub = true; break; }
+    // Determinar si la fila contiene algún correo (buscar '@' en cualquier celda)
+    const hasEmail = Object.values(row).some(v => v && v.toString().includes('@'));
+    // Determinar si la fila tiene al menos una celda con texto
+    const hasText = Object.values(row).some(v => v && v.toString().trim() !== '');
+    // Si NO tiene email pero sí texto, la consideramos subárea (se omite como registro)
+    if (!hasEmail && hasText) {
+      // Construir nombre de subárea a partir de las celdas no vacías (concatenar)
+      const concatenated = Object.entries(row)
+        .filter(([k,v]) => v && v.toString().trim() !== '')
+        .map(([k,v]) => v.toString().trim())
+        .join(' ').trim();
+      // Evitar capturar filas vacías o muy cortas
+      if (concatenated.length > 2) {
+        currentSubarea = concatenated;
+        if (!subareasFound.includes(currentSubarea)) subareasFound.push(currentSubarea);
+        // omitimos esta fila como registro
+        continue;
       }
-      if (!hasSub && currentSubarea) newRow['SUBAREA'] = currentSubarea;
-    } else {
-      if (!newRow['SUBAREA'] && currentSubarea) newRow['SUBAREA'] = currentSubarea;
     }
+    // Si la fila tiene email o no cumple como subárea, la tratamos como registro
+    const newRow = Object.assign({}, row);
+    // Si no existe columna SUBAREA, asignar currentSubarea si aplica
+    if (!newRow['SUBAREA'] && currentSubarea) newRow['SUBAREA'] = currentSubarea;
     normalized.push(newRow);
   }
   return { normalizedRows: normalized, subareas: subareasFound };
@@ -170,10 +173,8 @@ function extractSubareas(parsedRows, headers) {
 
 /* Inserta opciones de subárea en el selector justo después de la opción de la pestaña actual */
 function insertSubareaOptions(sheetName, subareas) {
-  // Eliminar subáreas previas
   Array.from(areaSelect.querySelectorAll('option.subarea-option')).forEach(o => o.remove());
   if (!subareas || subareas.length === 0) return;
-  // Encontrar la opción de la pestaña actual
   const mainOption = Array.from(areaSelect.options).find(o => o.value === sheetName);
   let insertIndex = mainOption ? mainOption.index + 1 : areaSelect.options.length;
   subareas.forEach(sa => {
@@ -182,7 +183,6 @@ function insertSubareaOptions(sheetName, subareas) {
     opt.text = `— ${sa}`;
     opt.className = 'subarea-option';
     opt.dataset.sheet = sheetName;
-    // estilo visual para subárea
     opt.style.fontStyle = 'italic';
     areaSelect.add(opt, areaSelect.options[insertIndex] || null);
     insertIndex++;
@@ -195,7 +195,6 @@ function loadData(sheetName) {
   table.style.display = 'none';
   detailPanel.style.display = 'none';
   searchInput.value = '';
-  // Asegurar que el selector muestre la pestaña principal
   areaSelect.value = sheetName;
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
   Papa.parse(url, {
@@ -223,13 +222,12 @@ function loadData(sheetName) {
           }
           if (hasData) parsed.push(rowObj);
         }
-        // Extraer subáreas y normalizar filas (las filas de subárea se omiten)
-        const { normalizedRows, subareas } = extractSubareas(parsed, currentHeaders);
+        // Extraer subáreas basadas en ausencia de correo
+        const { normalizedRows, subareas } = extractSubareasByNoEmail(parsed, currentHeaders);
         if (normalizedRows.some(r => r['SUBAREA'])) {
           if (!currentHeaders.includes('SUBAREA')) currentHeaders.push('SUBAREA');
         }
         currentData = normalizedRows;
-        // Insertar subáreas en selector
         insertSubareaOptions(sheetName, subareas);
       } else { currentHeaders = []; currentData = []; }
       filteredData = currentData.slice();
@@ -272,7 +270,6 @@ function renderTableAll() {
   }).join('');
   recordCount.innerText = `${filteredData.length} registros`;
 
-  // Attach row click handlers for details
   Array.from(tbody.querySelectorAll('tr')).forEach((tr, i) => {
     tr.addEventListener('click', (e) => {
       const idx = parseInt(tr.getAttribute('data-idx'),10);
@@ -281,7 +278,7 @@ function renderTableAll() {
   });
 }
 
-/* Muestra panel de detalle */
+/* Panel de detalle */
 function showDetails(row) {
   if (!row) { detailPanel.style.display='none'; detailPanel.setAttribute('aria-hidden','true'); return; }
   const email = row['CORREO'] || row['EMAIL'] || '';
@@ -311,33 +308,32 @@ function applyFilter() {
   renderTableAll();
 }
 
-/* Manejo del cambio en el selector:
-   - Si se selecciona una subárea (value empieza con SUBAREA::), filtramos por SUBAREA
-   - Si se selecciona una pestaña principal, recargamos la pestaña */
+/* Manejo del selector:
+   - Si se selecciona SUBAREA::nombre, filtramos por SUBAREA
+   - Si se selecciona la pestaña principal, recargamos la pestaña
+*/
 areaSelect.addEventListener('change', (e) => {
   const val = e.target.value;
   if (val && val.startsWith('SUBAREA::')) {
     const sub = val.replace('SUBAREA::','');
-    // Filtrar currentData por SUBAREA
     filteredData = currentData.filter(r => (r['SUBAREA']||'') === sub);
     renderTableAll();
   } else {
-    // valor es el nombre de la pestaña: recargar la pestaña
     loadData(val);
   }
 });
 
-// Search debounce
+// Debounce búsqueda
 let debounce;
 searchInput.addEventListener('input', ()=> {
   clearTimeout(debounce);
   debounce = setTimeout(()=> applyFilter(), 180);
 });
 
-// Initial load
+// Carga inicial
 loadData(areaSelect.value);
 
-// Accessibility shortcut
+// Atajo accesible
 document.addEventListener('keydown', (e) => {
   if (e.altKey && e.key === 'f') { e.preventDefault(); searchInput.focus(); }
 });
