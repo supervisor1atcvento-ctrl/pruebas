@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Directorio Post Venta - Zonificación completa</title>
+<title>Directorio Post Venta - Zonificación completa (sin col_0, filtro actualizado)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
 :root{
@@ -132,14 +132,14 @@ function fillMergedCells(rawData) {
   return rawData;
 }
 
-/* Excluir filas por nombre exacto o que contengan la frase */
+/* Excluir filas por nombre exacto o que contengan la frase (ahora incluye ANALISTA) */
 function isExcludedRow(row) {
   if (!row) return false;
   const excludeList = [
     'ESPECIALISTAS DE REPARACIONES',
     'SOPORTE TECNCO - GARANTIAS MOTOR, TRANSMISION Y BATERIAS'
   ];
-  const nameFields = ['NOMBRE','NOMBRE COMPLETO','ASESOR'];
+  const nameFields = ['NOMBRE','NOMBRE COMPLETO','ASESOR','ANALISTA'];
   for (const f of nameFields) {
     const v = (row[f] || '').toString().trim().toUpperCase();
     if (!v) continue;
@@ -152,37 +152,34 @@ function isExcludedRow(row) {
   return false;
 }
 
-/* Normaliza encabezados: propaga encabezados vacíos hacia la derecha
-   y devuelve un array de encabezados final con la misma longitud de columnas */
+/* Normaliza encabezados: propaga encabezados vacíos hacia la derecha.
+   Si la primera columna no tiene encabezado, la dejamos vacía y la eliminamos más adelante. */
 function normalizeHeaders(rawHeaderRow) {
   const headers = rawHeaderRow.map(h => (h || '').toString().trim());
   for (let i = 0; i < headers.length; i++) {
     if (!headers[i] || headers[i] === '') {
-      // hereda del anterior si existe, si no, crea un nombre genérico
-      headers[i] = i > 0 ? headers[i-1] : `COL_${i}`;
+      headers[i] = i > 0 ? headers[i-1] : ''; // no crear COL_0, dejar vacío si es la primera
     }
   }
   return headers;
 }
 
 /* Construye objetos de fila concatenando valores de columnas que comparten el mismo encabezado.
-   Esto asegura que ZONIFICACION repartida en varias columnas quede en un solo campo. */
+   Ignora columnas cuyo encabezado quedó vacío (evita col_0). */
 function buildRowsFromRaw(rawRows, headers) {
   const rows = [];
   for (let r = 0; r < rawRows.length; r++) {
     const raw = rawRows[r];
     const rowObj = {};
     for (let c = 0; c < headers.length; c++) {
-      const key = headers[c] || `COL_${c}`;
+      const key = headers[c] || ''; // puede ser '' si encabezado vacío
+      if (!key) continue; // ignorar columnas sin encabezado
       const val = (raw[c] || '').toString().trim();
       if (!rowObj[key]) {
         rowObj[key] = val;
       } else {
-        // si ya existe, concatenar con coma si hay contenido nuevo
         if (val && val.length > 0) {
-          // evitar duplicados simples
           const existing = rowObj[key];
-          // si el valor ya está incluido exactamente, no lo repitamos
           if (!existing.split(',').map(s=>s.trim()).includes(val)) {
             rowObj[key] = existing ? `${existing}, ${val}` : val;
           }
@@ -221,7 +218,6 @@ function loadData(sheetName) {
         // Normalizar encabezados propagando vacíos
         const rawHeaderRow = rawData[headerRowIndex];
         const headers = normalizeHeaders(rawHeaderRow);
-        currentHeaders = Array.from(new Set(headers)); // lista única de encabezados para mostrar (mantiene orden)
         // Construir rawRows (filas de datos) con la misma longitud de columnas
         const rawRows = [];
         for (let r = headerRowIndex + 1; r < rawData.length; r++) {
@@ -231,16 +227,16 @@ function loadData(sheetName) {
         const builtRows = buildRowsFromRaw(rawRows, headers);
         // Filtrar filas vacías y excluir nombres no deseados
         const nonEmpty = builtRows.filter(row => {
-          // considerar fila con datos si al menos una propiedad tiene texto
           const hasData = Object.values(row).some(v => v && v.toString().trim() !== '');
           return hasData && !isExcludedRow(row);
         });
         currentData = nonEmpty;
-        // Asegurar que currentHeaders incluya los encabezados que realmente usamos (ordenados)
         // Recalcular currentHeaders en base a keys del primer registro si existe
         if (currentData.length > 0) {
           const keys = Object.keys(currentData[0]);
           currentHeaders = keys;
+        } else {
+          currentHeaders = headers.filter(h => h && h !== '');
         }
       } else {
         currentHeaders = [];
@@ -265,7 +261,7 @@ function renderTableAll() {
   tbody.innerHTML = filteredData.map((row, idx) => {
     const nombre = row['NOMBRE'] || row['NOMBRE COMPLETO'] || row['ASESOR'] || '';
     const rol = row['ROL'] || row['PUESTO'] || '';
-    const zon = row['ZONIFICACION'] || row['ZONIFICACIÓN'] || row['ZONIFICACION/REGION'] || '';
+    const zon = row['ZONIFICACION'] || row['ZONIFICACIÓN'] || '';
     const roleClass = (rol.toLowerCase().includes('supervisor')) ? 'role-supervisor' : (rol.toLowerCase().includes('asesor') ? 'role-asesor' : 'role-gerente');
     return `<tr data-idx="${idx}">
       ${currentHeaders.filter(h=>h).map(h => {
@@ -281,7 +277,6 @@ function renderTableAll() {
         if (h.toUpperCase().includes('CORREO') || h.toUpperCase().includes('EMAIL')) {
           return `<td><a href="mailto:${val}" class="small">${display}</a></td>`;
         }
-        // Mostrar zonificación consolidada con etiqueta si corresponde
         if (h.toUpperCase().includes('ZON') || h.toUpperCase().includes('ZONIFIC')) {
           return `<td class="small">${display}</td>`;
         }
