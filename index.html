@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Directorio Post Venta - Profesional</title>
+<title>Directorio Post Venta - Profesional (Sin copiar, Sin paginación)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
 :root{
@@ -12,7 +12,6 @@
   --bg:#f4f6f8;
   --card:#fff;
   --border:#e6e6e6;
-  --success:#2e7d32;
   --info:#0288d1;
   --warning:#f57c00;
   --font: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -38,16 +37,12 @@ tr:hover{background:#fbfbfb}
 .role-asesor{background:var(--primary)}
 .role-gerente{background:var(--warning)}
 .small{font-size:12px;color:var(--muted)}
-.actions button{margin-right:6px;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer}
-.pager{display:flex;gap:8px;align-items:center}
-.pager button{padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer}
 .highlight{background:linear-gradient(90deg, rgba(255,235,59,0.2), transparent);padding:2px 4px;border-radius:3px}
 .details{background:#fafafa;padding:12px;border-radius:6px;margin-top:8px;border:1px solid var(--border)}
 @media(max-width:800px){
   .controls{flex-direction:column}
   th,td{font-size:12px;padding:8px}
 }
-.copy-btn{background:transparent;border:none;color:var(--info);cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
@@ -79,23 +74,12 @@ tr:hover{background:#fbfbfb}
       <label for="search-input">Buscar persona, correo o rol</label>
       <input type="text" id="search-input" placeholder="Escribe para buscar..." aria-label="Buscar persona correo o rol">
     </div>
-
-    <div class="control" style="min-width:140px">
-      <label for="per-page">Filas por página</label>
-      <select id="per-page" aria-label="Filas por página">
-        <option>10</option><option>25</option><option>50</option>
-      </select>
-    </div>
   </div>
 
   <div class="table-wrap">
     <div class="table-actions">
       <div class="small">Resultados mostrados</div>
-      <div class="pager" aria-label="Paginación">
-        <button id="prev-page" aria-label="Página anterior">Anterior</button>
-        <div id="page-info" class="small">Página 1</div>
-        <button id="next-page" aria-label="Página siguiente">Siguiente</button>
-      </div>
+      <div class="small" id="info-note">Vista completa (sin paginación)</div>
     </div>
 
     <div id="loader" class="small">Conectando y descargando datos desde Google Sheets...</div>
@@ -112,21 +96,19 @@ tr:hover{background:#fbfbfb}
 <script>
 const SHEET_ID = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
 let currentData = [], currentHeaders = [], filteredData = [];
-let page = 1, perPage = 10;
 
 const areaSelect = document.getElementById('area-select');
 const searchInput = document.getElementById('search-input');
-const perPageSelect = document.getElementById('per-page');
 const table = document.getElementById('data-table');
 const thead = document.getElementById('table-head');
 const tbody = document.getElementById('table-body');
 const loader = document.getElementById('loader');
 const recordCount = document.getElementById('record-count');
-const prevBtn = document.getElementById('prev-page');
-const nextBtn = document.getElementById('next-page');
-const pageInfo = document.getElementById('page-info');
 const detailPanel = document.getElementById('detail-panel');
 
+/**
+ * Normaliza filas y rellena celdas vacías que provienen de celdas combinadas.
+ */
 function fillMergedCells(rawData) {
   if (!rawData || rawData.length === 0) return rawData;
   const numRows = rawData.length;
@@ -148,6 +130,55 @@ function fillMergedCells(rawData) {
     }
   }
   return rawData;
+}
+
+/**
+ * Detecta filas que funcionan como "subárea" y las aplica a las filas siguientes.
+ * Heurística:
+ * - Si una fila tiene exactamente 1 o 2 celdas no vacías y ese texto está en MAYÚSCULAS (y es largo),
+ *   se considera una fila de subárea.
+ * - Se añade la propiedad 'SUBAREA' a las filas siguientes hasta encontrar otra subárea.
+ */
+function applySubareaNormalization(parsedRows, headers) {
+  const normalized = [];
+  let currentSubarea = '';
+  for (let i = 0; i < parsedRows.length; i++) {
+    const row = parsedRows[i];
+    // contar valores no vacíos y obtener el texto concatenado
+    const nonEmptyEntries = Object.entries(row).filter(([k,v]) => v && v.toString().trim() !== '');
+    const concatenated = nonEmptyEntries.map(([k,v]) => v.toString().trim()).join(' ').trim();
+    const onlyOneOrTwo = nonEmptyEntries.length <= 2 && nonEmptyEntries.length >= 1;
+    const isUpper = concatenated && concatenated === concatenated.toUpperCase();
+    const longEnough = concatenated.length > 6; // evita palabras cortas
+    // Heurística adicional: si la fila aparece con palabras como "SOPORTE", "ESPECIALISTAS", "GARANTIAS"
+    const keywords = ['SOPORTE','ESPECIALISTAS','GARANTIA','GARANTÍAS','GARANTIAS','REPARACIONES','MOTOR','TRANSMISION','BATERIAS','TÉCNICO','TECNICO'];
+    const hasKeyword = keywords.some(k => concatenated.toUpperCase().includes(k));
+    if (onlyOneOrTwo && isUpper && longEnough && hasKeyword) {
+      // marcar como subárea y no agregar como registro normal
+      currentSubarea = concatenated;
+      continue;
+    }
+    // Si la fila es normal, añadir SUBAREA si no tiene ya una columna SUBAREA
+    const newRow = Object.assign({}, row);
+    // Si existe alguna columna que claramente sea subárea en el CSV, respétala:
+    const possibleSubCols = headers.filter(h => h && h.toUpperCase().includes('SUB') || h.toUpperCase().includes('AREA') || h.toUpperCase().includes('DEPARTAMENTO'));
+    if (possibleSubCols.length > 0) {
+      // si la fila ya tiene valor en alguna de esas columnas, usarla; si no, aplicar currentSubarea
+      let hasSub = false;
+      for (const sc of possibleSubCols) {
+        if (newRow[sc] && newRow[sc].toString().trim() !== '') { hasSub = true; break; }
+      }
+      if (!hasSub && currentSubarea) {
+        // crear o asignar columna 'SUBAREA' para visibilidad
+        newRow['SUBAREA'] = currentSubarea;
+      }
+    } else {
+      // no hay columna obvia, añadimos SUBAREA
+      if (!newRow['SUBAREA'] && currentSubarea) newRow['SUBAREA'] = currentSubarea;
+    }
+    normalized.push(newRow);
+  }
+  return normalized;
 }
 
 function loadData(sheetName) {
@@ -181,11 +212,16 @@ function loadData(sheetName) {
           }
           if (hasData) parsed.push(rowObj);
         }
-        currentData = parsed;
+        // Aplicar normalización de subáreas
+        const normalized = applySubareaNormalization(parsed, currentHeaders);
+        // Si añadimos SUBAREA como columna nueva, asegurarnos de incluirla en headers
+        if (normalized.some(r => r['SUBAREA'])) {
+          if (!currentHeaders.includes('SUBAREA')) currentHeaders.push('SUBAREA');
+        }
+        currentData = normalized;
       } else { currentHeaders = []; currentData = []; }
       filteredData = currentData.slice();
-      page = 1;
-      renderTablePage();
+      renderTableAll();
       loader.style.display = 'none';
       table.style.display = 'table';
     },
@@ -196,73 +232,44 @@ function loadData(sheetName) {
   });
 }
 
-function renderTablePage() {
-  // Apply pagination
-  perPage = parseInt(perPageSelect.value,10);
-  const start = (page-1)*perPage;
-  const pageItems = filteredData.slice(start, start+perPage);
-  renderTable(pageItems);
-  recordCount.innerText = `${filteredData.length} registros`;
-  pageInfo.innerText = `Página ${page} de ${Math.max(1, Math.ceil(filteredData.length/perPage))}`;
-  prevBtn.disabled = page <= 1;
-  nextBtn.disabled = page >= Math.ceil(filteredData.length/perPage);
-}
-
-function renderTable(data) {
-  thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th data-col="${h}">${h} <button class="sort-btn" data-col="${h}" aria-label="Ordenar ${h}">⇅</button></th>`).join('') + '</tr>';
-  tbody.innerHTML = data.map((row, idx) => {
-    // Build a compact row with mailto and copy buttons
+/**
+ * Renderiza toda la tabla (sin paginación).
+ */
+function renderTableAll() {
+  thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th data-col="${h}">${h}</th>`).join('') + '</tr>';
+  tbody.innerHTML = filteredData.map((row, idx) => {
     const email = row['CORREO'] || row['EMAIL'] || row['E-MAIL'] || '';
     const nombre = row['NOMBRE'] || row['NOMBRE COMPLETO'] || row['ASESOR'] || '';
     const rol = row['ROL'] || row['PUESTO'] || '';
     const telefono = row['TEL'] || row['TELEFONO'] || row['CELULAR'] || '';
+    const subarea = row['SUBAREA'] || '';
     const roleClass = (rol.toLowerCase().includes('supervisor')) ? 'role-supervisor' : (rol.toLowerCase().includes('asesor') ? 'role-asesor' : 'role-gerente');
     return `<tr data-idx="${idx}">
       ${currentHeaders.filter(h=>h).map(h => {
         const val = row[h] || '';
-        // highlight search matches
         const q = (searchInput.value||'').trim().toLowerCase();
         const display = q && val.toString().toLowerCase().includes(q) ? val.toString().replace(new RegExp(q,'ig'), m=>`<span class="highlight">${m}</span>`) : val;
-        if (h.toUpperCase().includes('CORREO') || h.toUpperCase().includes('EMAIL')) {
-          return `<td><a href="mailto:${val}" class="small">${display}</a> <button class="copy-btn" data-copy="${val}" title="Copiar correo">Copiar</button></td>`;
-        }
-        if (h.toUpperCase().includes('TEL') || h.toUpperCase().includes('CEL')) {
-          return `<td>${display} <button class="copy-btn" data-copy="${val}" title="Copiar teléfono">Copiar</button></td>`;
-        }
         if (h.toUpperCase().includes('ROL') || h.toUpperCase().includes('PUESTO')) {
           return `<td><span class="role-badge ${roleClass}">${display}</span></td>`;
         }
         if (h.toUpperCase().includes('NOMBRE') || h.toUpperCase().includes('ASESOR')) {
-          return `<td><strong>${display}</strong><div class="small">${rol || ''}</div></td>`;
+          // mostrar subarea debajo del nombre si existe
+          return `<td><strong>${display}</strong>${subarea ? `<div class="small">Subárea: ${subarea}</div>` : (rol ? `<div class="small">${rol}</div>` : '')}</td>`;
+        }
+        if (h.toUpperCase().includes('CORREO') || h.toUpperCase().includes('EMAIL')) {
+          return `<td><a href="mailto:${val}" class="small">${display}</a></td>`;
         }
         return `<td>${display}</td>`;
       }).join('')}
     </tr>`;
   }).join('');
-  // Attach row click handlers for details and copy buttons
+  recordCount.innerText = `${filteredData.length} registros`;
+
+  // Attach row click handlers for details
   Array.from(tbody.querySelectorAll('tr')).forEach((tr, i) => {
     tr.addEventListener('click', (e) => {
-      // prevent when clicking copy button
-      if (e.target && e.target.classList.contains('copy-btn')) return;
-      const globalIdx = (page-1)*perPage + parseInt(tr.getAttribute('data-idx'),10);
-      showDetails(filteredData[globalIdx]);
-    });
-  });
-  Array.from(tbody.querySelectorAll('.copy-btn')).forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const text = btn.getAttribute('data-copy') || '';
-      navigator.clipboard.writeText(text || '').then(()=> {
-        btn.innerText = 'Copiado';
-        setTimeout(()=> btn.innerText = 'Copiar',1200);
-      });
-    });
-  });
-  // Sorting buttons
-  Array.from(thead.querySelectorAll('.sort-btn')).forEach(b => {
-    b.addEventListener('click', (ev) => {
-      const col = b.getAttribute('data-col');
-      sortByColumn(col);
+      const idx = parseInt(tr.getAttribute('data-idx'),10);
+      showDetails(filteredData[idx]);
     });
   });
 }
@@ -273,60 +280,33 @@ function showDetails(row) {
   const tel = row['TEL'] || row['TELEFONO'] || row['CELULAR'] || '';
   const horario = row['HORARIO'] || row['DISPONIBILIDAD'] || '';
   const notas = row['NOTAS'] || row['COMENTARIOS'] || '';
+  const subarea = row['SUBAREA'] || '';
   detailPanel.innerHTML = `<strong>${row['NOMBRE'] || row['ASESOR'] || ''}</strong>
     <div class="small">Rol: ${row['ROL'] || row['PUESTO'] || ''}</div>
-    <div style="margin-top:8px"><strong>Correo</strong>: <a href="mailto:${email}">${email}</a> <button class="copy-btn" data-copy="${email}">Copiar</button></div>
-    <div style="margin-top:6px"><strong>Teléfono</strong>: ${tel} <button class="copy-btn" data-copy="${tel}">Copiar</button></div>
+    ${subarea ? `<div class="small">Subárea: ${subarea}</div>` : ''}
+    <div style="margin-top:8px"><strong>Correo</strong>: <a href="mailto:${email}">${email}</a></div>
+    <div style="margin-top:6px"><strong>Teléfono</strong>: ${tel}</div>
     ${horario ? `<div style="margin-top:6px"><strong>Horario</strong>: ${horario}</div>` : ''}
     ${notas ? `<div style="margin-top:8px"><strong>Notas</strong>: ${notas}</div>` : ''}
   `;
   detailPanel.style.display = 'block';
   detailPanel.setAttribute('aria-hidden','false');
-  Array.from(detailPanel.querySelectorAll('.copy-btn')).forEach(btn => {
-    btn.addEventListener('click', () => {
-      const text = btn.getAttribute('data-copy') || '';
-      navigator.clipboard.writeText(text || '');
-      btn.innerText = 'Copiado';
-      setTimeout(()=> btn.innerText = 'Copiar',1200);
-    });
-  });
-}
-
-function sortByColumn(col) {
-  const dir = (table.getAttribute('data-sort-col') === col && table.getAttribute('data-sort-dir') === 'asc') ? 'desc' : 'asc';
-  filteredData.sort((a,b) => {
-    const va = (a[col]||'').toString().toLowerCase();
-    const vb = (b[col]||'').toString().toLowerCase();
-    if (va < vb) return dir === 'asc' ? -1 : 1;
-    if (va > vb) return dir === 'asc' ? 1 : -1;
-    return 0;
-  });
-  table.setAttribute('data-sort-col', col);
-  table.setAttribute('data-sort-dir', dir);
-  page = 1;
-  renderTablePage();
 }
 
 function applyFilter() {
   const q = (searchInput.value || '').trim().toLowerCase();
-  if (!q) { filteredData = currentData.slice(); page = 1; renderTablePage(); return; }
+  if (!q) { filteredData = currentData.slice(); renderTableAll(); return; }
   filteredData = currentData.filter(row => {
     return Object.values(row).some(v => (v||'').toString().toLowerCase().includes(q));
   });
-  page = 1;
-  renderTablePage();
+  renderTableAll();
 }
-
-// Pagination controls
-prevBtn.addEventListener('click', ()=> { if (page>1) { page--; renderTablePage(); }});
-nextBtn.addEventListener('click', ()=> { if (page < Math.ceil(filteredData.length/perPage)) { page++; renderTablePage(); }});
-perPageSelect.addEventListener('change', ()=> { page = 1; renderTablePage(); });
 
 // Search debounce
 let debounce;
 searchInput.addEventListener('input', ()=> {
   clearTimeout(debounce);
-  debounce = setTimeout(()=> applyFilter(), 220);
+  debounce = setTimeout(()=> applyFilter(), 180);
 });
 
 // Area change
@@ -335,11 +315,9 @@ areaSelect.addEventListener('change', (e)=> loadData(e.target.value));
 // Initial load
 loadData(areaSelect.value);
 
-// Keyboard shortcuts for accessibility
+// Accessibility shortcuts
 document.addEventListener('keydown', (e) => {
   if (e.altKey && e.key === 'f') { e.preventDefault(); searchInput.focus(); }
-  if (e.altKey && e.key === 'ArrowRight') { if (page < Math.ceil(filteredData.length/perPage)) { page++; renderTablePage(); } }
-  if (e.altKey && e.key === 'ArrowLeft') { if (page>1) { page--; renderTablePage(); } }
 });
 </script>
 </body>
