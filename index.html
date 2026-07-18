@@ -1,395 +1,262 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Buscador CESVE - Vento ATC</title>
-  <meta name="description" content="Buscador de CESVE con filtros por estado, municipio y texto libre." />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <style>
-    /* VARIABLES DE COLOR - VENTO ATC */
-    :root {
-      --white: #ffffff;
-      --orange: #ff5722;      
-      --orange-dark: #e64a19; 
-      --dark-blue: #0f172a;   
-      --slate: #1e293b;       
-      --gray: #64748b;        
-      --light-gray: #f1f5f9;  
-      --border: #e2e8f0;      
-      --text: #1e293b;        
-      --shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
-      --radius: 12px;
-      --red: #ef4444;
-      --red-dark: #dc2626;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
-      color: var(--text);
-      background-color: var(--light-gray);
-      padding: 20px;
-    }
-    .page-shell { width: min(1200px, calc(100% - 1rem)); margin: 0 auto; }
-    
-    .hero {
-      background-color: var(--dark-blue);
-      color: var(--white);
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border-left: 5px solid var(--orange);
-    }
-    .eyebrow {
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--orange);
-      font-weight: 800;
-      font-size: 10px;
-      margin: 0 0 4px;
-    }
-    .hero h1 { margin: 0; font-size: 20px; font-weight: 800; }
-    .hero-copy {
-      max-width: 760px; color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 6px 0 0;
-    }
-    
-    .controls-card, .result-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    
-    .controls-card { padding: 15px; margin-bottom: 20px; }
-    .controls-grid {
-      display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end;
-    }
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field span { font-size: 12px; font-weight: 700; color: var(--dark-blue); }
-    .field input, .field select {
-      width: 100%; border-radius: 6px; border: 2px solid var(--border);
-      padding: 10px 14px; font-size: 13px; font-weight: 600; background: var(--white); color: var(--text); outline: none;
-    }
-    .field input:focus, .field select:focus { border-color: var(--orange); }
-    
-    .actions { justify-content: flex-end; }
-    #clearFilters {
-      border: 0; border-radius: 25px; padding: 11px 20px; font-weight: 700; font-size: 13px;
-      background: linear-gradient(135deg, var(--orange) 0%, #ff7043 100%);
-      color: var(--white); cursor: pointer; transition: background 0.2s;
-    }
-    #clearFilters:hover { background: var(--orange-dark); }
-    
-    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 15px; }
-    
-    .result-card { padding: 16px; display: flex; flex-direction: column; border-left: 4px solid var(--orange); }
-    .result-top { display: flex; justify-content: space-between; gap: 0.75rem; align-items: center; margin-bottom: 10px; }
-    .result-id { margin: 0; font-size: 11px; font-weight: bold; color: var(--gray); }
-    .result-tag {
-      background: rgba(255, 87, 34, 0.1); color: var(--orange-dark);
-      border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: 700;
-    }
-    .result-title { margin: 0; font-size: 15px; font-weight: 800; color: var(--dark-blue); line-height: 1.3; }
-    .result-subtitle { margin: 4px 0 12px; color: var(--gray); font-size: 12px; font-style: italic; }
-    .result-meta, .result-contact {
-      display: grid; gap: 4px; font-size: 12px; border-top: 1px solid var(--light-gray); padding-top: 8px; margin-top: 4px;
-    }
-    .result-meta p, .result-contact p { margin: 0; color: var(--slate); }
-    .result-meta strong, .result-contact strong { color: var(--dark-blue); }
-    
-    .action-buttons {
-      margin-top: 15px; border-top: 1px solid var(--light-gray); padding-top: 10px;
-      display: flex; justify-content: flex-end;
-    }
-    .btn-delete {
-      background-color: var(--red); color: white; border: none; padding: 6px 12px;
-      border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;
-    }
-    .btn-delete:hover { background-color: var(--red-dark); }
-
-    .empty-state { grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--gray); }
-    .empty-state h2 { margin: 0 0 8px 0; color: var(--dark-blue); }
-    
-    #loadingSpinner { text-align: center; grid-column: 1 / -1; padding: 40px; color: var(--orange); font-weight: bold;}
-
-    @media (max-width: 900px) { .hero, .controls-grid { grid-template-columns: 1fr; display: grid; } }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directorio Post Venta | Consultor Web</title>
+    <!-- Librería PapaParse para lectura de CSV/Sheets -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #d32f2f; /* Tonos rojos institucionales */
+            --dark-color: #2b2b2b;
+            --light-bg: #f4f6f8;
+            --border-color: #e0e0e0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: var(--dark-color);
+            color: #fff;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 10px;
+        }
+        .controls {
+            padding: 20px 30px;
+            display: flex;
+            gap: 20px;
+            background: #fafafa;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 250px;
+        }
+        .control-group label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        select, input {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        select:focus, input:focus {
+            border-color: var(--primary-color);
+        }
+        .table-container {
+            padding: 20px 30px;
+            overflow-x: auto;
+            min-height: 300px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background-color: var(--dark-color);
+            color: white;
+            font-weight: 600;
+            white-space: nowrap;
+            text-transform: uppercase;
+            font-size: 12px;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        .loader {
+            text-align: center;
+            padding: 40px;
+            font-style: italic;
+            color: #888;
+        }
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-  <div class="page-shell">
-    <header class="hero">
-      <p class="eyebrow">MÓDULO DE SVE</p>
-      <h1>Buscador Oficial de CESVE</h1>
-      <p class="hero-copy">
-        Encuentra rápidamente centros, contactos y datos de la hoja oficial de CESVE. 
-        Filtra dinámicamente por texto libre, estado y sus municipios correspondientes.
-      </p>
-    </header>
-    <main>
-      <section class="controls-card">
-        <div class="controls-grid">
-          <label class="field">
-            <span>Buscar</span>
-            <input id="searchInput" type="search" placeholder="Razón social, ciudad, correo o ID" />
-          </label>
-          <label class="field">
-            <span>Estado</span>
-            <select id="stateFilter" onchange="actualizarFiltroMunicipios()"><option value="">Todos los estados</option></select>
-          </label>
-          <label class="field">
-            <span>Municipio / Ciudad</span>
-            <select id="cityFilter"><option value="">Todas las ciudades</option></select>
-          </label>
-          <div class="field actions">
-            <button id="clearFilters" type="button"><i class="fa-solid fa-filter-circle-xmark"></i> Limpiar</button>
-          </div>
+
+<div class="dashboard-container">
+    <div class="header">
+        <h1>Directorio Post Venta</h1>
+        <span class="badge" id="record-count">0 registros</span>
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label for="area-select">Seleccionar Área (Pestaña)</label>
+            <select id="area-select">
+                <option value="ATENCION A CLIENTES">Atención a Clientes</option>
+                <option value="REPARACIONES TIENDAS">Reparaciones Tiendas</option>
+                <option value="REPARACIONES AGENCIAS">Reparaciones Agencias</option>
+                <option value="REPARACIONES CEDIS">Reparaciones CEDIS</option>
+                <option value="ARMADOS Y ACTIVADOS">Armados y Activados</option>
+                <option value="GARANTIAS">Garantías</option>
+                <option value="COTIZACIONES">Cotizaciones</option>
+                <option value="PAGOS A CESVE">Pagos a CESVE</option>
+                <option value="REGIONALES">Regionales</option>
+                <option value="VENTOMAN COPPEL">Ventoman Coppel</option>
+                <option value="VENTOMAN VENTO">Ventoman Vento</option>
+            </select>
         </div>
-      </section>
-      <section id="resultsContainer" class="results-grid" aria-live="polite"></section>
-    </main>
-  </div>
-  
-  <template id="resultTemplate">
-    <article class="result-card">
-      <div class="result-top">
-        <p class="result-id"></p>
-        <span class="result-tag"></span>
-      </div>
-      <h2 class="result-title"></h2>
-      <p class="result-subtitle"></p>
-      <div class="result-meta"></div>
-      <div class="result-contact"></div>
-      <div class="action-buttons">
-        <button class="btn-delete" title="Archivar y eliminar permanentemente">
-          <i class="fa-solid fa-trash"></i> Eliminar
-        </button>
-      </div>
-    </article>
-  </template>
+        <div class="control-group">
+            <label for="search-input">Buscar persona, correo o rol</label>
+            <input type="text" id="search-input" placeholder="Escribe para buscar o filtrar...">
+        </div>
+    </div>
 
-  <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxwd8h8xKt9oLwcaIHRmrESBSzVqnF6FKdQNHQYQKsXRPqDEJxSdzGSr50orA6TEOqjbQ/exec'; 
+    <div class="table-container">
+        <div id="loader" class="loader">Conectando y descargando datos desde Google Sheets...</div>
+        <table id="data-table" style="display:none;">
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</div>
 
-    const searchInput = document.getElementById('searchInput');
-    const stateFilter = document.getElementById('stateFilter');
-    const cityFilter = document.getElementById('cityFilter');
-    const clearFiltersButton = document.getElementById('clearFilters');
-    const resultsContainer = document.getElementById('resultsContainer');
-    const resultTemplate = document.getElementById('resultTemplate');
+<script>
+    // ID del Documento de Google Sheets
+    const SHEET_ID = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
     
-    let rows = [];
-    let allStates = [];
+    let currentData = [];
+    let currentHeaders = [];
 
-    function normalize(value) { return String(value ?? '').trim().toLowerCase(); }
+    const areaSelect = document.getElementById('area-select');
+    const searchInput = document.getElementById('search-input');
+    const table = document.getElementById('data-table');
+    const thead = document.getElementById('table-head');
+    const tbody = document.getElementById('table-body');
+    const loader = document.getElementById('loader');
+    const recordCount = document.getElementById('record-count');
 
-    function buildRecord(rawRecord) {
-      const searchable = [
-        rawRecord['ID CESVE'], rawRecord['RAZON SOCIAL'], rawRecord['NOMBRE COMERCIAL'],
-        rawRecord['CIUDAD / MUNICIPIO'], rawRecord['ESTADO'], rawRecord['MAIL'],
-        rawRecord['CELULAR'], rawRecord['TELEFONO'], rawRecord['REGIONAL VENTO'],
-        rawRecord['TERRITORIAL VENTO'], rawRecord['CALLE'], rawRecord['COLONIA'],
-      ].filter(Boolean).join(' ');
-      
-      return { ...rawRecord, searchable: searchable.toLowerCase() };
-    }
-
-    function cargarEstadosEnFiltro() {
-      stateFilter.innerHTML = '<option value="">Todos los estados</option>';
-      allStates.filter(Boolean).sort((a, b) => a.localeCompare(b)).forEach((state) => {
-          const option = document.createElement('option');
-          option.value = state; option.textContent = state;
-          stateFilter.appendChild(option);
-      });
-      actualizarFiltroMunicipios();
-    }
-
-    function actualizarFiltroMunicipios() {
-      const estadoSeleccionado = normalize(stateFilter.value);
-      cityFilter.innerHTML = '<option value="">Todas las ciudades</option>';
-      const municipiosFiltrados = rows
-        .filter(row => !estadoSeleccionado || normalize(row['ESTADO']) === estadoSeleccionado)
-        .map(row => row['CIUDAD / MUNICIPIO']).filter(Boolean);
-      
-      const ciudadesUnicas = [...new Set(municipiosFiltrados)].sort((a, b) => a.localeCompare(b));
-      ciudadesUnicas.forEach((city) => {
-        const option = document.createElement('option');
-        option.value = city; option.textContent = city;
-        cityFilter.appendChild(option);
-      });
-      filterRecords();
-    }
-
-    function renderResults(filteredRows) {
-        resultsContainer.innerHTML = '';
-        if (!filteredRows.length) {
-          resultsContainer.innerHTML = '<div class="empty-state"><h2>No se encontraron resultados</h2></div>';
-          return;
-        }
+    async function loadData(sheetName) {
+        loader.style.display = 'block';
+        table.style.display = 'none';
+        searchInput.value = ''; 
         
-        filteredRows.forEach((record) => {
-          const card = resultTemplate.content.firstElementChild.cloneNode(true);
-          const title = record['RAZON SOCIAL'] || record['NOMBRE COMERCIAL'] || 'CESVE';
-          const subtitle = record['NOMBRE COMERCIAL'] && record['NOMBRE COMERCIAL'] !== record['RAZON SOCIAL']
-            ? record['NOMBRE COMERCIAL'] : 'Sin nombre comercial registrado';
-            
-          card.querySelector('.result-id').textContent = `ID CESVE: ${record['ID CESVE'] || 'No disponible'}`;
-          card.querySelector('.result-tag').textContent = `${record['ESTADO'] || 'Sin estado'} • ${record['CIUDAD / MUNICIPIO'] || 'Sin ciudad'}`;
-          card.querySelector('.result-title').textContent = title;
-          card.querySelector('.result-subtitle').textContent = subtitle;
-          
-          // BLOQUE 1: DATOS DEL CESVE
-          card.querySelector('.result-meta').innerHTML = `
-            <div style="margin-bottom: 8px; border-bottom: 1px dashed var(--border); padding-bottom: 4px;">
-              <span style="font-size: 11px; font-weight: 800; color: var(--orange);">DATOS DEL CESVE</span>
-            </div>
-            <p><strong><i class="fa-solid fa-location-dot" style="color:var(--orange);"></i> Dirección:</strong> ${[record['CALLE'], record['NÚMERO (EXT / INT)'], record['COLONIA'], record['C.P.']].filter(Boolean).join(', ') || 'Sin dirección'}</p>
-            <p><strong><i class="fa-solid fa-envelope"></i> Correo:</strong> ${record['MAIL'] || 'N/A'}</p>
-            <p><strong><i class="fa-solid fa-phone"></i> Teléfono / Celular:</strong> ${[record['TELEFONO'], record['CELULAR']].filter(Boolean).join(' / ') || 'N/A'}</p>
-          `;
-          
-          // BLOQUES 2 Y 3: DATOS REGIONAL Y TERRITORIAL VENTO
-          card.querySelector('.result-contact').innerHTML = `
-            <!-- INFORMACIÓN REGIONAL -->
-            <div style="margin: 10px 0 8px 0; border-bottom: 1px dashed var(--border); padding-bottom: 4px;">
-              <span style="font-size: 11px; font-weight: 800; color: var(--dark-blue);">INFORMACIÓN REGIONAL</span>
-            </div>
-            <p><strong><i class="fa-solid fa-user-tie"></i> Regional:</strong> ${record['REGIONAL VENTO'] || 'N/A'}</p>
-            <p><strong><i class="fa-solid fa-envelope"></i> Correo Reg:</strong> ${record['EMAIL REGIONAL VENTO'] || record['EMAIL REGIONAL VENTO'] || 'N/A'}</p>
-            <p><strong><i class="fa-solid fa-phone"></i> Teléfono Reg:</strong> ${record['TELEFONO REGIONAL VENTO'] || record['TELEFONO REGIONAL VENTO'] || 'N/A'}</p>
-  
-            <!-- INFORMACIÓN TERRITORIAL -->
-            <div style="margin: 10px 0 8px 0; border-bottom: 1px dashed var(--border); padding-bottom: 4px;">
-              <span style="font-size: 11px; font-weight: 800; color: var(--gray);">INFORMACIÓN TERRITORIAL</span>
-            </div>
-            <p><strong><i class="fa-solid fa-map-location-dot"></i> Territorial:</strong> ${record['TERRITORIAL VENTO'] || 'N/A'}</p>
-            <p><strong><i class="fa-solid fa-envelope"></i> Correo Terr:</strong> ${record['EMAIL TERRITORIAL'] || record['EMAIL TERRITORIAL'] || 'N/A'}</p>
-          `;
-  
-          const deleteBtn = card.querySelector('.btn-delete');
-          deleteBtn.onclick = () => deleteRecord(record['ID CESVE'], deleteBtn);
-          
-          resultsContainer.appendChild(card);
+        // Uso de la API de visualización de Google para extraer los datos crudos en CSV
+        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+        
+        Papa.parse(url, {
+            download: true,
+            header: false,
+            skipEmptyLines: true,
+            complete: function(results) {
+                let rawData = results.data;
+                let headerRowIndex = -1;
+                
+                // Lógica de limpieza: Buscamos en las primeras 10 filas dónde inician los encabezados reales
+                // ignorando textos informativos como "DIRECTORIO..." o "CONMUTADOR..."
+                for(let i=0; i < Math.min(10, rawData.length); i++) {
+                    const rowStr = rawData[i].join("").toUpperCase();
+                    if(rowStr.includes("CORREO") || rowStr.includes("ASESOR") || rowStr.includes("GERENTE") || rowStr.includes("NOMBRE") || rowStr.includes("ANALISTA")) {
+                        headerRowIndex = i;
+                        break;
+                    }
+                }
+                
+                if (headerRowIndex !== -1) {
+                    currentHeaders = rawData[headerRowIndex].map(h => h.trim());
+                    
+                    let parsedData = [];
+                    for(let i = headerRowIndex + 1; i < rawData.length; i++) {
+                        let rowObj = {};
+                        let hasData = false;
+                        for(let j = 0; j < currentHeaders.length; j++) {
+                            // Ignorar columnas vacías
+                            if(currentHeaders[j]) {
+                                rowObj[currentHeaders[j]] = rawData[i][j] || '';
+                                if(rawData[i][j]) hasData = true;
+                            }
+                        }
+                        if(hasData) parsedData.push(rowObj);
+                    }
+                    currentData = parsedData;
+                } else {
+                    currentHeaders = [];
+                    currentData = [];
+                }
+                
+                renderTable(currentData);
+                loader.style.display = 'none';
+                table.style.display = 'table';
+            },
+            error: function(err) {
+                loader.innerHTML = '<span style="color:#d32f2f;">No se pudo conectar. Verifica que el archivo de Sheets tenga permisos para que "Cualquier usuario con el vínculo" pueda leerlo.</span>';
+                console.error(err);
+            }
         });
-      }
-
-    function filterRecords() {
-      const searchTerm = normalize(searchInput.value);
-      const state = normalize(stateFilter.value);
-      const city = normalize(cityFilter.value);
-      
-      const filtered = rows.filter((record) => {
-        const matchesSearch = !searchTerm || record.searchable.includes(searchTerm);
-        const matchesState = !state || normalize(record['ESTADO']) === state;
-        const matchesCity = !city || normalize(record['CIUDAD / MUNICIPIO']) === city;
-        return matchesSearch && matchesState && matchesCity;
-      });
-      renderResults(filtered);
     }
 
-    async function loadSheet() {
-      resultsContainer.innerHTML = '<div id="loadingSpinner">Cargando base de datos BD_CESVE... <i class="fa-solid fa-spinner fa-spin"></i></div>';
-      try {
-        // Agregamos un parámetro único (?_=${Date.now()}) para burlar el caché de Google
-        const response = await fetch(`${API_URL}?_=${Date.now()}`);
-        if (!response.ok) throw new Error(`Error en servidor (${response.status})`);
+    function renderTable(data) {
+        thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th>${h}</th>`).join('') + '</tr>';
         
-        const jsonRecords = await response.json();
-        rows = jsonRecords.map((rawRecord) => buildRecord(rawRecord));
-        allStates = [...new Set(rows.map((row) => row['ESTADO']).filter(Boolean))];
-        
-        cargarEstadosEnFiltro();
-      } catch (error) {
-        console.error(error);
-        resultsContainer.innerHTML = `<div class="empty-state"><h2 style="color:#ef4444;">Error de Conexión</h2><p>Verifica que la API_URL de Apps Script sea correcta. Detalles: ${error.message}</p></div>`;
-      }
+        tbody.innerHTML = data.map(row => {
+            return '<tr>' + currentHeaders.filter(h=>h).map(h => `<td>${row[h] || ''}</td>`).join('') + '</tr>';
+        }).join('');
+
+        recordCount.innerText = `${data.length} registros`;
     }
 
-    async function deleteRecord(idCesve, btnElement) {
-      // 1. Solicitar la clave de autorización obligatoria
-      const passwordInput = prompt("Clave requerida para dar de baja un registro:");
-      
-      // Si presiona cancelar o lo deja vacío
-      if (passwordInput === null) return; 
-      
-      // Validar si es correcta
-      if (passwordInput !== "ATC") {
-        alert("Contraseña incorrecta. No tienes permisos para realizar bajas.");
-        return;
-      }
-
-      // 2. Confirmación final de la acción
-      if (!confirm(`¿Confirmas que deseas dar de baja el registro con ID CESVE: ${idCesve}?\nSe guardará un respaldo automático en la pestaña "Bajas_Respaldo".`)) return;
-      
-      const originalText = btnElement.innerHTML;
-      btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
-      btnElement.disabled = true;
-
-      let userIp = "IP Desconocida";
-      try {
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        if (ipResponse.ok) {
-          const ipData = await ipResponse.json();
-          userIp = ipData.ip;
-        }
-      } catch (e) {
-        console.warn("No se pudo obtener la IP local, se procesará como desconocida:", e);
-      }
-
-      try {
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'delete', id: idCesve, ip: userIp })
+    function filterData() {
+        const query = searchInput.value.toLowerCase();
+        const filtered = currentData.filter(row => {
+            return Object.values(row).some(val => 
+                String(val).toLowerCase().includes(query)
+            );
         });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          alert('El registro ha sido movido a la pestaña de respaldo e inactivado con éxito.');
-          loadSheet(); 
-        } else {
-          alert('Error al procesar la baja: ' + result.message);
-          btnElement.innerHTML = originalText;
-          btnElement.disabled = false;
-        }
-      } catch (error) {
-        alert('Cambio guardado en la base de datos de Sheets de forma segura.');
-        btnElement.innerHTML = originalText;
-        btnElement.disabled = false;
-        setTimeout(() => loadSheet(), 1500);
-      }
+        renderTable(filtered);
     }
 
-    searchInput.addEventListener('input', filterRecords);
-    cityFilter.addEventListener('change', filterRecords);
-    clearFiltersButton.addEventListener('click', () => {
-      searchInput.value = ''; stateFilter.value = ''; actualizarFiltroMunicipios();
-    });
+    areaSelect.addEventListener('change', (e) => loadData(e.target.value));
+    searchInput.addEventListener('keyup', filterData);
 
-    //Carga los datos por pimera ves
-      loadSheet();
-    
-    // ==========================================
-    // ACTUALIZACIÓN AUTOMÁTICA (CADA 5 MINUTOS)
-    // ==========================================
-    setInterval(async () => {
-      try {
-        // Hacemos la petición silenciosa con el destructor de caché para ver si hay cambios
-        const response = await fetch(`${API_URL}?_=${Date.now()}`);
-        if (response.ok) {
-          const jsonRecords = await response.json();
-          rows = jsonRecords.map((rawRecord) => buildRecord(rawRecord));
-          
-          // Actualizamos los resultados en pantalla respetando los filtros que el asesor tenga puestos en ese momento
-          filterRecords();
-          console.log('Base de datos actualizada automáticamente de forma silenciosa.');
-        }
-      } catch (error) {
-        console.error('No se pudo realizar la actualización automática en segundo plano:', error);
-      }
-    }, 5 * 60 * 1000); // 5 minutos en milisegundos (5 * 60 * 1000)
-    
-  </script>
+    // Inicializar cargando la primera pestaña seleccionada
+    loadData(areaSelect.value);
+</script>
+
 </body>
 </html>
