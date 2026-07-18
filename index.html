@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Directorio Post Venta - Selector de pestañas</title>
+<title>Directorio Post Venta - Zonificación completa</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
 :root{
@@ -78,8 +78,8 @@ tr:hover{background:#fbfbfb}
 
   <div class="table-wrap">
     <div class="table-actions">
-      <div class="small">Vista completa (sin subáreas)</div>
-      <div class="small" id="info-note">Se excluyen filas con nombres específicos indicados</div>
+      <div class="small">Vista completa (zonificación consolidada)</div>
+      <div class="small" id="info-note">Se concatenan columnas que pertenecen al mismo encabezado (ej. ZONIFICACION)</div>
     </div>
 
     <div id="loader" class="small">Conectando y descargando datos desde Google Sheets...</div>
@@ -108,7 +108,7 @@ const loader = document.getElementById('loader');
 const recordCount = document.getElementById('record-count');
 const detailPanel = document.getElementById('detail-panel');
 
-/* Normaliza filas y rellena celdas vacías que provienen de celdas combinadas */
+/* Rellena celdas vacías que provienen de celdas combinadas */
 function fillMergedCells(rawData) {
   if (!rawData || rawData.length === 0) return rawData;
   const numRows = rawData.length;
@@ -139,7 +139,7 @@ function isExcludedRow(row) {
     'ESPECIALISTAS DE REPARACIONES',
     'SOPORTE TECNCO - GARANTIAS MOTOR, TRANSMISION Y BATERIAS'
   ];
-  const nameFields = ['NOMBRE','NOMBRE COMPLETO','ASESOR','ANALISTA'];
+  const nameFields = ['NOMBRE','NOMBRE COMPLETO','ASESOR'];
   for (const f of nameFields) {
     const v = (row[f] || '').toString().trim().toUpperCase();
     if (!v) continue;
@@ -152,7 +152,49 @@ function isExcludedRow(row) {
   return false;
 }
 
-/* Carga la pestaña indicada y procesa filas (sin subáreas) */
+/* Normaliza encabezados: propaga encabezados vacíos hacia la derecha
+   y devuelve un array de encabezados final con la misma longitud de columnas */
+function normalizeHeaders(rawHeaderRow) {
+  const headers = rawHeaderRow.map(h => (h || '').toString().trim());
+  for (let i = 0; i < headers.length; i++) {
+    if (!headers[i] || headers[i] === '') {
+      // hereda del anterior si existe, si no, crea un nombre genérico
+      headers[i] = i > 0 ? headers[i-1] : `COL_${i}`;
+    }
+  }
+  return headers;
+}
+
+/* Construye objetos de fila concatenando valores de columnas que comparten el mismo encabezado.
+   Esto asegura que ZONIFICACION repartida en varias columnas quede en un solo campo. */
+function buildRowsFromRaw(rawRows, headers) {
+  const rows = [];
+  for (let r = 0; r < rawRows.length; r++) {
+    const raw = rawRows[r];
+    const rowObj = {};
+    for (let c = 0; c < headers.length; c++) {
+      const key = headers[c] || `COL_${c}`;
+      const val = (raw[c] || '').toString().trim();
+      if (!rowObj[key]) {
+        rowObj[key] = val;
+      } else {
+        // si ya existe, concatenar con coma si hay contenido nuevo
+        if (val && val.length > 0) {
+          // evitar duplicados simples
+          const existing = rowObj[key];
+          // si el valor ya está incluido exactamente, no lo repitamos
+          if (!existing.split(',').map(s=>s.trim()).includes(val)) {
+            rowObj[key] = existing ? `${existing}, ${val}` : val;
+          }
+        }
+      }
+    }
+    rows.push(rowObj);
+  }
+  return rows;
+}
+
+/* Carga la pestaña indicada y procesa filas (zonificación consolidada) */
 function loadData(sheetName) {
   loader.style.display = 'block';
   table.style.display = 'none';
@@ -164,33 +206,47 @@ function loadData(sheetName) {
     complete: function(results) {
       let rawData = results.data || [];
       rawData = fillMergedCells(rawData);
+
+      // Buscar fila de encabezado (misma heurística que antes)
       let headerRowIndex = -1;
       for (let i = 0; i < Math.min(10, rawData.length); i++) {
         const rowStr = rawData[i].join("").toUpperCase();
         if (rowStr.includes("CORREO") || rowStr.includes("ASESOR") || rowStr.includes("GERENTE") || rowStr.includes("NOMBRE") || rowStr.includes("ANALISTA")) {
-          headerRowIndex = i; break;
+          headerRowIndex = i;
+          break;
         }
       }
+
       if (headerRowIndex !== -1) {
-        currentHeaders = rawData[headerRowIndex].map(h => (h||'').toString().trim());
-        let parsed = [];
-        for (let i = headerRowIndex + 1; i < rawData.length; i++) {
-          let rowObj = {}; let hasData = false;
-          for (let j = 0; j < currentHeaders.length; j++) {
-            if (currentHeaders[j]) {
-              rowObj[currentHeaders[j]] = rawData[i][j] || '';
-              if (rawData[i][j] && rawData[i][j].toString().trim() !== '') hasData = true;
-            }
-          }
-          if (hasData) parsed.push(rowObj);
+        // Normalizar encabezados propagando vacíos
+        const rawHeaderRow = rawData[headerRowIndex];
+        const headers = normalizeHeaders(rawHeaderRow);
+        currentHeaders = Array.from(new Set(headers)); // lista única de encabezados para mostrar (mantiene orden)
+        // Construir rawRows (filas de datos) con la misma longitud de columnas
+        const rawRows = [];
+        for (let r = headerRowIndex + 1; r < rawData.length; r++) {
+          rawRows.push(rawData[r]);
         }
-        // Excluir filas no deseadas
-        const filtered = parsed.filter(r => !isExcludedRow(r));
-        currentData = filtered;
+        // Convertir filas crudas en objetos concatenando columnas con mismo encabezado
+        const builtRows = buildRowsFromRaw(rawRows, headers);
+        // Filtrar filas vacías y excluir nombres no deseados
+        const nonEmpty = builtRows.filter(row => {
+          // considerar fila con datos si al menos una propiedad tiene texto
+          const hasData = Object.values(row).some(v => v && v.toString().trim() !== '');
+          return hasData && !isExcludedRow(row);
+        });
+        currentData = nonEmpty;
+        // Asegurar que currentHeaders incluya los encabezados que realmente usamos (ordenados)
+        // Recalcular currentHeaders en base a keys del primer registro si existe
+        if (currentData.length > 0) {
+          const keys = Object.keys(currentData[0]);
+          currentHeaders = keys;
+        }
       } else {
         currentHeaders = [];
         currentData = [];
       }
+
       filteredData = currentData.slice();
       renderTableAll();
       loader.style.display = 'none';
@@ -203,12 +259,13 @@ function loadData(sheetName) {
   });
 }
 
-/* Renderiza toda la tabla (sin paginación ni subáreas) */
+/* Renderiza toda la tabla (sin paginación) */
 function renderTableAll() {
   thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th data-col="${h}">${h}</th>`).join('') + '</tr>';
   tbody.innerHTML = filteredData.map((row, idx) => {
     const nombre = row['NOMBRE'] || row['NOMBRE COMPLETO'] || row['ASESOR'] || '';
     const rol = row['ROL'] || row['PUESTO'] || '';
+    const zon = row['ZONIFICACION'] || row['ZONIFICACIÓN'] || row['ZONIFICACION/REGION'] || '';
     const roleClass = (rol.toLowerCase().includes('supervisor')) ? 'role-supervisor' : (rol.toLowerCase().includes('asesor') ? 'role-asesor' : 'role-gerente');
     return `<tr data-idx="${idx}">
       ${currentHeaders.filter(h=>h).map(h => {
@@ -223,6 +280,10 @@ function renderTableAll() {
         }
         if (h.toUpperCase().includes('CORREO') || h.toUpperCase().includes('EMAIL')) {
           return `<td><a href="mailto:${val}" class="small">${display}</a></td>`;
+        }
+        // Mostrar zonificación consolidada con etiqueta si corresponde
+        if (h.toUpperCase().includes('ZON') || h.toUpperCase().includes('ZONIFIC')) {
+          return `<td class="small">${display}</td>`;
         }
         return `<td>${display}</td>`;
       }).join('')}
@@ -243,10 +304,12 @@ function showDetails(row) {
   if (!row) { detailPanel.style.display='none'; detailPanel.setAttribute('aria-hidden','true'); return; }
   const email = row['CORREO'] || row['EMAIL'] || '';
   const tel = row['TEL'] || row['TELEFONO'] || row['CELULAR'] || '';
+  const zon = row['ZONIFICACION'] || row['ZONIFICACIÓN'] || '';
   const horario = row['HORARIO'] || row['DISPONIBILIDAD'] || '';
   const notas = row['NOTAS'] || row['COMENTARIOS'] || '';
   detailPanel.innerHTML = `<strong>${row['NOMBRE'] || row['ASESOR'] || ''}</strong>
     <div class="small">Rol: ${row['ROL'] || row['PUESTO'] || ''}</div>
+    ${zon ? `<div style="margin-top:6px"><strong>Zonificación</strong>: ${zon}</div>` : ''}
     <div style="margin-top:8px"><strong>Correo</strong>: <a href="mailto:${email}">${email}</a></div>
     <div style="margin-top:6px"><strong>Teléfono</strong>: ${tel}</div>
     ${horario ? `<div style="margin-top:6px"><strong>Horario</strong>: ${horario}</div>` : ''}
