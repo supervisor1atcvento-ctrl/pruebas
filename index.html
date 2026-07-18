@@ -1,881 +1,338 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Dashboard ATC — Rendimiento de Asesores</title>
-    <!-- Librería para Gráficas -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Librería para generar Excel con pestañas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buscador CESVE - Vento ATC</title>
+  <meta name="description" content="Buscador de CESVE con filtros por estado, municipio y texto libre." />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    /* VARIABLES DE COLOR - VENTO ATC */
+    :root {
+      --white: #ffffff;
+      --orange: #ff5722;      
+      --orange-dark: #e64a19; 
+      --dark-blue: #0f172a;   
+      --slate: #1e293b;       
+      --gray: #64748b;        
+      --light-gray: #f1f5f9;  
+      --border: #e2e8f0;      
+      --text: #1e293b;        
+      --shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      --radius: 12px;
+      --red: #ef4444;
+      --red-dark: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background-color: var(--light-gray);
+      padding: 20px;
+    }
+    .page-shell { width: min(1200px, calc(100% - 1rem)); margin: 0 auto; }
     
-    <style>
-        /* ----------------- Paleta e Identidad Corporativa ----------------- */
-        :root {
-            --bg: #F5F5F5;            
-            --card: #FFFFFF;          
-            --vento-primary: #231F20; /* Negro Institucional */
-            --muted: #616160;         /* Gris */
-            --vento-accent: #F28F17;  /* Naranja Institucional */
-            
-            --success: #10B981;       /* Verde Meta */
-            --warning: #F59E0B;       /* Amarillo Cerca */
-            --danger: #EF4444;        /* Rojo Alejado */
-            --border: #E5E7EB;
-            --radius: 12px;
-            --shadow-sm: 0 4px 20px rgba(35, 31, 32, 0.08);
-        }
+    .hero {
+      background-color: var(--dark-blue);
+      color: var(--white);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 5px solid var(--orange);
+    }
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--orange);
+      font-weight: 800;
+      font-size: 10px;
+      margin: 0 0 4px;
+    }
+    .hero h1 { margin: 0; font-size: 20px; font-weight: 800; }
+    .hero-copy {
+      max-width: 760px; color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 6px 0 0;
+    }
+    
+    .controls-card, .result-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    
+    .controls-card { padding: 15px; margin-bottom: 20px; }
+    .controls-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field span { font-size: 12px; font-weight: 700; color: var(--dark-blue); }
+    .field input, .field select {
+      width: 100%; border-radius: 6px; border: 2px solid var(--border);
+      padding: 10px 14px; font-size: 13px; font-weight: 600; background: var(--white); color: var(--text); outline: none;
+    }
+    .field input:focus, .field select:focus { border-color: var(--orange); }
+    
+    .actions { justify-content: flex-end; }
+    #clearFilters {
+      border: 0; border-radius: 25px; padding: 11px 20px; font-weight: 700; font-size: 13px;
+      background: linear-gradient(135deg, var(--orange) 0%, #ff7043 100%);
+      color: var(--white); cursor: pointer; transition: background 0.2s;
+    }
+    #clearFilters:hover { background: var(--orange-dark); }
+    
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 15px; }
+    
+    .result-card { padding: 16px; display: flex; flex-direction: column; border-left: 4px solid var(--orange); }
+    .result-top { display: flex; justify-content: space-between; gap: 0.75rem; align-items: center; margin-bottom: 10px; }
+    .result-id { margin: 0; font-size: 11px; font-weight: bold; color: var(--gray); }
+    .result-tag {
+      background: rgba(255, 87, 34, 0.1); color: var(--orange-dark);
+      border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: 700;
+    }
+    .result-title { margin: 0; font-size: 15px; font-weight: 800; color: var(--dark-blue); line-height: 1.3; }
+    .result-subtitle { margin: 4px 0 12px; color: var(--gray); font-size: 12px; font-style: italic; }
+    .result-meta, .result-contact {
+      display: grid; gap: 4px; font-size: 12px; border-top: 1px solid var(--light-gray); padding-top: 8px; margin-top: 4px;
+    }
+    .result-meta p, .result-contact p { margin: 0; color: var(--slate); }
+    .result-meta strong, .result-contact strong { color: var(--dark-blue); }
+    
+    .action-buttons {
+      margin-top: 15px; border-top: 1px solid var(--light-gray); padding-top: 10px;
+      display: flex; justify-content: flex-end;
+    }
+    .btn-delete {
+      background-color: var(--red); color: white; border: none; padding: 6px 12px;
+      border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn-delete:hover { background-color: var(--red-dark); }
 
-        /* ----------------- Reset y Tipografía ----------------- */
-        * { box-sizing: border-box; }
-        html, body { height: 100%; }
-        body {
-            margin: 0;
-            font-family: "Segoe UI", Inter, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--vento-primary);
-            -webkit-font-smoothing: antialiased;
-            line-height: 1.4;
-            font-size: 14px;
-        }
+    .empty-state { grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--gray); }
+    .empty-state h2 { margin: 0 0 8px 0; color: var(--dark-blue); }
+    
+    #loadingSpinner { text-align: center; grid-column: 1 / -1; padding: 40px; color: var(--orange); font-weight: bold;}
 
-        .container {
-            max-width: 1320px;
-            margin: 24px auto;
-            padding: 0 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* ----------------- Header ----------------- */
-        header {
-            display: flex; align-items: center; justify-content: space-between;
-            background: var(--card); padding: 16px 24px;
-            border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
-        }
-        .brand { display: flex; align-items: center; gap: 16px; }
-        .logo {
-            width: 52px; height: 52px; border-radius: 10px;
-            background: var(--vento-primary); color: #fff; 
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 20px; box-shadow: 0 4px 12px rgba(35, 31, 32, 0.15);
-        }
-        h1 { font-size: 24px; margin: 0; font-weight: 700; color: var(--vento-primary); letter-spacing: -0.5px; }
-        .subtitle { font-size: 14px; color: var(--muted); font-weight: 600; margin-top: 2px; }
-
-        /* ----------------- Top Cards ----------------- */
-        .top-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .top-card {
-            background: var(--card); border-radius: var(--radius); padding: 20px;
-            border: 1px solid var(--border); box-shadow: var(--shadow-sm);
-        }
-        .card-header { font-size: 14px; color: var(--vento-primary); font-weight: 700; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px; }
-        .goals-wrapper { display: flex; gap: 24px; flex-wrap: wrap; }
-        .goal-col { flex: 1; min-width: 200px; }
-        .goal-title { font-weight: 700; font-size: 13px; color: var(--muted); text-transform: uppercase; border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; }
-        .goal-item { font-size: 14px; display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
-        .goal-item strong { color: var(--vento-accent); font-size: 16px; font-weight: 700; }
-        
-        .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .stat { padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); text-align: center; }
-        .stat .label { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
-        .stat .value { font-weight: 700; font-size: 20px; color: var(--vento-primary); margin-top: 4px; }
-
-        /* ----------------- Controles y Filtros ----------------- */
-        .controls-wrapper {
-            background: var(--card); padding: 16px 20px; border-radius: var(--radius);
-            border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px;
-        }
-        .filters { display: flex; gap: 16px; flex-wrap: wrap; }
-        .control { display: flex; flex-direction: column; min-width: 160px; flex: 1; }
-        .control label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; }
-        select, input[type="date"] { padding: 10px; border-radius: 8px; border: 1px solid #CCC; font-size: 14px; font-family: "Segoe UI", sans-serif; outline: none; width: 100%; }
-        select:focus, input[type="date"]:focus { border-color: var(--vento-accent); }
-        
-        /* Tema de Reglas */
-        .rules-bar {
-            background: #FFF4E5;
-            border-left: 4px solid var(--vento-accent);
-            padding: 12px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            color: var(--vento-primary);
-        }
-        .rules-bar ul { margin: 6px 0 0 20px; padding: 0; }
-        .rules-bar li { margin-bottom: 4px; }
-
-        .actions-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 14px; }
-        button { font-family: "Segoe UI", sans-serif; cursor: pointer; transition: all 0.2s; }
-        button.primary { background: var(--vento-accent); border: none; color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 10px rgba(242, 143, 23, 0.3); }
-        button.primary:hover { background: #D97D12; }
-        button.ghost { background: transparent; border: 2px solid var(--vento-primary); color: var(--vento-primary); padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; }
-        button.ghost:hover { background: var(--vento-primary); color: #FFF; }
-        button.download-btn { background: transparent; border: 2px solid var(--vento-accent); color: var(--vento-accent); padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; }
-        button.download-btn:hover { background: var(--vento-accent); color: #FFF; }
-        
-        .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-        .tab { background: var(--bg); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--muted); font-size: 14px; }
-        .tab.active { background: var(--vento-primary); border-color: var(--vento-primary); color: #FFF; }
-
-        /* ----------------- Tabla Leaderboard ----------------- */
-        .card { background: var(--card); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
-        .table-wrap { overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        thead th { text-align: left; padding: 14px 12px; background: var(--bg); color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--border); }
-        tbody td { padding: 16px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        
-        .advisor-name-link { font-weight: 700; font-size: 16px; color: var(--vento-primary); cursor: pointer; text-decoration: none; transition: color 0.2s; }
-        .advisor-name-link:hover { color: var(--vento-accent); text-decoration: underline; }
-        .meta-small { font-size: 12px; color: var(--muted); margin-top: 4px; }
-        
-        .col-metric { min-width: 150px; }
-        .metric-val { font-size: 18px; font-weight: 700; color: var(--vento-primary); margin-bottom: 4px; }
-        .rubro-bar-wrap { width: 100%; background: #E5E7EB; border-radius: 4px; height: 6px; overflow: hidden; margin-bottom: 4px; }
-        .rubro-bar { height: 100%; transition: width 0.5s ease, background-color 0.3s ease; }
-        .metric-sub { font-size: 11px; font-weight: 600; color: var(--muted); }
-        
-        .score { font-size: 18px; padding: 6px 12px; border-radius: 8px; background: #FFF4E5; color: var(--vento-accent); font-weight: 700; display: inline-block; border: 1px solid rgba(242, 143, 23, 0.2); }
-        .status-pill { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; color: #fff; margin-top: 6px;}
-        .status-cumplido { background: var(--success); }
-        .status-cerca { background: var(--warning); color: #FFF; }
-        .status-lejos { background: var(--danger); }
-
-        .top-highlight-1 td { background: rgba(255, 213, 74, 0.1); }
-        .top-highlight-2 td { background: rgba(230, 238, 248, 0.4); }
-        .top-highlight-3 td { background: rgba(255, 216, 181, 0.2); }
-
-        /* ----------------- Modal Gráficas ----------------- */
-        .modal {
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(35, 31, 32, 0.7); backdrop-filter: blur(4px);
-            align-items: center; justify-content: center;
-        }
-        .modal-content {
-            background-color: var(--card); padding: 24px 32px; border-radius: var(--radius);
-            width: 90%; max-width: 800px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative;
-        }
-        .close-modal {
-            position: absolute; top: 16px; right: 24px; font-size: 28px; font-weight: bold;
-            color: var(--muted); cursor: pointer; transition: color 0.2s;
-        }
-        .close-modal:hover { color: var(--vento-accent); }
-        .chart-container { position: relative; height: 350px; width: 100%; margin-top: 20px; }
-
-        footer { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; padding-bottom: 20px; font-weight: 600; }
-
-        @media(max-width: 1000px) { .top-bar { grid-template-columns: 1fr; } }
-    </style>
+    @media (max-width: 900px) { .hero, .controls-grid { grid-template-columns: 1fr; display: grid; } }
+  </style>
 </head>
 <body>
-
-<div class="container">
-    <header>
-        <div class="brand">
-            <div class="logo">ATC</div>
-            <div>
-                <h1>Dashboard de Rendimiento</h1>
-                <div class="subtitle">Panel de supervisión y alcance de metas</div>
-            </div>
-        </div>
-        <div style="text-align: right;">
-            <div style="font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase;">Última sincronización</div>
-            <div id="lastSync" style="font-weight: 700; color: var(--vento-primary); font-size: 15px; margin-top: 4px;">--:--</div>
-        </div>
+  <div class="page-shell">
+    <header class="hero">
+      <p class="eyebrow">MÓDULO DE SVE</p>
+      <h1>Buscador Oficial de CESVE</h1>
+      <p class="hero-copy">
+        Encuentra rápidamente centros, contactos y datos de la hoja oficial de CESVE. 
+        Filtra dinámicamente por texto libre, estado y sus municipios correspondientes.
+      </p>
     </header>
-
-    <!-- TOP BAR -->
-    <div class="top-bar">
-        <div class="top-card">
-            <div class="card-header">Metas del Mes Activas</div>
-            <div class="goals-wrapper">
-                <div class="goal-col">
-                    <div class="goal-title">🏢 Presencial</div>
-                    <div class="goal-item"><span>Tickets Resolutivos</span><strong id="goal_pres_tickets">374</strong></div>
-                    <div class="goal-item"><span>Chats Atendidos</span><strong id="goal_pres_chats">384</strong></div>
-                    <div class="goal-item"><span>Llamadas Completadas</span><strong id="goal_pres_calls">393</strong></div>
-                </div>
-                <div class="goal-col">
-                    <div class="goal-title">🏡 Home Office</div>
-                    <div class="goal-item"><span>Tickets Resolutivos</span><strong id="goal_ho_tickets">524</strong></div>
-                    <div class="goal-item"><span>Chats Atendidos</span><strong id="goal_ho_chats">1727</strong></div>
-                    <div class="goal-item"><span style="color:var(--muted)">Llamadas (N/A)</span><strong style="color:var(--muted)">0</strong></div>
-                </div>
-            </div>
+    <main>
+      <section class="controls-card">
+        <div class="controls-grid">
+          <label class="field">
+            <span>Buscar</span>
+            <input id="searchInput" type="search" placeholder="Razón social, ciudad, correo o ID" />
+          </label>
+          <label class="field">
+            <span>Estado</span>
+            <select id="stateFilter" onchange="actualizarFiltroMunicipios()"><option value="">Todos los estados</option></select>
+          </label>
+          <label class="field">
+            <span>Municipio / Ciudad</span>
+            <select id="cityFilter"><option value="">Todas las ciudades</option></select>
+          </label>
+          <div class="field actions">
+            <button id="clearFilters" type="button"><i class="fa-solid fa-filter-circle-xmark"></i> Limpiar</button>
+          </div>
         </div>
-        
-        <div class="top-card">
-            <div class="card-header">Métricas Generales del Periodo (Válidas)</div>
-            <div class="stats">
-                <div class="stat"><div class="label">Asesores Activos</div><div class="value" id="statAdvisors">--</div></div>
-                <div class="stat"><div class="label">Tickets Válidos</div><div class="value" id="statTickets">--</div></div>
-                <div class="stat"><div class="label">Llamadas Válidas</div><div class="value" id="statCalls">--</div></div>
-                <div class="stat"><div class="label">Chats Válidos</div><div class="value" id="statChats">--</div></div>
-            </div>
-        </div>
-    </div>
+      </section>
+      <section id="resultsContainer" class="results-grid" aria-live="polite"></section>
+    </main>
+  </div>
+  
+  <template id="resultTemplate">
+    <article class="result-card">
+      <div class="result-top">
+        <p class="result-id"></p>
+        <span class="result-tag"></span>
+      </div>
+      <h2 class="result-title"></h2>
+      <p class="result-subtitle"></p>
+      <div class="result-meta"></div>
+      <div class="result-contact"></div>
+      <div class="action-buttons">
+        <button class="btn-delete" title="Eliminar de la base de datos">
+          <i class="fa-solid fa-trash"></i> Eliminar
+        </button>
+      </div>
+    </article>
+  </template>
 
-    <!-- CONTROLES -->
-    <div class="controls-wrapper">
-        <div class="filters">
-            <div class="control">
-                <label>Periodo</label>
-                <select id="periodSelector">
-                    <option value="custom">Personalizado</option>
-                    <option value="today">Hoy</option>
-                    <option value="thisMonth" selected>Este Mes</option>
-                </select>
-            </div>
-            <div class="control">
-                <label>Fecha inicio</label>
-                <input type="date" id="dateFrom">
-            </div>
-            <div class="control">
-                <label>Fecha fin</label>
-                <input type="date" id="dateTo">
-            </div>
-            <div class="control" style="min-width: 200px;">
-                <label>Filtrar Supervisor</label>
-                <select id="filterSupervisor">
-                    <option value="">Todos los supervisores</option>
-                </select>
-            </div>
-        </div>
-        
-        <!-- Módulo de Reglas -->
-        <div class="rules-bar">
-            <strong>📌 Reglas de Negocio (Filtros de validación para metas):</strong>
-            <ul>
-                <li><strong>Tickets:</strong> Únicamente se contabilizan los que cuentan con estatus <em>CANALIZADO</em>.</li>
-                <li><strong>Llamadas:</strong> Se cuentan con estatus <em>COMPLETED</em> y una duración <em>mayor o igual a 1 minuto (60 segundos)</em>.</li>
-                <li><strong>Chats:</strong> Se cuentan los atendidos por <em>AGENT</em> y con una duración <em>menor o igual a 5 minutos (300 segundos)</em>.</li>
-            </ul>
-        </div>
-        
-        <!-- Fila de Descargas -->
-        <div class="actions-row">
-            <button class="ghost" id="refreshBtn">↻ Refrescar</button>
-            <button class="primary" id="applyFilters">Aplicar Filtros</button>
-            <button class="download-btn" id="downloadFilteredBtn" title="Descarga la tabla resumen que ves en pantalla">📊 Resumen Leaderboard</button>
-            <button class="download-btn" id="downloadExcelTabsBtn" title="Descarga un Excel con 4 pestañas: Resumen y bases de datos detalladas exclusivas de interacciones válidas">🗂️ Descargar Excel Multi-Pestaña</button>
-            <select id="downloadRawSelect" style="max-width: 200px; border: 2px solid var(--muted); font-weight: 600; border-radius:8px; padding:8px;">
-                <option value="">📁 Base en Crudo...</option>
-                <option value="tickets">Crudo: Tickets</option>
-                <option value="chats">Crudo: Chats</option>
-                <option value="calls">Crudo: Llamadas</option>
-            </select>
-        </div>
-    </div>
+  <script>
+    // URL DE GOOGLE APPS SCRIPT INTEGRADA
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxwd8h8xKt9oLwcaIHRmrESBSzVqnF6FKdQNHQYQKsXRPqDEJxSdzGSr50orA6TEOqjbQ/exec'; 
 
-    <div class="tabs" role="tablist">
-        <div class="tab active" data-group="All">Visualizar Todos</div>
-        <div class="tab" data-group="Vento">Vento</div>
-        <div class="tab" data-group="Piston">Piston</div>
-        <div class="tab" data-group="Home Office">Home Office</div>
-        <div class="tab" data-group="Nuevo ingreso">Nuevo Ingreso</div>
-        <div class="tab" data-group="OTROS">Otros</div>
-    </div>
+    const searchInput = document.getElementById('searchInput');
+    const stateFilter = document.getElementById('stateFilter');
+    const cityFilter = document.getElementById('cityFilter');
+    const clearFiltersButton = document.getElementById('clearFilters');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const resultTemplate = document.getElementById('resultTemplate');
+    
+    let rows = [];
+    let allStates = [];
 
-    <!-- MAIN LEADERBOARD -->
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin: 0; font-size: 18px; color: var(--vento-primary); font-weight: 700;">Leaderboard de Rendimiento</h2>
-        </div>
-        
-        <div class="table-wrap">
-            <table id="leaderboardTable">
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">Pos</th>
-                        <th style="min-width: 200px;">Asesor / Grupo</th>
-                        <th>Tickets (Canalizados)</th>
-                        <th>Llamadas (Completadas)</th>
-                        <th>Chats (Atendidos)</th>
-                        <th style="text-align: right;">Puntaje General</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboardBody"></tbody>
-            </table>
-        </div>
-        
-        <div style="margin-top: 16px; color: var(--muted); font-size: 12px; background: var(--bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border);">
-            <strong style="color: var(--vento-accent);">💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para visualizar la gráfica de constancia diaria.<br>
-            <div style="margin-top: 4px;"><strong>Indicadores de color:</strong> <span style="color: var(--success); font-weight: bold;">■ Verde</span> (En meta), <span style="color: var(--warning); font-weight: bold;">■ Amarillo</span> (Cerca, &ge;80%), <span style="color: var(--danger); font-weight: bold;">■ Rojo</span> (Rezago, &lt;80%).</div>
-        </div>
-    </div>
+    function normalize(value) { return String(value ?? '').trim().toLowerCase(); }
 
-    <footer>Dashboard Privado · Actualización automática programada (15 min)</footer>
-</div>
-
-<!-- Modal de Gráfica -->
-<div id="chartModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" id="closeModal">&times;</span>
-        <h2 id="chartTitle" style="margin-top: 0; font-size: 20px; color: var(--vento-primary);">Rendimiento Diario</h2>
-        <div style="font-size: 13px; color: var(--muted); margin-bottom: 10px;">Comportamiento de interacciones válidas en los últimos 15 días.</div>
-        <div class="chart-container">
-            <canvas id="advisorChart"></canvas>
-        </div>
-    </div>
-</div>
-
-<!-- Loader -->
-<div id="loadingOverlay" style="position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(255,255,255,0.85); z-index: 9999;">
-    <div style="text-align: center;">
-        <div style="width: 50px; height: 50px; border-radius: 50%; border: 4px solid var(--border); border-top-color: var(--vento-accent); animation: spin 0.8s linear infinite; margin: 0 auto;"></div>
-        <div style="margin-top: 16px; font-weight: 700; color: var(--vento-primary);">Procesando base de datos...</div>
-    </div>
-</div>
-<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-
-<script>
-/* ----------------- Config y constantes ----------------- */
-const SPREADSHEET_ID = '1JBre4cLAbYiOJuYye_FGcsk5U_BIStDoAiCbV-B8WoA';
-const ASSESSORS_SPREADSHEET_ID = '1GBcoYjw-mziCA30F2CgqGM9kKWjJjeSiTGfHN6XM8rE';
-const SHEETS = { tickets: 'Tickets_BD', chats: 'Chats_BD', calls: 'Llamadas_BD', asesoresSheet: 'Asesores' };
-const AUTO_REFRESH_MS = 15 * 60 * 1000;
-
-function letterToIndex(letter){ return letter.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0); }
-const COL = {
-    tickets: { advisor: letterToIndex('E'), date: letterToIndex('H'), status: letterToIndex('M') },
-    chats: { advisor: letterToIndex('B'), duration: letterToIndex('C'), date: letterToIndex('I'), agentFlag: letterToIndex('M') },
-    calls: { advisor: letterToIndex('B'), date: letterToIndex('C'), status: letterToIndex('D'), duration: letterToIndex('K') },
-    asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') }
-};
-
-/* ----------------- Estado Global ----------------- */
-let aliasMap = {}; let metaMap = {}; let cache = { tickets:[], chats:[], calls:[] };
-let activeGroup = 'All'; let currentChartInstance = null;
-let currentFilteredData = []; 
-
-/* ----------------- Utilidades de Parseo ----------------- */
-function parseCSV(text){
-    const rows=[]; let cur='', row=[], inQuotes=false;
-    for(let i=0; i<text.length; i++){ 
-        const ch=text[i], next=text[i+1];
-        if(ch==='"'){ if(inQuotes && next==='"'){ cur+='"'; i++; continue; } inQuotes=!inQuotes; continue; }
-        if(ch===',' && !inQuotes){ row.push(cur); cur=''; continue; }
-        if((ch==='\n' || ch==='\r') && !inQuotes){ if(ch==='\r' && next==='\n'){ i++; } row.push(cur); rows.push(row); row=[]; cur=''; continue; }
-        cur+=ch;
+    function buildRecord(rawRecord) {
+      const searchable = [
+        rawRecord['ID CESVE'], rawRecord['RAZON SOCIAL'], rawRecord['NOMBRE COMERCIAL'],
+        rawRecord['CIUDAD / MUNICIPIO'], rawRecord['ESTADO'], rawRecord['MAIL'],
+        rawRecord['CELULAR'], rawRecord['TELEFONO'], rawRecord['REGIONAL VENTO'],
+        rawRecord['TERRITORIAL VENTO'], rawRecord['CALLE'], rawRecord['COLONIA'],
+      ].filter(Boolean).join(' ');
+      
+      return { ...rawRecord, searchable: searchable.toLowerCase() };
     }
-    if(cur!=='' || row.length){ row.push(cur); rows.push(row); }
-    return rows;
-}
 
-function fetchSheetCSVRowsById(spreadsheetId, sheetName){
-    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-    return fetch(url).then(res => { if(!res.ok) throw new Error('Error al leer hoja (' + res.status + ')'); return res.text(); }).then(parseCSV);
-}
-
-function normalizeForKey(s){ 
-    if(!s) return ''; 
-    let t=String(s).replace(/\u00A0/g,' ').replace(/\t/g,' ').trim(); t=t.replace(/[\\\.,]/g,''); t=t.toUpperCase();
-    const tokens=['ATC PISTON','ATC SUP','ATC','SUP','CORD','COORD','ANL','CAP','AGT','AGENTE','SR','SRA'];
-    for(const tk of tokens){ const reStart=new RegExp('^\\s*'+tk+'[\\s\\-\\_\\.]*','i'); t=t.replace(reStart,''); const reEnd=new RegExp('[\\s\\-\\_\\.]+'+tk+'\\s*$','i'); t=t.replace(reEnd,''); }
-    if(t.includes(',')){ const parts=t.split(','); if(parts.length>=2){ t=(parts[1]+' '+parts[0]).trim(); } }
-    t=t.replace(/\s+/g,' ').trim(); return t;
-}
-
-function titleCase(s){ return !s ? s : s.toLowerCase().split(' ').map(w=>w?(w[0].toUpperCase()+w.slice(1)):'').join(' '); }
-
-function durationToSeconds(s){ 
-    if(!s) return 0; const str=String(s).trim().toLowerCase(); if(!str) return 0; let total=0;
-    const mD=str.match(/(\d+)\s*d/); if(mD) total+=parseInt(mD[1],10)*86400;
-    const mH=str.match(/(\d+)\s*h/); if(mH) total+=parseInt(mH[1],10)*3600;
-    const mM=str.match(/(\d+)\s*m/); if(mM) total+=parseInt(mM[1],10)*60;
-    const mS=str.match(/(\d+)\s*s/); if(mS) total+=parseInt(mS[1],10);
-    if(total===0){ const onlyNum=str.match(/^(\d+)$/); if(onlyNum) total=parseInt(onlyNum[1],10); }
-    return total;
-}
-
-function parseDateFlexible(v){ 
-    if(!v) return null; const s=String(v).trim(); if(s===''||s==='0'||s==='-'||s.toLowerCase()==='null') return null;
-    const d1=new Date(s); if(!isNaN(d1.getTime())) return d1;
-    const m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/); if(m){ const day=+m[1], mon=+m[2]-1, yr=+m[3]; return new Date(yr<100?2000+yr:yr,mon,day); }
-    const m2=s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/); if(m2){ return new Date(+m2[1], +m2[2]-1, +m2[3]); } return null;
-}
-
-/* ----------------- Lógica de Fechas Automatizadas ----------------- */
-document.getElementById('periodSelector').addEventListener('change', function() {
-    const period = this.value;
-    const today = new Date();
-    
-    const formatDateLocal = (date) => {
-        const offset = date.getTimezoneOffset();
-        const localDate = new Date(date.getTime() - (offset * 60 * 1000));
-        return localDate.toISOString().split('T')[0];
-    };
-    
-    if (period === 'today') {
-        const dateStr = formatDateLocal(today);
-        document.getElementById('dateFrom').value = dateStr;
-        document.getElementById('dateTo').value = dateStr;
-    } else if (period === 'thisMonth') {
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        document.getElementById('dateFrom').value = formatDateLocal(firstDay);
-        document.getElementById('dateTo').value = formatDateLocal(lastDay);
+    function cargarEstadosEnFiltro() {
+      stateFilter.innerHTML = '<option value="">Todos los estados</option>';
+      allStates.filter(Boolean).sort((a, b) => a.localeCompare(b)).forEach((state) => {
+          const option = document.createElement('option');
+          option.value = state; option.textContent = state;
+          stateFilter.appendChild(option);
+      });
+      actualizarFiltroMunicipios();
     }
-});
 
-/* ----------------- Días Laborales y Progreso Esperado ----------------- */
-function getWorkingDaysForMonth(modality, year, month) {
-    const total = new Date(year, month + 1, 0).getDate();
-    const result = [];
-    for (let d = 1; d <= total; d++) {
-        const dt = new Date(year, month, d);
-        const dow = dt.getDay();
-        if (modality === 'Home Office') { if (dow !== 4 && dow !== 5) result.push(dt); } 
-        else { if (dow !== 0) result.push(dt); }
+    function actualizarFiltroMunicipios() {
+      const estadoSeleccionado = normalize(stateFilter.value);
+      cityFilter.innerHTML = '<option value="">Todas las ciudades</option>';
+      const municipiosFiltrados = rows
+        .filter(row => !estadoSeleccionado || normalize(row['ESTADO']) === estadoSeleccionado)
+        .map(row => row['CIUDAD / MUNICIPIO']).filter(Boolean);
+      
+      const ciudadesUnicas = [...new Set(municipiosFiltrados)].sort((a, b) => a.localeCompare(b));
+      ciudadesUnicas.forEach((city) => {
+        const option = document.createElement('option');
+        option.value = city; option.textContent = city;
+        cityFilter.appendChild(option);
+      });
+      filterRecords();
     }
-    return result;
-}
 
-function expectedUntilToday(monthlyMeta, workingDaysArray, today = new Date()) {
-    const total = workingDaysArray.length;
-    const passed = workingDaysArray.filter(d => d <= today).length;
-    if (total === 0) return 0;
-    return (monthlyMeta / total) * passed;
-}
-
-function getBarColor(real, expected) {
-    if (expected <= 0) return 'var(--success)';
-    const ratio = real / expected;
-    if (ratio >= 1.0) return 'var(--success)';
-    if (ratio >= 0.8) return 'var(--warning)';
-    return 'var(--danger)';
-}
-
-/* ----------------- Mapeo de Usuarios ----------------- */
-async function buildAliasAndMetaMaps(){
-    aliasMap={}; metaMap={};
-    try{
-        const rows = await fetchSheetCSVRowsById(ASSESSORS_SPREADSHEET_ID, SHEETS.asesoresSheet);
-        const supervisorSet = new Set();
-        for(let r=0;r<rows.length;r++){
-            const row=rows[r];
-            const rawUser=(row[COL.asesores.username]||'').trim();
-            const rawGroup=(row[COL.asesores.group]||'').trim();
-            const rawSupervisor=(row[COL.asesores.supervisor]||'').trim();
-            if(!rawUser) continue;
-            
-            const keyNorm=normalizeForKey(rawUser);
-            const canonical=titleCase(keyNorm);
-            const group=rawGroup?rawGroup:'OTROS';
-            const supervisor=rawSupervisor?rawSupervisor.toUpperCase():'OTROS';
-            const modality = group && group.toLowerCase().includes('home') ? 'Home Office' : 'Presencial';
-            
-            metaMap[canonical]={group,supervisor,modality};
-            aliasMap[keyNorm]=canonical;
-            if(supervisor !== 'OTROS') supervisorSet.add(supervisor);
-        }
-        
-        const supSelect = document.getElementById('filterSupervisor');
-        const currentVal = supSelect.value;
-        supSelect.innerHTML = '<option value="">Todos los supervisores</option>';
-        Array.from(supervisorSet).sort().forEach(sup => {
-            const opt = document.createElement('option'); opt.value = sup; opt.textContent = sup;
-            supSelect.appendChild(opt);
-        });
-        supSelect.value = currentVal;
-    }catch(err){ console.warn('Error Asesores:', err.message); }
-}
-
-function mapAdvisorToCanonical(raw){
-    const norm=normalizeForKey(raw); if(!norm) return '';
-    if(aliasMap[norm]) return aliasMap[norm];
-    const found=Object.keys(metaMap).find(c=>c.toUpperCase()===norm.toUpperCase());
-    if(found) return found;
-    const canonical=titleCase(norm);
-    if(!metaMap[canonical]) metaMap[canonical]={group:'OTROS',supervisor:'OTROS',modality:'Presencial'};
-    aliasMap[norm]=canonical; return canonical;
-}
-
-/* ----------------- Renderizado del Leaderboard ----------------- */
-function buildLeaderboardRows(scoresArr) {
-    const tbody = document.getElementById('leaderboardBody');
-    tbody.innerHTML = '';
-    const year = (new Date()).getFullYear();
-    const month = (new Date()).getMonth();
-    
-    const presTickets = Number(document.getElementById('goal_pres_tickets').textContent);
-    const presChats = Number(document.getElementById('goal_pres_chats').textContent);
-    const presCalls = Number(document.getElementById('goal_pres_calls').textContent);
-    const hoTickets = Number(document.getElementById('goal_ho_tickets').textContent);
-    const hoChats = Number(document.getElementById('goal_ho_chats').textContent);
-
-    scoresArr.forEach((s, idx) => {
-        const meta = {
-            tickets: s.modality === 'Home Office' ? hoTickets : presTickets,
-            calls: s.modality === 'Home Office' ? 0 : presCalls,
-            chats: s.modality === 'Home Office' ? hoChats : presChats
-        };
-        
-        const workingDays = getWorkingDaysForMonth(s.modality, year, month);
-        const expT = expectedUntilToday(meta.tickets, workingDays);
-        const expC = expectedUntilToday(meta.calls, workingDays);
-        const expCh = expectedUntilToday(meta.chats, workingDays);
-        
-        const pctT = meta.tickets > 0 ? Math.min(100, (s.tickets / meta.tickets) * 100) : 0;
-        const pctC = meta.calls > 0 ? Math.min(100, (s.calls / meta.calls) * 100) : 0;
-        const pctCh = meta.chats > 0 ? Math.min(100, (s.chats / meta.chats) * 100) : 0;
-        
-        const colorT = getBarColor(s.tickets, expT);
-        const colorC = getBarColor(s.calls, expC);
-        const colorCh = getBarColor(s.chats, expCh);
-        
-        const sumReal = s.tickets + s.calls + s.chats;
-        const sumMeta = meta.tickets + meta.calls + meta.chats;
-        const sumExp = expT + expC + expCh;
-        
-        const pctRealOverall = sumMeta > 0 ? (sumReal / sumMeta) * 100 : 0;
-        const pctExpOverall = sumMeta > 0 ? (sumExp / sumMeta) * 100 : 0;
-        
-        let statusClass = 'status-lejos';
-        if (pctRealOverall >= pctExpOverall) statusClass = 'status-cumplido';
-        else if (pctRealOverall >= pctExpOverall * 0.8) statusClass = 'status-cerca';
-
-        const tr = document.createElement('tr');
-        if(idx === 0) tr.classList.add('top-highlight-1');
-        else if(idx === 1) tr.classList.add('top-highlight-2');
-        else if(idx === 2) tr.classList.add('top-highlight-3');
-
-        tr.innerHTML = `
-            <td style="font-weight: 700; color: var(--muted);">${idx + 1}</td>
-            <td>
-                <a class="advisor-name-link" data-advisor="${s.name}">${s.name}</a>
-                <div class="meta-small">${s.group} • ${s.supervisor} • ${s.modality}</div>
-            </td>
-            <td class="col-metric">
-                <div class="metric-val">${s.tickets}</div>
-                <div class="rubro-bar-wrap" title="Meta: ${meta.tickets}"><div class="rubro-bar" style="width:${pctT}%; background-color:${colorT};"></div></div>
-                <div class="metric-sub">Real: ${Math.round(pctT)}% | Exp: ${Math.round((expT/meta.tickets)*100 || 0)}%</div>
-            </td>
-            <td class="col-metric">
-                <div class="metric-val">${s.calls}</div>
-                <div class="rubro-bar-wrap" title="Meta: ${meta.calls}"><div class="rubro-bar" style="width:${pctC}%; background-color:${colorC};"></div></div>
-                <div class="metric-sub">Real: ${Math.round(pctC)}% | Exp: ${Math.round((expC/meta.calls)*100 || 0)}%</div>
-            </td>
-            <td class="col-metric">
-                <div class="metric-val">${s.chats}</div>
-                <div class="rubro-bar-wrap" title="Meta: ${meta.chats}"><div class="rubro-bar" style="width:${pctCh}%; background-color:${colorCh};"></div></div>
-                <div class="metric-sub">Real: ${Math.round(pctCh)}% | Exp: ${Math.round((expCh/meta.chats)*100 || 0)}%</div>
-            </td>
-            <td style="text-align: right;">
-                <div class="score">${s.total.toFixed(0)} Pts</div>
-                <br><span class="status-pill ${statusClass}">${Math.round(pctRealOverall)}% Meta</span>
-            </td>
-        `;
-        tbody.appendChild(tr);
-
-        const link = tr.querySelector('.advisor-name-link');
-        if(link) link.addEventListener('click', () => openChartModal(s.name));
-    });
-}
-
-/* ----------------- Lógica Gráfica Individual ----------------- */
-function getDailyChartData(advisorName, start, end) {
-    const labels=[]; const dates=[];
-    let curr=new Date(start);
-    while(curr<=end){ 
-        const ds=curr.getFullYear()+'-'+String(curr.getMonth()+1).padStart(2,'0')+'-'+String(curr.getDate()).padStart(2,'0'); 
-        dates.push(ds); 
-        labels.push(String(curr.getDate()).padStart(2,'0')+'/'+String(curr.getMonth()+1).padStart(2,'0')); 
-        curr.setDate(curr.getDate()+1); 
-    }
-    
-    const dailyCounts={}; dates.forEach(d=>dailyCounts[d]={t:0,c:0,ch:0});
-    function addCount(dateStr, type){ if(dailyCounts[dateStr]) dailyCounts[dateStr][type]++; }
-    
-    cache.tickets.forEach(row => {
-        if(mapAdvisorToCanonical(row[COL.tickets.advisor]) !== advisorName) return;
-        if(String(row[COL.tickets.status]||'').toUpperCase()!=='CANALIZADO') return;
-        const parsed=parseDateFlexible(row[COL.tickets.date]);
-        if(parsed && parsed>=start && parsed<=end){
-            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 't');
-        }
-    });
-
-    cache.chats.forEach(row => {
-        if(mapAdvisorToCanonical(row[COL.chats.advisor]) !== advisorName) return;
-        if(String(row[COL.chats.agentFlag]||'').toUpperCase()!=='AGENT') return;
-        if(durationToSeconds(row[COL.chats.duration])>300) return;
-        const parsed=parseDateFlexible(row[COL.chats.date]);
-        if(parsed && parsed>=start && parsed<=end){
-            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 'ch');
-        }
-    });
-
-    cache.calls.forEach(row => {
-        if(mapAdvisorToCanonical(row[COL.calls.advisor]) !== advisorName) return;
-        if(String(row[COL.calls.status]||'').toLowerCase()!=='completed') return;
-        if(durationToSeconds(row[COL.calls.duration])<60) return; // <--- CORRECCIÓN DE REGLA AQUÍ
-        const parsed=parseDateFlexible(row[COL.calls.date]);
-        if(parsed && parsed>=start && parsed<=end){
-            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 'c');
-        }
-    });
-    
-    const seriesData = dates.map(d => { const v = dailyCounts[d] ? dailyCounts[d] : {t:0,c:0,ch:0}; return v.t + v.c + v.ch; });
-    return { labels, series: seriesData };
-}
-
-function openChartModal(advisorName) {
-    const modal = document.getElementById('chartModal');
-    document.getElementById('chartTitle').textContent = `Rendimiento de ${advisorName}`;
-    modal.style.display = 'flex';
-    
-    const end = new Date(); const start = new Date(); start.setDate(end.getDate() - 14);
-    const data = getDailyChartData(advisorName, start, end);
-    const ctx = document.getElementById('advisorChart').getContext('2d');
-    
-    if (currentChartInstance) currentChartInstance.destroy();
-    
-    currentChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.labels,
-            datasets: [{
-                label: 'Interacciones Válidas Totales',
-                data: data.series, borderColor: '#F28F17', backgroundColor: 'rgba(242, 143, 23, 0.15)',
-                borderWidth: 3, tension: 0.2, fill: true, pointBackgroundColor: '#231F20', pointRadius: 4
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, grid: { color: '#E5E7EB' } }, x: { grid: { display: false } } }
-        }
-    });
-}
-
-document.getElementById('closeModal').addEventListener('click', () => { document.getElementById('chartModal').style.display = 'none'; });
-
-/* ----------------- Descargas de Archivos ----------------- */
-function downloadCSV(csvContent, fileName) {
-    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a"); const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url); link.setAttribute("download", fileName);
-    link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-}
-
-function exportFilteredTable() {
-    if(!currentFilteredData.length) { alert("No hay registros en la vista actual para descargar."); return; }
-    let csv = "Posicion,Asesor,Grupo,Supervisor,Modalidad,Tickets,Llamadas,Chats,Puntaje\n";
-    currentFilteredData.forEach((s, idx) => {
-        csv += `${idx + 1},"${s.name}","${s.group}","${s.supervisor}","${s.modality}",${s.tickets},${s.calls},${s.chats},${s.total.toFixed(0)}\n`;
-    });
-    downloadCSV(csv, `Reporte_Leaderboard_${new Date().toISOString().split('T')[0]}.csv`);
-}
-
-// NUEVA FUNCIÓN: Descarga de archivo Excel real (.xlsx) con las 4 pestañas y datos íntegros
-function exportExcelMultiTabs() {
-    if (typeof XLSX === 'undefined') {
-        alert("La librería de Excel no ha terminado de cargar. Por favor, intenta de nuevo en unos segundos.");
+    function renderResults(filteredRows) {
+      resultsContainer.innerHTML = '';
+      if (!filteredRows.length) {
+        resultsContainer.innerHTML = '<div class="empty-state"><h2>No se encontraron resultados</h2></div>';
         return;
+      }
+      
+      filteredRows.forEach((record) => {
+        const card = resultTemplate.content.firstElementChild.cloneNode(true);
+        const title = record['RAZON SOCIAL'] || record['NOMBRE COMERCIAL'] || 'CESVE';
+        const subtitle = record['NOMBRE COMERCIAL'] && record['NOMBRE COMERCIAL'] !== record['RAZON SOCIAL']
+          ? record['NOMBRE COMERCIAL'] : 'Sin nombre comercial registrado';
+          
+        card.querySelector('.result-id').textContent = `ID CESVE: ${record['ID CESVE'] || 'No disponible'}`;
+        card.querySelector('.result-tag').textContent = `${record['ESTADO'] || 'Sin estado'} • ${record['CIUDAD / MUNICIPIO'] || 'Sin ciudad'}`;
+        card.querySelector('.result-title').textContent = title;
+        card.querySelector('.result-subtitle').textContent = subtitle;
+        
+        card.querySelector('.result-meta').innerHTML = `
+          <p><strong><i class="fa-solid fa-location-dot" style="color:var(--orange);"></i> Dirección:</strong> ${[record['CALLE'], record['NÚMERO (EXT / INT)'], record['COLONIA'], record['C.P.']].filter(Boolean).join(', ') || 'Sin dirección'}</p>
+          <p><strong><i class="fa-solid fa-user-tie"></i> Regional:</strong> ${record['REGIONAL VENTO'] || 'N/A'}</p>
+        `;
+        
+        card.querySelector('.result-contact').innerHTML = `
+          <p><strong><i class="fa-solid fa-envelope"></i> Correo:</strong> ${record['MAIL'] || 'N/A'}</p>
+          <p><strong><i class="fa-solid fa-phone"></i> Teléfono:</strong> ${record['TELEFONO'] || 'N/A'}</p>
+        `;
+
+        // Asignar evento al botón de eliminar
+        const deleteBtn = card.querySelector('.btn-delete');
+        deleteBtn.onclick = () => deleteRecord(record['ID CESVE'], deleteBtn);
+        
+        resultsContainer.appendChild(card);
+      });
     }
 
-    let from = null, to = null;
-    if(document.getElementById('dateFrom').value) from = new Date(document.getElementById('dateFrom').value + 'T00:00:00');
-    if(document.getElementById('dateTo').value) to = new Date(document.getElementById('dateTo').value + 'T23:59:59');
-    const selectedSupervisor = document.getElementById('filterSupervisor').value;
+    function filterRecords() {
+      const searchTerm = normalize(searchInput.value);
+      const state = normalize(stateFilter.value);
+      const city = normalize(cityFilter.value);
+      
+      const filtered = rows.filter((record) => {
+        const matchesSearch = !searchTerm || record.searchable.includes(searchTerm);
+        const matchesState = !state || normalize(record['ESTADO']) === state;
+        const matchesCity = !city || normalize(record['CIUDAD / MUNICIPIO']) === city;
+        return matchesSearch && matchesState && matchesCity;
+      });
+      renderResults(filtered);
+    }
 
-    // 1. Matriz de datos para la pestaña "Leaderboard"
-    const wsLeaderboardData = [["Posicion", "Asesor", "Grupo", "Supervisor", "Modalidad", "Tickets Válidos", "Llamadas Válidas", "Chats Válidos", "Puntaje"]];
-    currentFilteredData.forEach((s, idx) => {
-        wsLeaderboardData.push([idx + 1, s.name, s.group, s.supervisor, s.modality, s.tickets, s.calls, s.chats, s.total.toFixed(0)]);
-    });
-
-    // 2. Matriz de datos para la pestaña "Tickets Válidos"
-    const wsTicketsData = [];
-    if(cache.tickets.length > 0) wsTicketsData.push(cache.tickets[0]); // Conservar las cabeceras originales
-    cache.tickets.forEach((row, index) => {
-        if(index === 0) return; // Saltamos la fila de cabeceras
-        const adv = mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!adv) return;
-        const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
-        if(activeGroup !== 'All' && meta.group !== activeGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase() !== selectedSupervisor.toUpperCase()) return;
+    async function loadSheet() {
+      resultsContainer.innerHTML = '<div id="loadingSpinner">Cargando base de datos BD_CESVE... <i class="fa-solid fa-spinner fa-spin"></i></div>';
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error(`Error en servidor (${response.status})`);
         
-        if(String(row[COL.tickets.status]||'').toUpperCase() === 'CANALIZADO') {
-            const d = parseDateFlexible(row[COL.tickets.date]);
-            if(from && d < from) return; if(to && d > to) return;
-            wsTicketsData.push(row); // Insertar toda la fila original
-        }
-    });
-
-    // 3. Matriz de datos para la pestaña "Chats Válidos"
-    const wsChatsData = [];
-    if(cache.chats.length > 0) wsChatsData.push(cache.chats[0]);
-    cache.chats.forEach((row, index) => {
-        if(index === 0) return;
-        const adv = mapAdvisorToCanonical(row[COL.chats.advisor]); if(!adv) return;
-        const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
-        if(activeGroup !== 'All' && meta.group !== activeGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase() !== selectedSupervisor.toUpperCase()) return;
+        const jsonRecords = await response.json();
+        rows = jsonRecords.map((rawRecord) => buildRecord(rawRecord));
+        allStates = [...new Set(rows.map((row) => row['ESTADO']).filter(Boolean))];
         
-        const durSecs = durationToSeconds(row[COL.chats.duration]);
-        if(String(row[COL.chats.agentFlag]||'').toUpperCase() === 'AGENT' && durSecs <= 300) {
-            const d = parseDateFlexible(row[COL.chats.date]);
-            if(from && d < from) return; if(to && d > to) return;
-            wsChatsData.push(row); // Insertar toda la fila original
-        }
-    });
+        cargarEstadosEnFiltro();
+      } catch (error) {
+        console.error(error);
+        resultsContainer.innerHTML = `<div class="empty-state"><h2 style="color:#ef4444;">Error de Conexión</h2><p>Verifica que la API_URL de Apps Script sea correcta. Detalles: ${error.message}</p></div>`;
+      }
+    }
 
-    // 4. Matriz de datos para la pestaña "Llamadas Válidas"
-    const wsCallsData = [];
-    if(cache.calls.length > 0) wsCallsData.push(cache.calls[0]);
-    cache.calls.forEach((row, index) => {
-        if(index === 0) return;
-        const adv = mapAdvisorToCanonical(row[COL.calls.advisor]); if(!adv) return;
-        const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
-        if(activeGroup !== 'All' && meta.group !== activeGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase() !== selectedSupervisor.toUpperCase()) return;
+    async function deleteRecord(idCesve, btnElement) {
+      if (!confirm(`¿Estás seguro de que deseas dar de baja el registro con ID CESVE: ${idCesve} de Google Sheets?`)) return;
+      
+      const originalText = btnElement.innerHTML;
+      btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Borrando...';
+      btnElement.disabled = true;
+
+      try {
+        // Asegúrate de que las opciones del fetch manejan redirecciones transparentes 
+        // y utilizan mode: 'no-cors' si encuentras problemas con el POST, 
+        // aunque el script como Web App pública debería soportar cors si devuelve las cabeceras adecuadas.
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'delete', id: idCesve })
+        });
         
-        const durSecs = durationToSeconds(row[COL.calls.duration]);
-        if(String(row[COL.calls.status]||'').toLowerCase() === 'completed' && durSecs >= 60) { // <--- CORRECCIÓN DE REGLA AQUÍ
-            const d = parseDateFlexible(row[COL.calls.date]);
-            if(from && d < from) return; if(to && d > to) return;
-            wsCallsData.push(row); // Insertar toda la fila original
-        }
-    });
-
-    // Crear y configurar el documento Excel
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsLeaderboardData), "Leaderboard");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsTicketsData), "Tickets Válidos");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsChatsData), "Chats Válidos");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsCallsData), "Llamadas Válidas");
-
-    // Descargar el archivo
-    XLSX.writeFile(wb, `Reporte_Detallado_Valido_${new Date().toISOString().split('T')[0]}.xlsx`);
-}
-
-function exportRawBase(type) {
-    const data = cache[type];
-    if (!data || data.length === 0) { alert("Base de datos vacía o no sincronizada."); return; }
-    let csv = "";
-    data.forEach(row => {
-        const escaped = row.map(v => `"${String(v).replace(/"/g, '""')}"`);
-        csv += escaped.join(",") + "\n";
-    });
-    downloadCSV(csv, `Base_Completa_${type.toUpperCase()}_${new Date().toISOString().split('T')[0]}.csv`);
-}
-
-document.getElementById('downloadFilteredBtn').addEventListener('click', exportFilteredTable);
-document.getElementById('downloadExcelTabsBtn').addEventListener('click', exportExcelMultiTabs);
-document.getElementById('downloadRawSelect').addEventListener('change', function() {
-    if (this.value) { exportRawBase(this.value); this.value = ""; }
-});
-
-/* ----------------- Motor de Análisis ----------------- */
-function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervisor){
-    const counts={};
-    function ensure(name){ if(!counts[name]) counts[name]={tickets:0,chats:0,calls:0}; }
-    
-    cache.tickets.forEach(row => {
-        const adv=mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!adv) return;
-        const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
-        if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
-        if(String(row[COL.tickets.status]||'').toUpperCase()==='CANALIZADO'){
-            const d=parseDateFlexible(row[COL.tickets.date]);
-            if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
-            ensure(adv); counts[adv].tickets++;
-        }
-    });
-
-    cache.chats.forEach(row => {
-        const adv=mapAdvisorToCanonical(row[COL.chats.advisor]); if(!adv) return;
-        const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
-        if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
-        if(String(row[COL.chats.agentFlag]||'').toUpperCase()==='AGENT' && durationToSeconds(row[COL.chats.duration])<=300){
-            const d=parseDateFlexible(row[COL.chats.date]);
-            if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
-            ensure(adv); counts[adv].chats++;
-        }
-    });
-
-    cache.calls.forEach(row => {
-        const adv=mapAdvisorToCanonical(row[COL.calls.advisor]); if(!adv) return;
-        const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
-        if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
-        if(String(row[COL.calls.status]||'').toLowerCase()==='completed' && durationToSeconds(row[COL.calls.duration])>=60){ // <--- CORRECCIÓN DE REGLA AQUÍ
-            const d=parseDateFlexible(row[COL.calls.date]);
-            if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
-            ensure(adv); counts[adv].calls++;
-        }
-    });
-
-    let maxT=0, maxC=0, maxCh=0;
-    Object.values(counts).forEach(c => {
-        if(c.tickets>maxT) maxT=c.tickets; if(c.calls>maxC) maxC=c.calls; if(c.chats>maxCh) maxCh=c.chats;
-    });
-
-    const arr = Object.keys(counts).map(name => {
-        const c=counts[name];
-        const tPts = maxT ? (c.tickets/maxT)*100 : 0;
-        const cPts = maxC ? (c.calls/maxC)*100 : 0;
-        const chPts = maxCh ? (c.chats/maxCh)*100 : 0;
-        return {
-            name, tickets: c.tickets, calls: c.calls, chats: c.chats,
-            total: tPts + cPts + chPts,
-            group: metaMap[name]?.group||'OTROS', supervisor: metaMap[name]?.supervisor||'OTROS',
-            modality: metaMap[name]?.modality||'Presencial'
-        };
-    });
-    
-    arr.sort((a,b)=>b.total-a.total);
-    currentFilteredData = arr; 
-    
-    document.getElementById('statAdvisors').textContent = arr.length;
-    document.getElementById('statTickets').textContent = Object.values(counts).reduce((s,c)=>s+c.tickets,0);
-    document.getElementById('statCalls').textContent = Object.values(counts).reduce((s,c)=>s+c.calls,0);
-    document.getElementById('statChats').textContent = Object.values(counts).reduce((s,c)=>s+c.chats,0);
-    
-    buildLeaderboardRows(arr);
-}
-
-function applyAllFilters() {
-    let from = null, to = null;
-    if(document.getElementById('dateFrom').value) from = new Date(document.getElementById('dateFrom').value + 'T00:00:00');
-    if(document.getElementById('dateTo').value) to = new Date(document.getElementById('dateTo').value + 'T23:59:59');
-    aggregateAndScore(from, to, activeGroup, document.getElementById('filterSupervisor').value);
-}
-
-/* ----------------- Flujo de Ejecución e Inicialización ----------------- */
-async function loadAllAndRender() {
-    try {
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        await buildAliasAndMetaMaps();
+        const result = await response.json();
         
-        const [t, ch, c] = await Promise.all([
-            fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.tickets).catch(()=>[]),
-            fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.chats).catch(()=>[]),
-            fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.calls).catch(()=>[])
-        ]);
-        cache.tickets = t; cache.chats = ch; cache.calls = c;
+        if (result.success) {
+          alert('Registro eliminado correctamente de la base de datos.');
+          loadSheet(); // Recargar los datos para reflejar el cambio
+        } else {
+          alert('Error al eliminar: ' + result.message);
+          btnElement.innerHTML = originalText;
+          btnElement.disabled = false;
+        }
+      } catch (error) {
+        alert('Hubo un error de conexión al intentar eliminar el registro. Si el registro se borró en Sheets pero ves este error, podría ser un tema de CORS con el método POST en tu navegador.');
+        btnElement.innerHTML = originalText;
+        btnElement.disabled = false;
         
-        applyAllFilters();
-        document.getElementById('lastSync').textContent = new Date().toLocaleString('es-MX', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-    } catch(e) { console.error(e); } finally { document.getElementById('loadingOverlay').style.display = 'none'; }
-}
+        // Recargar por precaución para ver si sí se aplicó en el backend
+        setTimeout(() => loadSheet(), 2000);
+      }
+    }
 
-document.getElementById('applyFilters').addEventListener('click', applyAllFilters);
-document.getElementById('refreshBtn').addEventListener('click', loadAllAndRender);
-
-document.querySelectorAll('.tab').forEach(t => {
-    t.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        t.classList.add('active');
-        activeGroup = t.dataset.group;
-        applyAllFilters();
+    searchInput.addEventListener('input', filterRecords);
+    cityFilter.addEventListener('change', filterRecords);
+    clearFiltersButton.addEventListener('click', () => {
+      searchInput.value = ''; stateFilter.value = ''; actualizarFiltroMunicipios();
     });
-});
 
-document.getElementById('periodSelector').dispatchEvent(new Event('change'));
-loadAllAndRender();
-setInterval(loadAllAndRender, AUTO_REFRESH_MS);
-</script>
+    // Iniciar carga
+    loadSheet();
+  </script>
 </body>
 </html>
