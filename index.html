@@ -367,7 +367,29 @@
       searchInput.value = ''; stateFilter.value = ''; actualizarFiltroMunicipios();
     });
 
-    loadSheet();
+    //Carga los datos por pimera ves
+      loadSheet();
+    
+    // ==========================================
+    // ACTUALIZACIÓN AUTOMÁTICA (CADA 5 MINUTOS)
+    // ==========================================
+    setInterval(async () => {
+      try {
+        // Hacemos la petición silenciosa con el destructor de caché para ver si hay cambios
+        const response = await fetch(`${API_URL}?_=${Date.now()}`);
+        if (response.ok) {
+          const jsonRecords = await response.json();
+          rows = jsonRecords.map((rawRecord) => buildRecord(rawRecord));
+          
+          // Actualizamos los resultados en pantalla respetando los filtros que el asesor tenga puestos en ese momento
+          filterRecords();
+          console.log('Base de datos actualizada automáticamente de forma silenciosa.');
+        }
+      } catch (error) {
+        console.error('No se pudo realizar la actualización automática en segundo plano:', error);
+      }
+    }, 5 * 60 * 1000); // 5 minutos en milisegundos (5 * 60 * 1000)
+    
   </script>
 </body>
 </html>
