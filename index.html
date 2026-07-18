@@ -1,132 +1,66 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Directorio Post Venta | Consultor Web</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Directorio Post Venta - Profesional</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
-:root {
-  --primary-color: #d32f2f;
-  --dark-color: #2b2b2b;
-  --light-bg: #f4f6f8;
-  --border-color: #e0e0e0;
+:root{
+  --primary:#d32f2f;
+  --muted:#6b6b6b;
+  --bg:#f4f6f8;
+  --card:#fff;
+  --border:#e6e6e6;
+  --success:#2e7d32;
+  --info:#0288d1;
+  --warning:#f57c00;
+  --font: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--light-bg);
-  margin: 0;
-  padding: 20px;
-  color: #333;
+*{box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);margin:0;padding:20px;color:#222}
+.container{max-width:1200px;margin:0 auto;background:var(--card);border-radius:8px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+.header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;background:#222;color:#fff}
+.header h1{margin:0;font-size:20px;border-left:4px solid var(--primary);padding-left:10px}
+.controls{display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--border);flex-wrap:wrap;background:#fafafa}
+.control{display:flex;flex-direction:column;min-width:200px}
+.control label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+input[type="text"],select{padding:10px;border:1px solid var(--border);border-radius:6px;font-size:14px}
+.table-wrap{padding:18px;overflow:auto}
+.table-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:12px}
+.badge{background:rgba(255,255,255,0.08);padding:6px 10px;border-radius:999px;color:#fff;font-weight:600}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle}
+th{position:sticky;top:0;background:#222;color:#fff;font-size:12px;text-transform:uppercase}
+tr:hover{background:#fbfbfb}
+.role-badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;color:#fff}
+.role-supervisor{background:var(--info)}
+.role-asesor{background:var(--primary)}
+.role-gerente{background:var(--warning)}
+.small{font-size:12px;color:var(--muted)}
+.actions button{margin-right:6px;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer}
+.pager{display:flex;gap:8px;align-items:center}
+.pager button{padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer}
+.highlight{background:linear-gradient(90deg, rgba(255,235,59,0.2), transparent);padding:2px 4px;border-radius:3px}
+.details{background:#fafafa;padding:12px;border-radius:6px;margin-top:8px;border:1px solid var(--border)}
+@media(max-width:800px){
+  .controls{flex-direction:column}
+  th,td{font-size:12px;padding:8px}
 }
-.dashboard-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  overflow: hidden;
-}
-.header {
-  background-color: var(--dark-color);
-  color: #fff;
-  padding: 20px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.header h1 {
-  margin: 0;
-  font-size: 24px;
-  border-left: 4px solid var(--primary-color);
-  padding-left: 10px;
-}
-.controls {
-  padding: 20px 30px;
-  display: flex;
-  gap: 20px;
-  background: #fafafa;
-  border-bottom: 1px solid var(--border-color);
-  flex-wrap: wrap;
-}
-.control-group {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 250px;
-}
-.control-group label {
-  font-size: 12px;
-  font-weight: bold;
-  color: #666;
-  margin-bottom: 5px;
-  text-transform: uppercase;
-}
-select, input {
-  padding: 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-select:focus, input:focus {
-  border-color: var(--primary-color);
-}
-.table-container {
-  padding: 20px 30px;
-  overflow-x: auto;
-  min-height: 300px;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-th, td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
-}
-th {
-  background-color: var(--dark-color);
-  color: white;
-  font-weight: 600;
-  white-space: nowrap;
-  text-transform: uppercase;
-  font-size: 12px;
-  position: sticky;
-  top: 0;
-}
-tr:hover {
-  background-color: #f9f9f9;
-}
-.loader {
-  text-align: center;
-  padding: 40px;
-  font-style: italic;
-  color: #888;
-}
-.badge {
-  background: rgba(255,255,255,0.2);
-  padding: 5px 10px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: bold;
-}
+.copy-btn{background:transparent;border:none;color:var(--info);cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
-<div class="dashboard-container">
+<div class="container" role="application" aria-label="Directorio Post Venta">
   <div class="header">
     <h1>Directorio Post Venta</h1>
-    <span class="badge" id="record-count">0 registros</span>
+    <div class="badge" id="record-count">0 registros</div>
   </div>
 
-  <div class="controls">
-    <div class="control-group">
-      <label for="area-select">Seleccionar Área (Pestaña)</label>
-      <select id="area-select">
+  <div class="controls" aria-hidden="false">
+    <div class="control">
+      <label for="area-select">Seleccionar Área</label>
+      <select id="area-select" aria-label="Seleccionar área">
         <option value="ATENCION A CLIENTES">Atención a Clientes</option>
         <option value="REPARACIONES TIENDAS">Reparaciones Tiendas</option>
         <option value="REPARACIONES AGENCIAS">Reparaciones Agencias</option>
@@ -141,52 +75,68 @@ tr:hover {
       </select>
     </div>
 
-    <div class="control-group">
+    <div class="control" style="flex:1">
       <label for="search-input">Buscar persona, correo o rol</label>
-      <input type="text" id="search-input" placeholder="Escribe para buscar o filtrar...">
+      <input type="text" id="search-input" placeholder="Escribe para buscar..." aria-label="Buscar persona correo o rol">
+    </div>
+
+    <div class="control" style="min-width:140px">
+      <label for="per-page">Filas por página</label>
+      <select id="per-page" aria-label="Filas por página">
+        <option>10</option><option>25</option><option>50</option>
+      </select>
     </div>
   </div>
 
-  <div class="table-container">
-    <div id="loader" class="loader">Conectando y descargando datos desde Google Sheets...</div>
-    <table id="data-table" style="display:none;">
+  <div class="table-wrap">
+    <div class="table-actions">
+      <div class="small">Resultados mostrados</div>
+      <div class="pager" aria-label="Paginación">
+        <button id="prev-page" aria-label="Página anterior">Anterior</button>
+        <div id="page-info" class="small">Página 1</div>
+        <button id="next-page" aria-label="Página siguiente">Siguiente</button>
+      </div>
+    </div>
+
+    <div id="loader" class="small">Conectando y descargando datos desde Google Sheets...</div>
+
+    <table id="data-table" class="table" style="display:none" aria-live="polite">
       <thead id="table-head"></thead>
       <tbody id="table-body"></tbody>
     </table>
+
+    <div id="detail-panel" style="display:none" class="details" aria-hidden="true"></div>
   </div>
 </div>
 
 <script>
-// ID del Documento de Google Sheets
 const SHEET_ID = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
-
-let currentData = [];
-let currentHeaders = [];
+let currentData = [], currentHeaders = [], filteredData = [];
+let page = 1, perPage = 10;
 
 const areaSelect = document.getElementById('area-select');
 const searchInput = document.getElementById('search-input');
+const perPageSelect = document.getElementById('per-page');
 const table = document.getElementById('data-table');
 const thead = document.getElementById('table-head');
 const tbody = document.getElementById('table-body');
 const loader = document.getElementById('loader');
 const recordCount = document.getElementById('record-count');
+const prevBtn = document.getElementById('prev-page');
+const nextBtn = document.getElementById('next-page');
+const pageInfo = document.getElementById('page-info');
+const detailPanel = document.getElementById('detail-panel');
 
-/**
- * Rellena celdas vacías que provienen de celdas combinadas en el CSV.
- * Normaliza la longitud de filas y rellena hacia abajo por columna.
- */
 function fillMergedCells(rawData) {
   if (!rawData || rawData.length === 0) return rawData;
   const numRows = rawData.length;
   const numCols = Math.max(...rawData.map(r => r.length));
-  // Normalizar longitud de filas
   for (let i = 0; i < numRows; i++) {
     rawData[i] = rawData[i] || [];
     for (let j = 0; j < numCols; j++) {
       if (typeof rawData[i][j] === 'undefined') rawData[i][j] = '';
     }
   }
-  // Rellenar hacia abajo por columna
   for (let col = 0; col < numCols; col++) {
     let last = '';
     for (let row = 0; row < numRows; row++) {
@@ -200,86 +150,197 @@ function fillMergedCells(rawData) {
   return rawData;
 }
 
-async function loadData(sheetName) {
+function loadData(sheetName) {
   loader.style.display = 'block';
   table.style.display = 'none';
+  detailPanel.style.display = 'none';
   searchInput.value = '';
-
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-
   Papa.parse(url, {
-    download: true,
-    header: false,
-    skipEmptyLines: true,
+    download: true, header: false, skipEmptyLines: true,
     complete: function(results) {
       let rawData = results.data || [];
-      // Normalizar celdas combinadas antes de detectar encabezados
       rawData = fillMergedCells(rawData);
-
       let headerRowIndex = -1;
-      // Buscar encabezado real en las primeras filas (mantener tu heurística)
       for (let i = 0; i < Math.min(10, rawData.length); i++) {
         const rowStr = rawData[i].join("").toUpperCase();
         if (rowStr.includes("CORREO") || rowStr.includes("ASESOR") || rowStr.includes("GERENTE") || rowStr.includes("NOMBRE") || rowStr.includes("ANALISTA")) {
-          headerRowIndex = i;
-          break;
+          headerRowIndex = i; break;
         }
       }
-
       if (headerRowIndex !== -1) {
-        currentHeaders = rawData[headerRowIndex].map(h => (h || '').toString().trim());
-        let parsedData = [];
+        currentHeaders = rawData[headerRowIndex].map(h => (h||'').toString().trim());
+        let parsed = [];
         for (let i = headerRowIndex + 1; i < rawData.length; i++) {
-          let rowObj = {};
-          let hasData = false;
+          let rowObj = {}; let hasData = false;
           for (let j = 0; j < currentHeaders.length; j++) {
             if (currentHeaders[j]) {
               rowObj[currentHeaders[j]] = rawData[i][j] || '';
               if (rawData[i][j] && rawData[i][j].toString().trim() !== '') hasData = true;
             }
           }
-          if (hasData) parsedData.push(rowObj);
+          if (hasData) parsed.push(rowObj);
         }
-        currentData = parsedData;
-      } else {
-        currentHeaders = [];
-        currentData = [];
-      }
-
-      renderTable(currentData);
+        currentData = parsed;
+      } else { currentHeaders = []; currentData = []; }
+      filteredData = currentData.slice();
+      page = 1;
+      renderTablePage();
       loader.style.display = 'none';
       table.style.display = 'table';
     },
     error: function(err) {
-      loader.innerHTML = '<span style="color:#d32f2f;">No se pudo conectar. Verifica que el archivo de Sheets tenga permisos para que "Cualquier usuario con el vínculo" pueda leerlo.</span>';
+      loader.innerHTML = '<span style="color:#d32f2f;">No se pudo conectar. Verifica permisos de lectura.</span>';
       console.error(err);
     }
   });
 }
 
+function renderTablePage() {
+  // Apply pagination
+  perPage = parseInt(perPageSelect.value,10);
+  const start = (page-1)*perPage;
+  const pageItems = filteredData.slice(start, start+perPage);
+  renderTable(pageItems);
+  recordCount.innerText = `${filteredData.length} registros`;
+  pageInfo.innerText = `Página ${page} de ${Math.max(1, Math.ceil(filteredData.length/perPage))}`;
+  prevBtn.disabled = page <= 1;
+  nextBtn.disabled = page >= Math.ceil(filteredData.length/perPage);
+}
+
 function renderTable(data) {
-  thead.innerHTML = '<tr>' + currentHeaders.filter(h => h).map(h => `<th>${h}</th>`).join('') + '</tr>';
-  tbody.innerHTML = data.map(row => {
-    return '<tr>' + currentHeaders.filter(h => h).map(h => `<td>${row[h] || ''}</td>`).join('') + '</tr>';
+  thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th data-col="${h}">${h} <button class="sort-btn" data-col="${h}" aria-label="Ordenar ${h}">⇅</button></th>`).join('') + '</tr>';
+  tbody.innerHTML = data.map((row, idx) => {
+    // Build a compact row with mailto and copy buttons
+    const email = row['CORREO'] || row['EMAIL'] || row['E-MAIL'] || '';
+    const nombre = row['NOMBRE'] || row['NOMBRE COMPLETO'] || row['ASESOR'] || '';
+    const rol = row['ROL'] || row['PUESTO'] || '';
+    const telefono = row['TEL'] || row['TELEFONO'] || row['CELULAR'] || '';
+    const roleClass = (rol.toLowerCase().includes('supervisor')) ? 'role-supervisor' : (rol.toLowerCase().includes('asesor') ? 'role-asesor' : 'role-gerente');
+    return `<tr data-idx="${idx}">
+      ${currentHeaders.filter(h=>h).map(h => {
+        const val = row[h] || '';
+        // highlight search matches
+        const q = (searchInput.value||'').trim().toLowerCase();
+        const display = q && val.toString().toLowerCase().includes(q) ? val.toString().replace(new RegExp(q,'ig'), m=>`<span class="highlight">${m}</span>`) : val;
+        if (h.toUpperCase().includes('CORREO') || h.toUpperCase().includes('EMAIL')) {
+          return `<td><a href="mailto:${val}" class="small">${display}</a> <button class="copy-btn" data-copy="${val}" title="Copiar correo">Copiar</button></td>`;
+        }
+        if (h.toUpperCase().includes('TEL') || h.toUpperCase().includes('CEL')) {
+          return `<td>${display} <button class="copy-btn" data-copy="${val}" title="Copiar teléfono">Copiar</button></td>`;
+        }
+        if (h.toUpperCase().includes('ROL') || h.toUpperCase().includes('PUESTO')) {
+          return `<td><span class="role-badge ${roleClass}">${display}</span></td>`;
+        }
+        if (h.toUpperCase().includes('NOMBRE') || h.toUpperCase().includes('ASESOR')) {
+          return `<td><strong>${display}</strong><div class="small">${rol || ''}</div></td>`;
+        }
+        return `<td>${display}</td>`;
+      }).join('')}
+    </tr>`;
   }).join('');
-  recordCount.innerText = `${data.length} registros`;
-}
-
-function filterData() {
-  const query = searchInput.value.toLowerCase();
-  const filtered = currentData.filter(row => {
-    return Object.values(row).some(val =>
-      String(val).toLowerCase().includes(query)
-    );
+  // Attach row click handlers for details and copy buttons
+  Array.from(tbody.querySelectorAll('tr')).forEach((tr, i) => {
+    tr.addEventListener('click', (e) => {
+      // prevent when clicking copy button
+      if (e.target && e.target.classList.contains('copy-btn')) return;
+      const globalIdx = (page-1)*perPage + parseInt(tr.getAttribute('data-idx'),10);
+      showDetails(filteredData[globalIdx]);
+    });
   });
-  renderTable(filtered);
+  Array.from(tbody.querySelectorAll('.copy-btn')).forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const text = btn.getAttribute('data-copy') || '';
+      navigator.clipboard.writeText(text || '').then(()=> {
+        btn.innerText = 'Copiado';
+        setTimeout(()=> btn.innerText = 'Copiar',1200);
+      });
+    });
+  });
+  // Sorting buttons
+  Array.from(thead.querySelectorAll('.sort-btn')).forEach(b => {
+    b.addEventListener('click', (ev) => {
+      const col = b.getAttribute('data-col');
+      sortByColumn(col);
+    });
+  });
 }
 
-areaSelect.addEventListener('change', (e) => loadData(e.target.value));
-searchInput.addEventListener('keyup', filterData);
+function showDetails(row) {
+  if (!row) { detailPanel.style.display='none'; detailPanel.setAttribute('aria-hidden','true'); return; }
+  const email = row['CORREO'] || row['EMAIL'] || '';
+  const tel = row['TEL'] || row['TELEFONO'] || row['CELULAR'] || '';
+  const horario = row['HORARIO'] || row['DISPONIBILIDAD'] || '';
+  const notas = row['NOTAS'] || row['COMENTARIOS'] || '';
+  detailPanel.innerHTML = `<strong>${row['NOMBRE'] || row['ASESOR'] || ''}</strong>
+    <div class="small">Rol: ${row['ROL'] || row['PUESTO'] || ''}</div>
+    <div style="margin-top:8px"><strong>Correo</strong>: <a href="mailto:${email}">${email}</a> <button class="copy-btn" data-copy="${email}">Copiar</button></div>
+    <div style="margin-top:6px"><strong>Teléfono</strong>: ${tel} <button class="copy-btn" data-copy="${tel}">Copiar</button></div>
+    ${horario ? `<div style="margin-top:6px"><strong>Horario</strong>: ${horario}</div>` : ''}
+    ${notas ? `<div style="margin-top:8px"><strong>Notas</strong>: ${notas}</div>` : ''}
+  `;
+  detailPanel.style.display = 'block';
+  detailPanel.setAttribute('aria-hidden','false');
+  Array.from(detailPanel.querySelectorAll('.copy-btn')).forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = btn.getAttribute('data-copy') || '';
+      navigator.clipboard.writeText(text || '');
+      btn.innerText = 'Copiado';
+      setTimeout(()=> btn.innerText = 'Copiar',1200);
+    });
+  });
+}
 
-// Cargar la pestaña inicial seleccionada
+function sortByColumn(col) {
+  const dir = (table.getAttribute('data-sort-col') === col && table.getAttribute('data-sort-dir') === 'asc') ? 'desc' : 'asc';
+  filteredData.sort((a,b) => {
+    const va = (a[col]||'').toString().toLowerCase();
+    const vb = (b[col]||'').toString().toLowerCase();
+    if (va < vb) return dir === 'asc' ? -1 : 1;
+    if (va > vb) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  table.setAttribute('data-sort-col', col);
+  table.setAttribute('data-sort-dir', dir);
+  page = 1;
+  renderTablePage();
+}
+
+function applyFilter() {
+  const q = (searchInput.value || '').trim().toLowerCase();
+  if (!q) { filteredData = currentData.slice(); page = 1; renderTablePage(); return; }
+  filteredData = currentData.filter(row => {
+    return Object.values(row).some(v => (v||'').toString().toLowerCase().includes(q));
+  });
+  page = 1;
+  renderTablePage();
+}
+
+// Pagination controls
+prevBtn.addEventListener('click', ()=> { if (page>1) { page--; renderTablePage(); }});
+nextBtn.addEventListener('click', ()=> { if (page < Math.ceil(filteredData.length/perPage)) { page++; renderTablePage(); }});
+perPageSelect.addEventListener('change', ()=> { page = 1; renderTablePage(); });
+
+// Search debounce
+let debounce;
+searchInput.addEventListener('input', ()=> {
+  clearTimeout(debounce);
+  debounce = setTimeout(()=> applyFilter(), 220);
+});
+
+// Area change
+areaSelect.addEventListener('change', (e)=> loadData(e.target.value));
+
+// Initial load
 loadData(areaSelect.value);
+
+// Keyboard shortcuts for accessibility
+document.addEventListener('keydown', (e) => {
+  if (e.altKey && e.key === 'f') { e.preventDefault(); searchInput.focus(); }
+  if (e.altKey && e.key === 'ArrowRight') { if (page < Math.ceil(filteredData.length/perPage)) { page++; renderTablePage(); } }
+  if (e.altKey && e.key === 'ArrowLeft') { if (page>1) { page--; renderTablePage(); } }
+});
 </script>
 </body>
 </html>
