@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Directorio Post Venta - Sin áreas</title>
+<title>Directorio Post Venta - Selector de pestañas</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
 :root{
@@ -21,10 +21,10 @@ body{font-family:var(--font);background:var(--bg);margin:0;padding:20px;color:#2
 .container{max-width:1200px;margin:0 auto;background:var(--card);border-radius:8px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
 .header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;background:#222;color:#fff}
 .header h1{margin:0;font-size:20px;border-left:4px solid var(--primary);padding-left:10px}
-.controls{display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--border);flex-wrap:wrap;background:#fafafa}
+.controls{padding:16px;border-bottom:1px solid var(--border);background:#fafafa;display:flex;gap:12px;flex-wrap:wrap}
 .control{display:flex;flex-direction:column;min-width:200px}
 .control label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
-input[type="text"]{padding:10px;border:1px solid var(--border);border-radius:6px;font-size:14px;width:100%}
+select,input[type="text"]{padding:10px;border:1px solid var(--border);border-radius:6px;font-size:14px}
 .table-wrap{padding:18px;overflow:auto}
 .table-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:12px}
 .badge{background:rgba(255,255,255,0.08);padding:6px 10px;border-radius:999px;color:#fff;font-weight:600}
@@ -53,6 +53,23 @@ tr:hover{background:#fbfbfb}
   </div>
 
   <div class="controls" aria-hidden="false">
+    <div class="control">
+      <label for="area-select">Seleccionar Pestaña</label>
+      <select id="area-select" aria-label="Seleccionar pestaña">
+        <option value="ATENCION A CLIENTES">Atención a Clientes</option>
+        <option value="REPARACIONES TIENDAS">Reparaciones Tiendas</option>
+        <option value="REPARACIONES AGENCIAS">Reparaciones Agencias</option>
+        <option value="REPARACIONES CEDIS">Reparaciones CEDIS</option>
+        <option value="ARMADOS Y ACTIVADOS">Armados y Activados</option>
+        <option value="GARANTIAS">Garantías</option>
+        <option value="COTIZACIONES">Cotizaciones</option>
+        <option value="PAGOS A CESVE">Pagos a CESVE</option>
+        <option value="REGIONALES">Regionales</option>
+        <option value="VENTOMAN COPPEL">Ventoman Coppel</option>
+        <option value="VENTOMAN VENTO">Ventoman Vento</option>
+      </select>
+    </div>
+
     <div class="control" style="flex:1">
       <label for="search-input">Buscar persona, correo o rol</label>
       <input type="text" id="search-input" placeholder="Escribe para buscar..." aria-label="Buscar persona correo o rol">
@@ -61,7 +78,7 @@ tr:hover{background:#fbfbfb}
 
   <div class="table-wrap">
     <div class="table-actions">
-      <div class="small">Vista completa (sin áreas ni subáreas)</div>
+      <div class="small">Vista completa (sin subáreas)</div>
       <div class="small" id="info-note">Se excluyen filas con nombres específicos indicados</div>
     </div>
 
@@ -77,12 +94,12 @@ tr:hover{background:#fbfbfb}
 </div>
 
 <script>
-/* CONFIGURACIÓN: cambiar SHEET_ID y SHEET_NAME según necesites */
+/* CONFIGURACIÓN: cambiar SHEET_ID si necesitas apuntar a otra hoja */
 const SHEET_ID = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
-const SHEET_NAME = 'REPARACIONES TIENDAS'; // pestaña por defecto a cargar
 
 let currentData = [], currentHeaders = [], filteredData = [];
 
+const areaSelect = document.getElementById('area-select');
 const searchInput = document.getElementById('search-input');
 const table = document.getElementById('data-table');
 const thead = document.getElementById('table-head');
@@ -91,7 +108,7 @@ const loader = document.getElementById('loader');
 const recordCount = document.getElementById('record-count');
 const detailPanel = document.getElementById('detail-panel');
 
-/* Rellena celdas vacías que provienen de celdas combinadas */
+/* Normaliza filas y rellena celdas vacías que provienen de celdas combinadas */
 function fillMergedCells(rawData) {
   if (!rawData || rawData.length === 0) return rawData;
   const numRows = rawData.length;
@@ -120,7 +137,7 @@ function isExcludedRow(row) {
   if (!row) return false;
   const excludeList = [
     'ESPECIALISTAS DE REPARACIONES',
-    'SOPORTE TECNCO - GARANTIAS MOTOR, TRANSMISION Y BATERIAS '
+    'SOPORTE TECNCO - GARANTIAS MOTOR, TRANSMISION Y BATERIAS'
   ];
   const nameFields = ['NOMBRE','NOMBRE COMPLETO','ASESOR'];
   for (const f of nameFields) {
@@ -135,7 +152,7 @@ function isExcludedRow(row) {
   return false;
 }
 
-/* Carga la pestaña indicada y procesa filas (sin áreas/subáreas) */
+/* Carga la pestaña indicada y procesa filas (sin subáreas) */
 function loadData(sheetName) {
   loader.style.display = 'block';
   table.style.display = 'none';
@@ -186,7 +203,7 @@ function loadData(sheetName) {
   });
 }
 
-/* Renderiza toda la tabla (sin paginación ni áreas) */
+/* Renderiza toda la tabla (sin paginación ni subáreas) */
 function renderTableAll() {
   thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th data-col="${h}">${h}</th>`).join('') + '</tr>';
   tbody.innerHTML = filteredData.map((row, idx) => {
@@ -249,15 +266,15 @@ function applyFilter() {
   renderTableAll();
 }
 
-/* Debounce búsqueda */
-let debounce;
-searchInput.addEventListener('input', ()=> {
-  clearTimeout(debounce);
-  debounce = setTimeout(()=> applyFilter(), 180);
+/* Eventos */
+searchInput.addEventListener('input', () => {
+  clearTimeout(window._deb);
+  window._deb = setTimeout(applyFilter, 180);
 });
+areaSelect.addEventListener('change', (e) => loadData(e.target.value));
 
-/* Carga inicial usando la pestaña configurada */
-loadData(SHEET_NAME);
+/* Carga inicial: pestaña por defecto (la primera opción del selector) */
+loadData(areaSelect.value);
 
 /* Atajo accesible */
 document.addEventListener('keydown', (e) => {
