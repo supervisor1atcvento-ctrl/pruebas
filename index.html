@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Directorio Post Venta - Subáreas por ausencia de correo</title>
+<title>Directorio Post Venta - Sin áreas</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
 :root{
@@ -24,7 +24,7 @@ body{font-family:var(--font);background:var(--bg);margin:0;padding:20px;color:#2
 .controls{display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--border);flex-wrap:wrap;background:#fafafa}
 .control{display:flex;flex-direction:column;min-width:200px}
 .control label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
-input[type="text"],select{padding:10px;border:1px solid var(--border);border-radius:6px;font-size:14px}
+input[type="text"]{padding:10px;border:1px solid var(--border);border-radius:6px;font-size:14px;width:100%}
 .table-wrap{padding:18px;overflow:auto}
 .table-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:12px}
 .badge{background:rgba(255,255,255,0.08);padding:6px 10px;border-radius:999px;color:#fff;font-weight:600}
@@ -39,7 +39,6 @@ tr:hover{background:#fbfbfb}
 .small{font-size:12px;color:var(--muted)}
 .highlight{background:linear-gradient(90deg, rgba(255,235,59,0.2), transparent);padding:2px 4px;border-radius:3px}
 .details{background:#fafafa;padding:12px;border-radius:6px;margin-top:8px;border:1px solid var(--border)}
-.opt-subarea{padding-left:10px;color:#333;font-style:italic}
 @media(max-width:800px){
   .controls{flex-direction:column}
   th,td{font-size:12px;padding:8px}
@@ -54,23 +53,6 @@ tr:hover{background:#fbfbfb}
   </div>
 
   <div class="controls" aria-hidden="false">
-    <div class="control">
-      <label for="area-select">Seleccionar Área</label>
-      <select id="area-select" aria-label="Seleccionar área">
-        <option value="ATENCION A CLIENTES">Atención a Clientes</option>
-        <option value="REPARACIONES TIENDAS">Reparaciones Tiendas</option>
-        <option value="REPARACIONES AGENCIAS">Reparaciones Agencias</option>
-        <option value="REPARACIONES CEDIS">Reparaciones CEDIS</option>
-        <option value="ARMADOS Y ACTIVADOS">Armados y Activados</option>
-        <option value="GARANTIAS">Garantías</option>
-        <option value="COTIZACIONES">Cotizaciones</option>
-        <option value="PAGOS A CESVE">Pagos a CESVE</option>
-        <option value="REGIONALES">Regionales</option>
-        <option value="VENTOMAN COPPEL">Ventoman Coppel</option>
-        <option value="VENTOMAN VENTO">Ventoman Vento</option>
-      </select>
-    </div>
-
     <div class="control" style="flex:1">
       <label for="search-input">Buscar persona, correo o rol</label>
       <input type="text" id="search-input" placeholder="Escribe para buscar..." aria-label="Buscar persona correo o rol">
@@ -79,8 +61,8 @@ tr:hover{background:#fbfbfb}
 
   <div class="table-wrap">
     <div class="table-actions">
-      <div class="small">Vista completa (sin paginación)</div>
-      <div class="small" id="info-note">Las filas sin correo se agregan como subáreas en el selector</div>
+      <div class="small">Vista completa (sin áreas ni subáreas)</div>
+      <div class="small" id="info-note">Se excluyen filas con nombres específicos indicados</div>
     </div>
 
     <div id="loader" class="small">Conectando y descargando datos desde Google Sheets...</div>
@@ -95,9 +77,12 @@ tr:hover{background:#fbfbfb}
 </div>
 
 <script>
+/* CONFIGURACIÓN: cambiar SHEET_ID y SHEET_NAME según necesites */
 const SHEET_ID = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
+const SHEET_NAME = 'REPARACIONES TIENDAS'; // pestaña por defecto a cargar
+
 let currentData = [], currentHeaders = [], filteredData = [];
-const areaSelect = document.getElementById('area-select');
+
 const searchInput = document.getElementById('search-input');
 const table = document.getElementById('data-table');
 const thead = document.getElementById('table-head');
@@ -106,7 +91,7 @@ const loader = document.getElementById('loader');
 const recordCount = document.getElementById('record-count');
 const detailPanel = document.getElementById('detail-panel');
 
-/* Normaliza filas y rellena celdas vacías que provienen de celdas combinadas */
+/* Rellena celdas vacías que provienen de celdas combinadas */
 function fillMergedCells(rawData) {
   if (!rawData || rawData.length === 0) return rawData;
   const numRows = rawData.length;
@@ -130,51 +115,17 @@ function fillMergedCells(rawData) {
   return rawData;
 }
 
-/* Extrae subáreas basadas en la AUSENCIA de correo en la fila original.
-   Devuelve { normalizedRows, subareas } donde:
-   - subareas es un array de nombres de subárea en el orden que aparecen
-   - normalizedRows son los registros reales (las filas sin correo se omiten)
-*/
-function extractSubareasByNoEmail(parsedRows, headers) {
-  const normalized = [];
-  const subareasFound = [];
-  let currentSubarea = '';
-  for (let i = 0; i < parsedRows.length; i++) {
-    const row = parsedRows[i];
-    const hasEmail = Object.values(row).some(v => v && v.toString().includes('@'));
-    const hasText = Object.values(row).some(v => v && v.toString().trim() !== '');
-    if (!hasEmail && hasText) {
-      const concatenated = Object.entries(row)
-        .filter(([k,v]) => v && v.toString().trim() !== '')
-        .map(([k,v]) => v.toString().trim())
-        .join(' ').trim();
-      if (concatenated.length > 2) {
-        currentSubarea = concatenated;
-        if (!subareasFound.includes(currentSubarea)) subareasFound.push(currentSubarea);
-        continue;
-      }
-    }
-    const newRow = Object.assign({}, row);
-    if (!newRow['SUBAREA'] && currentSubarea) newRow['SUBAREA'] = currentSubarea;
-    normalized.push(newRow);
-  }
-  return { normalizedRows: normalized, subareas: subareasFound };
-}
-
-/* Función que determina si una fila debe excluirse del directorio
-   según nombres exactos o que contengan las frases indicadas */
+/* Excluir filas por nombre exacto o que contengan la frase */
 function isExcludedRow(row) {
   if (!row) return false;
   const excludeList = [
     'ESPECIALISTAS DE REPARACIONES',
     'SOPORTE TECNCO - GARANTIAS MOTOR, TRANSMISION Y BATERIAS '
   ];
-  // Campos donde puede aparecer el nombre
   const nameFields = ['NOMBRE','NOMBRE COMPLETO','ASESOR'];
   for (const f of nameFields) {
     const v = (row[f] || '').toString().trim().toUpperCase();
     if (!v) continue;
-    // comparar igualdad o si contiene la frase completa
     for (const ex of excludeList) {
       const exNorm = ex.toString().trim().toUpperCase();
       if (v === exNorm) return true;
@@ -184,31 +135,12 @@ function isExcludedRow(row) {
   return false;
 }
 
-/* Inserta opciones de subárea en el selector justo después de la opción de la pestaña actual */
-function insertSubareaOptions(sheetName, subareas) {
-  Array.from(areaSelect.querySelectorAll('option.subarea-option')).forEach(o => o.remove());
-  if (!subareas || subareas.length === 0) return;
-  const mainOption = Array.from(areaSelect.options).find(o => o.value === sheetName);
-  let insertIndex = mainOption ? mainOption.index + 1 : areaSelect.options.length;
-  subareas.forEach(sa => {
-    const opt = document.createElement('option');
-    opt.value = `SUBAREA::${sa}`;
-    opt.text = `— ${sa}`;
-    opt.className = 'subarea-option';
-    opt.dataset.sheet = sheetName;
-    opt.style.fontStyle = 'italic';
-    areaSelect.add(opt, areaSelect.options[insertIndex] || null);
-    insertIndex++;
-  });
-}
-
-/* Carga datos de la pestaña y prepara subáreas */
+/* Carga la pestaña indicada y procesa filas (sin áreas/subáreas) */
 function loadData(sheetName) {
   loader.style.display = 'block';
   table.style.display = 'none';
   detailPanel.style.display = 'none';
   searchInput.value = '';
-  areaSelect.value = sheetName;
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
   Papa.parse(url, {
     download: true, header: false, skipEmptyLines: true,
@@ -235,16 +167,13 @@ function loadData(sheetName) {
           }
           if (hasData) parsed.push(rowObj);
         }
-        // Extraer subáreas basadas en ausencia de correo
-        const { normalizedRows, subareas } = extractSubareasByNoEmail(parsed, currentHeaders);
-        // Excluir filas con nombres específicos
-        const filteredNormalized = normalizedRows.filter(r => !isExcludedRow(r));
-        if (filteredNormalized.some(r => r['SUBAREA'])) {
-          if (!currentHeaders.includes('SUBAREA')) currentHeaders.push('SUBAREA');
-        }
-        currentData = filteredNormalized;
-        insertSubareaOptions(sheetName, subareas);
-      } else { currentHeaders = []; currentData = []; }
+        // Excluir filas no deseadas
+        const filtered = parsed.filter(r => !isExcludedRow(r));
+        currentData = filtered;
+      } else {
+        currentHeaders = [];
+        currentData = [];
+      }
       filteredData = currentData.slice();
       renderTableAll();
       loader.style.display = 'none';
@@ -257,13 +186,12 @@ function loadData(sheetName) {
   });
 }
 
-/* Renderiza toda la tabla (sin paginación) */
+/* Renderiza toda la tabla (sin paginación ni áreas) */
 function renderTableAll() {
   thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th data-col="${h}">${h}</th>`).join('') + '</tr>';
   tbody.innerHTML = filteredData.map((row, idx) => {
     const nombre = row['NOMBRE'] || row['NOMBRE COMPLETO'] || row['ASESOR'] || '';
     const rol = row['ROL'] || row['PUESTO'] || '';
-    const subarea = row['SUBAREA'] || '';
     const roleClass = (rol.toLowerCase().includes('supervisor')) ? 'role-supervisor' : (rol.toLowerCase().includes('asesor') ? 'role-asesor' : 'role-gerente');
     return `<tr data-idx="${idx}">
       ${currentHeaders.filter(h=>h).map(h => {
@@ -274,7 +202,7 @@ function renderTableAll() {
           return `<td><span class="role-badge ${roleClass}">${display}</span></td>`;
         }
         if (h.toUpperCase().includes('NOMBRE') || h.toUpperCase().includes('ASESOR')) {
-          return `<td><strong>${display}</strong>${subarea ? `<div class="small">Subárea: ${subarea}</div>` : (rol ? `<div class="small">${rol}</div>` : '')}</td>`;
+          return `<td><strong>${display}</strong>${rol ? `<div class="small">${rol}</div>` : ''}</td>`;
         }
         if (h.toUpperCase().includes('CORREO') || h.toUpperCase().includes('EMAIL')) {
           return `<td><a href="mailto:${val}" class="small">${display}</a></td>`;
@@ -285,7 +213,7 @@ function renderTableAll() {
   }).join('');
   recordCount.innerText = `${filteredData.length} registros`;
 
-  Array.from(tbody.querySelectorAll('tr')).forEach((tr, i) => {
+  Array.from(tbody.querySelectorAll('tr')).forEach((tr) => {
     tr.addEventListener('click', (e) => {
       const idx = parseInt(tr.getAttribute('data-idx'),10);
       showDetails(filteredData[idx]);
@@ -300,10 +228,8 @@ function showDetails(row) {
   const tel = row['TEL'] || row['TELEFONO'] || row['CELULAR'] || '';
   const horario = row['HORARIO'] || row['DISPONIBILIDAD'] || '';
   const notas = row['NOTAS'] || row['COMENTARIOS'] || '';
-  const subarea = row['SUBAREA'] || '';
   detailPanel.innerHTML = `<strong>${row['NOMBRE'] || row['ASESOR'] || ''}</strong>
     <div class="small">Rol: ${row['ROL'] || row['PUESTO'] || ''}</div>
-    ${subarea ? `<div class="small">Subárea: ${subarea}</div>` : ''}
     <div style="margin-top:8px"><strong>Correo</strong>: <a href="mailto:${email}">${email}</a></div>
     <div style="margin-top:6px"><strong>Teléfono</strong>: ${tel}</div>
     ${horario ? `<div style="margin-top:6px"><strong>Horario</strong>: ${horario}</div>` : ''}
@@ -323,32 +249,17 @@ function applyFilter() {
   renderTableAll();
 }
 
-/* Manejo del selector:
-   - Si se selecciona SUBAREA::nombre, filtramos por SUBAREA
-   - Si se selecciona la pestaña principal, recargamos la pestaña
-*/
-areaSelect.addEventListener('change', (e) => {
-  const val = e.target.value;
-  if (val && val.startsWith('SUBAREA::')) {
-    const sub = val.replace('SUBAREA::','');
-    filteredData = currentData.filter(r => (r['SUBAREA']||'') === sub);
-    renderTableAll();
-  } else {
-    loadData(val);
-  }
-});
-
-// Debounce búsqueda
+/* Debounce búsqueda */
 let debounce;
 searchInput.addEventListener('input', ()=> {
   clearTimeout(debounce);
   debounce = setTimeout(()=> applyFilter(), 180);
 });
 
-// Carga inicial
-loadData(areaSelect.value);
+/* Carga inicial usando la pestaña configurada */
+loadData(SHEET_NAME);
 
-// Atajo accesible
+/* Atajo accesible */
 document.addEventListener('keydown', (e) => {
   if (e.altKey && e.key === 'f') { e.preventDefault(); searchInput.focus(); }
 });
