@@ -139,36 +139,49 @@ function extractSubareasByNoEmail(parsedRows, headers) {
   const normalized = [];
   const subareasFound = [];
   let currentSubarea = '';
-  // Detectores de columna de correo comunes
-  const emailHeaderCandidates = headers.filter(h => h && /CORREO|EMAIL|E-MAIL|MAIL/i.test(h));
   for (let i = 0; i < parsedRows.length; i++) {
     const row = parsedRows[i];
-    // Determinar si la fila contiene algún correo (buscar '@' en cualquier celda)
     const hasEmail = Object.values(row).some(v => v && v.toString().includes('@'));
-    // Determinar si la fila tiene al menos una celda con texto
     const hasText = Object.values(row).some(v => v && v.toString().trim() !== '');
-    // Si NO tiene email pero sí texto, la consideramos subárea (se omite como registro)
     if (!hasEmail && hasText) {
-      // Construir nombre de subárea a partir de las celdas no vacías (concatenar)
       const concatenated = Object.entries(row)
         .filter(([k,v]) => v && v.toString().trim() !== '')
         .map(([k,v]) => v.toString().trim())
         .join(' ').trim();
-      // Evitar capturar filas vacías o muy cortas
       if (concatenated.length > 2) {
         currentSubarea = concatenated;
         if (!subareasFound.includes(currentSubarea)) subareasFound.push(currentSubarea);
-        // omitimos esta fila como registro
         continue;
       }
     }
-    // Si la fila tiene email o no cumple como subárea, la tratamos como registro
     const newRow = Object.assign({}, row);
-    // Si no existe columna SUBAREA, asignar currentSubarea si aplica
     if (!newRow['SUBAREA'] && currentSubarea) newRow['SUBAREA'] = currentSubarea;
     normalized.push(newRow);
   }
   return { normalizedRows: normalized, subareas: subareasFound };
+}
+
+/* Función que determina si una fila debe excluirse del directorio
+   según nombres exactos o que contengan las frases indicadas */
+function isExcludedRow(row) {
+  if (!row) return false;
+  const excludeList = [
+    'ESPECIALISTAS DE REPARACIONES',
+    'SOPORTE TECNCO - GARANTIAS MOTOR, TRANSMISION Y BATERIAS'
+  ];
+  // Campos donde puede aparecer el nombre
+  const nameFields = ['NOMBRE','NOMBRE COMPLETO','ASESOR'];
+  for (const f of nameFields) {
+    const v = (row[f] || '').toString().trim().toUpperCase();
+    if (!v) continue;
+    // comparar igualdad o si contiene la frase completa
+    for (const ex of excludeList) {
+      const exNorm = ex.toString().trim().toUpperCase();
+      if (v === exNorm) return true;
+      if (v.includes(exNorm)) return true;
+    }
+  }
+  return false;
 }
 
 /* Inserta opciones de subárea en el selector justo después de la opción de la pestaña actual */
@@ -224,10 +237,12 @@ function loadData(sheetName) {
         }
         // Extraer subáreas basadas en ausencia de correo
         const { normalizedRows, subareas } = extractSubareasByNoEmail(parsed, currentHeaders);
-        if (normalizedRows.some(r => r['SUBAREA'])) {
+        // Excluir filas con nombres específicos
+        const filteredNormalized = normalizedRows.filter(r => !isExcludedRow(r));
+        if (filteredNormalized.some(r => r['SUBAREA'])) {
           if (!currentHeaders.includes('SUBAREA')) currentHeaders.push('SUBAREA');
         }
-        currentData = normalizedRows;
+        currentData = filteredNormalized;
         insertSubareaOptions(sheetName, subareas);
       } else { currentHeaders = []; currentData = []; }
       filteredData = currentData.slice();
