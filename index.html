@@ -1,262 +1,285 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Directorio Post Venta | Consultor Web</title>
-    <!-- Librería PapaParse para lectura de CSV/Sheets -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <style>
-        :root {
-            --primary-color: #d32f2f; /* Tonos rojos institucionales */
-            --dark-color: #2b2b2b;
-            --light-bg: #f4f6f8;
-            --border-color: #e0e0e0;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light-bg);
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        .header {
-            background-color: var(--dark-color);
-            color: #fff;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-            border-left: 4px solid var(--primary-color);
-            padding-left: 10px;
-        }
-        .controls {
-            padding: 20px 30px;
-            display: flex;
-            gap: 20px;
-            background: #fafafa;
-            border-bottom: 1px solid var(--border-color);
-            flex-wrap: wrap;
-        }
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-width: 250px;
-        }
-        .control-group label {
-            font-size: 12px;
-            font-weight: bold;
-            color: #666;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-        select, input {
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        select:focus, input:focus {
-            border-color: var(--primary-color);
-        }
-        .table-container {
-            padding: 20px 30px;
-            overflow-x: auto;
-            min-height: 300px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-        th {
-            background-color: var(--dark-color);
-            color: white;
-            font-weight: 600;
-            white-space: nowrap;
-            text-transform: uppercase;
-            font-size: 12px;
-            position: sticky;
-            top: 0;
-        }
-        tr:hover {
-            background-color: #f9f9f9;
-        }
-        .loader {
-            text-align: center;
-            padding: 40px;
-            font-style: italic;
-            color: #888;
-        }
-        .badge {
-            background: rgba(255,255,255,0.2);
-            padding: 5px 10px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Directorio Post Venta | Consultor Web</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<style>
+:root {
+  --primary-color: #d32f2f;
+  --dark-color: #2b2b2b;
+  --light-bg: #f4f6f8;
+  --border-color: #e0e0e0;
+}
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--light-bg);
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+.header {
+  background-color: var(--dark-color);
+  color: #fff;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header h1 {
+  margin: 0;
+  font-size: 24px;
+  border-left: 4px solid var(--primary-color);
+  padding-left: 10px;
+}
+.controls {
+  padding: 20px 30px;
+  display: flex;
+  gap: 20px;
+  background: #fafafa;
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+.control-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 250px;
+}
+.control-group label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+select, input {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+select:focus, input:focus {
+  border-color: var(--primary-color);
+}
+.table-container {
+  padding: 20px 30px;
+  overflow-x: auto;
+  min-height: 300px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+th {
+  background-color: var(--dark-color);
+  color: white;
+  font-weight: 600;
+  white-space: nowrap;
+  text-transform: uppercase;
+  font-size: 12px;
+  position: sticky;
+  top: 0;
+}
+tr:hover {
+  background-color: #f9f9f9;
+}
+.loader {
+  text-align: center;
+  padding: 40px;
+  font-style: italic;
+  color: #888;
+}
+.badge {
+  background: rgba(255,255,255,0.2);
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: bold;
+}
+</style>
 </head>
 <body>
-
 <div class="dashboard-container">
-    <div class="header">
-        <h1>Directorio Post Venta</h1>
-        <span class="badge" id="record-count">0 registros</span>
-    </div>
-    
-    <div class="controls">
-        <div class="control-group">
-            <label for="area-select">Seleccionar Área (Pestaña)</label>
-            <select id="area-select">
-                <option value="ATENCION A CLIENTES">Atención a Clientes</option>
-                <option value="REPARACIONES TIENDAS">Reparaciones Tiendas</option>
-                <option value="REPARACIONES AGENCIAS">Reparaciones Agencias</option>
-                <option value="REPARACIONES CEDIS">Reparaciones CEDIS</option>
-                <option value="ARMADOS Y ACTIVADOS">Armados y Activados</option>
-                <option value="GARANTIAS">Garantías</option>
-                <option value="COTIZACIONES">Cotizaciones</option>
-                <option value="PAGOS A CESVE">Pagos a CESVE</option>
-                <option value="REGIONALES">Regionales</option>
-                <option value="VENTOMAN COPPEL">Ventoman Coppel</option>
-                <option value="VENTOMAN VENTO">Ventoman Vento</option>
-            </select>
-        </div>
-        <div class="control-group">
-            <label for="search-input">Buscar persona, correo o rol</label>
-            <input type="text" id="search-input" placeholder="Escribe para buscar o filtrar...">
-        </div>
+  <div class="header">
+    <h1>Directorio Post Venta</h1>
+    <span class="badge" id="record-count">0 registros</span>
+  </div>
+
+  <div class="controls">
+    <div class="control-group">
+      <label for="area-select">Seleccionar Área (Pestaña)</label>
+      <select id="area-select">
+        <option value="ATENCION A CLIENTES">Atención a Clientes</option>
+        <option value="REPARACIONES TIENDAS">Reparaciones Tiendas</option>
+        <option value="REPARACIONES AGENCIAS">Reparaciones Agencias</option>
+        <option value="REPARACIONES CEDIS">Reparaciones CEDIS</option>
+        <option value="ARMADOS Y ACTIVADOS">Armados y Activados</option>
+        <option value="GARANTIAS">Garantías</option>
+        <option value="COTIZACIONES">Cotizaciones</option>
+        <option value="PAGOS A CESVE">Pagos a CESVE</option>
+        <option value="REGIONALES">Regionales</option>
+        <option value="VENTOMAN COPPEL">Ventoman Coppel</option>
+        <option value="VENTOMAN VENTO">Ventoman Vento</option>
+      </select>
     </div>
 
-    <div class="table-container">
-        <div id="loader" class="loader">Conectando y descargando datos desde Google Sheets...</div>
-        <table id="data-table" style="display:none;">
-            <thead id="table-head"></thead>
-            <tbody id="table-body"></tbody>
-        </table>
+    <div class="control-group">
+      <label for="search-input">Buscar persona, correo o rol</label>
+      <input type="text" id="search-input" placeholder="Escribe para buscar o filtrar...">
     </div>
+  </div>
+
+  <div class="table-container">
+    <div id="loader" class="loader">Conectando y descargando datos desde Google Sheets...</div>
+    <table id="data-table" style="display:none;">
+      <thead id="table-head"></thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
 </div>
 
 <script>
-    // ID del Documento de Google Sheets
-    const SHEET_ID = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
-    
-    let currentData = [];
-    let currentHeaders = [];
+// ID del Documento de Google Sheets
+const SHEET_ID = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
 
-    const areaSelect = document.getElementById('area-select');
-    const searchInput = document.getElementById('search-input');
-    const table = document.getElementById('data-table');
-    const thead = document.getElementById('table-head');
-    const tbody = document.getElementById('table-body');
-    const loader = document.getElementById('loader');
-    const recordCount = document.getElementById('record-count');
+let currentData = [];
+let currentHeaders = [];
 
-    async function loadData(sheetName) {
-        loader.style.display = 'block';
-        table.style.display = 'none';
-        searchInput.value = ''; 
-        
-        // Uso de la API de visualización de Google para extraer los datos crudos en CSV
-        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-        
-        Papa.parse(url, {
-            download: true,
-            header: false,
-            skipEmptyLines: true,
-            complete: function(results) {
-                let rawData = results.data;
-                let headerRowIndex = -1;
-                
-                // Lógica de limpieza: Buscamos en las primeras 10 filas dónde inician los encabezados reales
-                // ignorando textos informativos como "DIRECTORIO..." o "CONMUTADOR..."
-                for(let i=0; i < Math.min(10, rawData.length); i++) {
-                    const rowStr = rawData[i].join("").toUpperCase();
-                    if(rowStr.includes("CORREO") || rowStr.includes("ASESOR") || rowStr.includes("GERENTE") || rowStr.includes("NOMBRE") || rowStr.includes("ANALISTA")) {
-                        headerRowIndex = i;
-                        break;
-                    }
-                }
-                
-                if (headerRowIndex !== -1) {
-                    currentHeaders = rawData[headerRowIndex].map(h => h.trim());
-                    
-                    let parsedData = [];
-                    for(let i = headerRowIndex + 1; i < rawData.length; i++) {
-                        let rowObj = {};
-                        let hasData = false;
-                        for(let j = 0; j < currentHeaders.length; j++) {
-                            // Ignorar columnas vacías
-                            if(currentHeaders[j]) {
-                                rowObj[currentHeaders[j]] = rawData[i][j] || '';
-                                if(rawData[i][j]) hasData = true;
-                            }
-                        }
-                        if(hasData) parsedData.push(rowObj);
-                    }
-                    currentData = parsedData;
-                } else {
-                    currentHeaders = [];
-                    currentData = [];
-                }
-                
-                renderTable(currentData);
-                loader.style.display = 'none';
-                table.style.display = 'table';
-            },
-            error: function(err) {
-                loader.innerHTML = '<span style="color:#d32f2f;">No se pudo conectar. Verifica que el archivo de Sheets tenga permisos para que "Cualquier usuario con el vínculo" pueda leerlo.</span>';
-                console.error(err);
+const areaSelect = document.getElementById('area-select');
+const searchInput = document.getElementById('search-input');
+const table = document.getElementById('data-table');
+const thead = document.getElementById('table-head');
+const tbody = document.getElementById('table-body');
+const loader = document.getElementById('loader');
+const recordCount = document.getElementById('record-count');
+
+/**
+ * Rellena celdas vacías que provienen de celdas combinadas en el CSV.
+ * Normaliza la longitud de filas y rellena hacia abajo por columna.
+ */
+function fillMergedCells(rawData) {
+  if (!rawData || rawData.length === 0) return rawData;
+  const numRows = rawData.length;
+  const numCols = Math.max(...rawData.map(r => r.length));
+  // Normalizar longitud de filas
+  for (let i = 0; i < numRows; i++) {
+    rawData[i] = rawData[i] || [];
+    for (let j = 0; j < numCols; j++) {
+      if (typeof rawData[i][j] === 'undefined') rawData[i][j] = '';
+    }
+  }
+  // Rellenar hacia abajo por columna
+  for (let col = 0; col < numCols; col++) {
+    let last = '';
+    for (let row = 0; row < numRows; row++) {
+      if (rawData[row][col] !== '' && rawData[row][col] !== null) {
+        last = rawData[row][col];
+      } else {
+        rawData[row][col] = last;
+      }
+    }
+  }
+  return rawData;
+}
+
+async function loadData(sheetName) {
+  loader.style.display = 'block';
+  table.style.display = 'none';
+  searchInput.value = '';
+
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+
+  Papa.parse(url, {
+    download: true,
+    header: false,
+    skipEmptyLines: true,
+    complete: function(results) {
+      let rawData = results.data || [];
+      // Normalizar celdas combinadas antes de detectar encabezados
+      rawData = fillMergedCells(rawData);
+
+      let headerRowIndex = -1;
+      // Buscar encabezado real en las primeras filas (mantener tu heurística)
+      for (let i = 0; i < Math.min(10, rawData.length); i++) {
+        const rowStr = rawData[i].join("").toUpperCase();
+        if (rowStr.includes("CORREO") || rowStr.includes("ASESOR") || rowStr.includes("GERENTE") || rowStr.includes("NOMBRE") || rowStr.includes("ANALISTA")) {
+          headerRowIndex = i;
+          break;
+        }
+      }
+
+      if (headerRowIndex !== -1) {
+        currentHeaders = rawData[headerRowIndex].map(h => (h || '').toString().trim());
+        let parsedData = [];
+        for (let i = headerRowIndex + 1; i < rawData.length; i++) {
+          let rowObj = {};
+          let hasData = false;
+          for (let j = 0; j < currentHeaders.length; j++) {
+            if (currentHeaders[j]) {
+              rowObj[currentHeaders[j]] = rawData[i][j] || '';
+              if (rawData[i][j] && rawData[i][j].toString().trim() !== '') hasData = true;
             }
-        });
+          }
+          if (hasData) parsedData.push(rowObj);
+        }
+        currentData = parsedData;
+      } else {
+        currentHeaders = [];
+        currentData = [];
+      }
+
+      renderTable(currentData);
+      loader.style.display = 'none';
+      table.style.display = 'table';
+    },
+    error: function(err) {
+      loader.innerHTML = '<span style="color:#d32f2f;">No se pudo conectar. Verifica que el archivo de Sheets tenga permisos para que "Cualquier usuario con el vínculo" pueda leerlo.</span>';
+      console.error(err);
     }
+  });
+}
 
-    function renderTable(data) {
-        thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th>${h}</th>`).join('') + '</tr>';
-        
-        tbody.innerHTML = data.map(row => {
-            return '<tr>' + currentHeaders.filter(h=>h).map(h => `<td>${row[h] || ''}</td>`).join('') + '</tr>';
-        }).join('');
+function renderTable(data) {
+  thead.innerHTML = '<tr>' + currentHeaders.filter(h => h).map(h => `<th>${h}</th>`).join('') + '</tr>';
+  tbody.innerHTML = data.map(row => {
+    return '<tr>' + currentHeaders.filter(h => h).map(h => `<td>${row[h] || ''}</td>`).join('') + '</tr>';
+  }).join('');
+  recordCount.innerText = `${data.length} registros`;
+}
 
-        recordCount.innerText = `${data.length} registros`;
-    }
+function filterData() {
+  const query = searchInput.value.toLowerCase();
+  const filtered = currentData.filter(row => {
+    return Object.values(row).some(val =>
+      String(val).toLowerCase().includes(query)
+    );
+  });
+  renderTable(filtered);
+}
 
-    function filterData() {
-        const query = searchInput.value.toLowerCase();
-        const filtered = currentData.filter(row => {
-            return Object.values(row).some(val => 
-                String(val).toLowerCase().includes(query)
-            );
-        });
-        renderTable(filtered);
-    }
+areaSelect.addEventListener('change', (e) => loadData(e.target.value));
+searchInput.addEventListener('keyup', filterData);
 
-    areaSelect.addEventListener('change', (e) => loadData(e.target.value));
-    searchInput.addEventListener('keyup', filterData);
-
-    // Inicializar cargando la primera pestaña seleccionada
-    loadData(areaSelect.value);
+// Cargar la pestaña inicial seleccionada
+loadData(areaSelect.value);
 </script>
-
 </body>
 </html>
