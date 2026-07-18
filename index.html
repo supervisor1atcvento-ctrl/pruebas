@@ -273,7 +273,8 @@
     async function loadSheet() {
       resultsContainer.innerHTML = '<div id="loadingSpinner">Cargando base de datos BD_CESVE... <i class="fa-solid fa-spinner fa-spin"></i></div>';
       try {
-        const response = await fetch(API_URL);
+        // Agregamos un parámetro único (?_=${Date.now()}) para burlar el caché de Google
+        const response = await fetch(`${API_URL}?_=${Date.now()}`);
         if (!response.ok) throw new Error(`Error en servidor (${response.status})`);
         
         const jsonRecords = await response.json();
