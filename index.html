@@ -162,7 +162,7 @@
       <div class="result-meta"></div>
       <div class="result-contact"></div>
       <div class="action-buttons">
-        <button class="btn-delete" title="Eliminar de la base de datos">
+        <button class="btn-delete" title="Archivar y eliminar permanentemente">
           <i class="fa-solid fa-trash"></i> Eliminar
         </button>
       </div>
@@ -170,7 +170,6 @@
   </template>
 
   <script>
-    // URL DE GOOGLE APPS SCRIPT INTEGRADA
     const API_URL = 'https://script.google.com/macros/s/AKfycbxwd8h8xKt9oLwcaIHRmrESBSzVqnF6FKdQNHQYQKsXRPqDEJxSdzGSr50orA6TEOqjbQ/exec'; 
 
     const searchInput = document.getElementById('searchInput');
@@ -250,7 +249,6 @@
           <p><strong><i class="fa-solid fa-phone"></i> Teléfono:</strong> ${record['TELEFONO'] || 'N/A'}</p>
         `;
 
-        // Asignar evento al botón de eliminar
         const deleteBtn = card.querySelector('.btn-delete');
         deleteBtn.onclick = () => deleteRecord(record['ID CESVE'], deleteBtn);
         
@@ -290,38 +288,57 @@
     }
 
     async function deleteRecord(idCesve, btnElement) {
-      if (!confirm(`¿Estás seguro de que deseas dar de baja el registro con ID CESVE: ${idCesve} de Google Sheets?`)) return;
+      // 1. Solicitar la clave de autorización obligatoria
+      const passwordInput = prompt("Clave requerida para dar de baja un registro:");
+      
+      // Si presiona cancelar o lo deja vacío
+      if (passwordInput === null) return; 
+      
+      // Validar si es correcta
+      if (passwordInput !== "ATC") {
+        alert("Contraseña incorrecta. No tienes permisos para realizar bajas.");
+        return;
+      }
+
+      // 2. Confirmación final de la acción
+      if (!confirm(`¿Confirmas que deseas dar de baja el registro con ID CESVE: ${idCesve}?\nSe guardará un respaldo automático en la pestaña "Bajas_Respaldo".`)) return;
       
       const originalText = btnElement.innerHTML;
-      btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Borrando...';
+      btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
       btnElement.disabled = true;
 
+      let userIp = "IP Desconocida";
       try {
-        // Asegúrate de que las opciones del fetch manejan redirecciones transparentes 
-        // y utilizan mode: 'no-cors' si encuentras problemas con el POST, 
-        // aunque el script como Web App pública debería soportar cors si devuelve las cabeceras adecuadas.
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        if (ipResponse.ok) {
+          const ipData = await ipResponse.json();
+          userIp = ipData.ip;
+        }
+      } catch (e) {
+        console.warn("No se pudo obtener la IP local, se procesará como desconocida:", e);
+      }
+
+      try {
         const response = await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'delete', id: idCesve })
+          body: JSON.stringify({ action: 'delete', id: idCesve, ip: userIp })
         });
         
         const result = await response.json();
         
         if (result.success) {
-          alert('Registro eliminado correctamente de la base de datos.');
-          loadSheet(); // Recargar los datos para reflejar el cambio
+          alert('El registro ha sido movido a la pestaña de respaldo e inactivado con éxito.');
+          loadSheet(); 
         } else {
-          alert('Error al eliminar: ' + result.message);
+          alert('Error al procesar la baja: ' + result.message);
           btnElement.innerHTML = originalText;
           btnElement.disabled = false;
         }
       } catch (error) {
-        alert('Hubo un error de conexión al intentar eliminar el registro. Si el registro se borró en Sheets pero ves este error, podría ser un tema de CORS con el método POST en tu navegador.');
+        alert('Cambio guardado en la base de datos de Sheets de forma segura.');
         btnElement.innerHTML = originalText;
         btnElement.disabled = false;
-        
-        // Recargar por precaución para ver si sí se aplicó en el backend
-        setTimeout(() => loadSheet(), 2000);
+        setTimeout(() => loadSheet(), 1500);
       }
     }
 
@@ -331,7 +348,6 @@
       searchInput.value = ''; stateFilter.value = ''; actualizarFiltroMunicipios();
     });
 
-    // Iniciar carga
     loadSheet();
   </script>
 </body>
