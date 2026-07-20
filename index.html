@@ -3,53 +3,213 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Directorio Post Venta - Zonificación completa (pestañas ampliadas)</title>
+<title>Directorio Post Venta - Vento Motorcycles</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
-:root{
-  --primary:#d32f2f;
-  --muted:#6b6b6b;
-  --bg:#f4f6f8;
-  --card:#fff;
-  --border:#e6e6e6;
-  --info:#0288d1;
-  --warning:#f57c00;
-  --font: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+/* 
+  Lineamientos Institucionales:
+  - Título: Segoe UI 38 (negritas)
+  - Subtítulo: Segoe UI Semibold 32
+  - Contenido: Segoe UI 28 (Ajustado proporcionalmente para tabla de datos web)
+  - Paleta: Blanco (#FFFFFF), Negro (#231F20), Gris (#616160), Naranja (#F28F17)
+*/
+:root {
+  --vento-black: #231F20;
+  --vento-white: #FFFFFF;
+  --vento-grey:  #616160;
+  --vento-orange:#F28F17;
+  --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
-*{box-sizing:border-box}
-body{font-family:var(--font);background:var(--bg);margin:0;padding:20px;color:#222}
-.container{max-width:1200px;margin:0 auto;background:var(--card);border-radius:8px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-.header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;background:#222;color:#fff}
-.header h1{margin:0;font-size:20px;border-left:4px solid var(--primary);padding-left:10px}
-.controls{padding:16px;border-bottom:1px solid var(--border);background:#fafafa;display:flex;gap:12px;flex-wrap:wrap}
-.control{display:flex;flex-direction:column;min-width:200px}
-.control label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
-select,input[type="text"]{padding:10px;border:1px solid var(--border);border-radius:6px;font-size:14px}
-.table-wrap{padding:18px;overflow:auto}
-.table-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:12px}
-.badge{background:rgba(255,255,255,0.08);padding:6px 10px;border-radius:999px;color:#fff;font-weight:600}
-.table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle}
-th{position:sticky;top:0;background:#222;color:#fff;font-size:12px;text-transform:uppercase}
-tr:hover{background:#fbfbfb}
-.role-badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;color:#fff}
-.role-supervisor{background:var(--info)}
-.role-asesor{background:var(--primary)}
-.role-gerente{background:var(--warning)}
-.small{font-size:12px;color:var(--muted)}
-.highlight{background:linear-gradient(90deg, rgba(255,235,59,0.2), transparent);padding:2px 4px;border-radius:3px}
-.details{background:#fafafa;padding:12px;border-radius:6px;margin-top:8px;border:1px solid var(--border)}
+* { box-sizing: border-box; }
+body {
+  font-family: var(--font-family);
+  background: var(--vento-white);
+  margin: 0;
+  padding: 0;
+  color: var(--vento-black);
+}
+.top-bar {
+  background-color: var(--vento-black);
+  height: 8px;
+  width: 100%;
+  border-bottom: 4px solid var(--vento-orange);
+}
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 0 30px 0;
+  border-bottom: 2px solid var(--vento-grey);
+  margin-bottom: 30px;
+}
+.header-titles h1 {
+  margin: 0;
+  font-size: 38px;
+  font-weight: bold;
+  color: var(--vento-black);
+  line-height: 1.2;
+}
+.header-titles h2 {
+  margin: 5px 0 0 0;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--vento-grey);
+}
+.logo-container {
+  text-align: right;
+}
+.logo-text {
+  font-size: 38px;
+  font-weight: 900;
+  font-style: italic;
+  color: var(--vento-black);
+  letter-spacing: -1px;
+  margin: 0;
+  line-height: 1;
+}
+.logo-sub {
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: var(--vento-black);
+  font-weight: 600;
+}
+.controls {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  background: #f7f7f7;
+  padding: 25px;
+  border-radius: 0;
+  border-left: 6px solid var(--vento-orange);
+}
+.control {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 250px;
+}
+.control label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--vento-black);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+select, input[type="text"] {
+  padding: 14px;
+  border: 1px solid var(--vento-grey);
+  border-radius: 0;
+  font-size: 18px;
+  font-family: var(--font-family);
+  color: var(--vento-black);
+}
+select:focus, input[type="text"]:focus {
+  outline: none;
+  border-color: var(--vento-orange);
+  box-shadow: 0 0 0 2px rgba(242, 143, 23, 0.2);
+}
+.table-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.badge {
+  background: var(--vento-black);
+  padding: 8px 16px;
+  color: var(--vento-white);
+  font-weight: bold;
+  font-size: 16px;
+}
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e0e0e0;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 18px; /* Acercándonos a los 28px de contenido, ajustado a legibilidad web */
+}
+th, td {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+  vertical-align: middle;
+}
+th {
+  background: var(--vento-black);
+  color: var(--vento-white);
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+}
+tr:nth-child(even) { background: #fafafa; }
+tr:hover { background: rgba(242, 143, 23, 0.05); cursor: pointer; }
+.role-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--vento-white);
+  text-transform: uppercase;
+}
+.role-supervisor { background: var(--vento-black); }
+.role-asesor { background: var(--vento-orange); }
+.role-gerente { background: var(--vento-grey); }
+
+.highlight { 
+  background: rgba(242, 143, 23, 0.3); 
+  padding: 2px 4px; 
+}
+.small { font-size: 14px; color: var(--vento-grey); }
+a { color: var(--vento-orange); text-decoration: none; font-weight: bold; }
+a:hover { text-decoration: underline; color: var(--vento-black); }
+
+#loader { 
+  color: var(--vento-orange); 
+  font-weight: bold; 
+  padding: 20px 0; 
+  font-size: 18px;
+}
+
+.details {
+  background: #f7f7f7;
+  padding: 20px;
+  border-left: 6px solid var(--vento-orange);
+  margin-top: 15px;
+  font-size: 18px;
+}
+.details strong {
+  color: var(--vento-black);
+}
 @media(max-width:800px){
-  .controls{flex-direction:column}
-  th,td{font-size:12px;padding:8px}
+  .header-section { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .header-titles h1 { font-size: 32px; }
+  .header-titles h2 { font-size: 26px; }
 }
 </style>
 </head>
 <body>
+<div class="top-bar"></div>
 <div class="container" role="application" aria-label="Directorio Post Venta">
-  <div class="header">
-    <h1>Directorio Post Venta</h1>
-    <div class="badge" id="record-count">0 registros</div>
+  
+  <div class="header-section">
+    <div class="header-titles">
+      <h1>Directorio Post Venta</h1>
+      <h2>Zonificación de Equipo y Áreas</h2>
+    </div>
+    <div class="logo-container">
+      <div class="logo-text">VENTO</div>
+      <div class="logo-sub">MOTORCYCLES U.S.A</div>
+    </div>
   </div>
 
   <div class="controls" aria-hidden="false">
@@ -67,42 +227,40 @@ tr:hover{background:#fbfbfb}
         <option value="REGIONALES">Regionales</option>
         <option value="VENTOMAN COPPEL">Ventoman Coppel</option>
         <option value="VENTOMAN VENTO">Ventoman Vento</option>
-        <!-- Pestañas adicionales solicitadas -->
-        <option value="INGENIERIA POSTVENTA">INGENIERIA POSTVENTA</option>
-        <option value="STAFF">STAFF</option>
-        <option value="AMERICAN PISTON">AMERICAN PISTON</option>
-        <option value="REFACCIONES">REFACCIONES</option>
-        <option value="STAFF - COMPLETO">STAFF - COMPLETO</option>
+        <option value="INGENIERIA POSTVENTA">Ingeniería Postventa</option>
+        <option value="STAFF">Staff</option>
+        <option value="AMERICAN PISTON">American Piston</option>
+        <option value="REFACCIONES">Refacciones</option>
+        <option value="STAFF - COMPLETO">Staff - Completo</option>
       </select>
     </div>
-
-    <div class="control" style="flex:1">
+    <div class="control" style="flex:2">
       <label for="search-input">Buscar persona, correo o rol</label>
-      <input type="text" id="search-input" placeholder="Escribe para buscar..." aria-label="Buscar persona correo o rol">
+      <input type="text" id="search-input" placeholder="Escribe para buscar (Ej. Asesor, Nombre)..." aria-label="Buscar persona correo o rol">
     </div>
   </div>
 
-  <div class="table-wrap">
+  <div>
     <div class="table-actions">
-      <div class="small">Vista completa (zonificación consolidada)</div>
-      <div class="small" id="info-note">Se concatenan columnas que pertenecen al mismo encabezado (ej. ZONIFICACION)</div>
+      <div class="small" id="info-note">Vista completa consolidada. Selecciona una fila para ver detalles completos.</div>
+      <div class="badge" id="record-count">0 registros</div>
     </div>
-
-    <div id="loader" class="small">Conectando y descargando datos desde Google Sheets...</div>
-
-    <table id="data-table" class="table" style="display:none" aria-live="polite">
-      <thead id="table-head"></thead>
-      <tbody id="table-body"></tbody>
-    </table>
-
+    
+    <div id="loader">Conectando y descargando datos desde Google Sheets...</div>
+    
+    <div class="table-wrap">
+      <table id="data-table" class="table" style="display:none" aria-live="polite">
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    
     <div id="detail-panel" style="display:none" class="details" aria-hidden="true"></div>
   </div>
 </div>
 
 <script>
-/* CONFIGURACIÓN: cambiar SHEET_ID si necesitas apuntar a otra hoja */
 const SHEET_ID = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
-
 let currentData = [], currentHeaders = [], filteredData = [];
 
 const areaSelect = document.getElementById('area-select');
@@ -114,7 +272,6 @@ const loader = document.getElementById('loader');
 const recordCount = document.getElementById('record-count');
 const detailPanel = document.getElementById('detail-panel');
 
-/* Rellena celdas vacías que provienen de celdas combinadas */
 function fillMergedCells(rawData) {
   if (!rawData || rawData.length === 0) return rawData;
   const numRows = rawData.length;
@@ -138,13 +295,9 @@ function fillMergedCells(rawData) {
   return rawData;
 }
 
-/* Excluir filas por nombre exacto o que contengan la frase (incluye ANALISTA) */
 function isExcludedRow(row) {
   if (!row) return false;
-  const excludeList = [
-    'ESPECIALISTAS DE REPARACIONES',
-    'SOPORTE TECNCO - GARANTIAS MOTOR, TRANSMISION Y BATERIAS'
-  ];
+  const excludeList = ['ESPECIALISTAS DE REPARACIONES', 'SOPORTE TECNCO - GARANTIAS MOTOR, TRANSMISION Y BATERIAS'];
   const nameFields = ['NOMBRE','NOMBRE COMPLETO','ASESOR','ANALISTA'];
   for (const f of nameFields) {
     const v = (row[f] || '').toString().trim().toUpperCase();
@@ -158,28 +311,24 @@ function isExcludedRow(row) {
   return false;
 }
 
-/* Normaliza encabezados: propaga encabezados vacíos hacia la derecha.
-   Si la primera columna no tiene encabezado, la dejamos vacía y la eliminamos más adelante. */
 function normalizeHeaders(rawHeaderRow) {
   const headers = rawHeaderRow.map(h => (h || '').toString().trim());
   for (let i = 0; i < headers.length; i++) {
     if (!headers[i] || headers[i] === '') {
-      headers[i] = i > 0 ? headers[i-1] : ''; // no crear COL_0, dejar vacío si es la primera
+      headers[i] = i > 0 ? headers[i-1] : ''; 
     }
   }
   return headers;
 }
 
-/* Construye objetos de fila concatenando valores de columnas que comparten el mismo encabezado.
-   Ignora columnas cuyo encabezado quedó vacío (evita col_0). */
 function buildRowsFromRaw(rawRows, headers) {
   const rows = [];
   for (let r = 0; r < rawRows.length; r++) {
     const raw = rawRows[r];
     const rowObj = {};
     for (let c = 0; c < headers.length; c++) {
-      const key = headers[c] || ''; // puede ser '' si encabezado vacío
-      if (!key) continue; // ignorar columnas sin encabezado
+      const key = headers[c] || ''; 
+      if (!key) continue; 
       const val = (raw[c] || '').toString().trim();
       if (!rowObj[key]) {
         rowObj[key] = val;
@@ -197,20 +346,20 @@ function buildRowsFromRaw(rawRows, headers) {
   return rows;
 }
 
-/* Carga la pestaña indicada y procesa filas (zonificación consolidada) */
 function loadData(sheetName) {
   loader.style.display = 'block';
   table.style.display = 'none';
   detailPanel.style.display = 'none';
   searchInput.value = '';
+  
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+  
   Papa.parse(url, {
     download: true, header: false, skipEmptyLines: true,
     complete: function(results) {
       let rawData = results.data || [];
       rawData = fillMergedCells(rawData);
-
-      // Buscar fila de encabezado (misma heurística que antes)
+      
       let headerRowIndex = -1;
       for (let i = 0; i < Math.min(10, rawData.length); i++) {
         const rowStr = rawData[i].join("").toUpperCase();
@@ -219,25 +368,22 @@ function loadData(sheetName) {
           break;
         }
       }
-
       if (headerRowIndex !== -1) {
-        // Normalizar encabezados propagando vacíos
         const rawHeaderRow = rawData[headerRowIndex];
         const headers = normalizeHeaders(rawHeaderRow);
-        // Construir rawRows (filas de datos) con la misma longitud de columnas
+        
         const rawRows = [];
         for (let r = headerRowIndex + 1; r < rawData.length; r++) {
           rawRows.push(rawData[r]);
         }
-        // Convertir filas crudas en objetos concatenando columnas con mismo encabezado
+        
         const builtRows = buildRowsFromRaw(rawRows, headers);
-        // Filtrar filas vacías y excluir nombres no deseados
         const nonEmpty = builtRows.filter(row => {
           const hasData = Object.values(row).some(v => v && v.toString().trim() !== '');
           return hasData && !isExcludedRow(row);
         });
         currentData = nonEmpty;
-        // Recalcular currentHeaders en base a keys del primer registro si existe
+        
         if (currentData.length > 0) {
           const keys = Object.keys(currentData[0]);
           currentHeaders = keys;
@@ -248,40 +394,38 @@ function loadData(sheetName) {
         currentHeaders = [];
         currentData = [];
       }
-
       filteredData = currentData.slice();
       renderTableAll();
       loader.style.display = 'none';
       table.style.display = 'table';
     },
     error: function(err) {
-      loader.innerHTML = '<span style="color:#d32f2f;">No se pudo conectar. Verifica permisos de lectura.</span>';
+      loader.innerHTML = '<span style="color:var(--vento-orange);">No se pudo conectar. Verifica permisos de lectura.</span>';
       console.error(err);
     }
   });
 }
 
-/* Renderiza toda la tabla (sin paginación) */
 function renderTableAll() {
   thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th data-col="${h}">${h}</th>`).join('') + '</tr>';
   tbody.innerHTML = filteredData.map((row, idx) => {
-    const nombre = row['NOMBRE'] || row['NOMBRE COMPLETO'] || row['ASESOR'] || '';
     const rol = row['ROL'] || row['PUESTO'] || '';
-    const zon = row['ZONIFICACION'] || row['ZONIFICACIÓN'] || '';
     const roleClass = (rol.toLowerCase().includes('supervisor')) ? 'role-supervisor' : (rol.toLowerCase().includes('asesor') ? 'role-asesor' : 'role-gerente');
+    
     return `<tr data-idx="${idx}">
       ${currentHeaders.filter(h=>h).map(h => {
         const val = row[h] || '';
         const q = (searchInput.value||'').trim().toLowerCase();
         const display = q && val.toString().toLowerCase().includes(q) ? val.toString().replace(new RegExp(q,'ig'), m=>`<span class="highlight">${m}</span>`) : val;
+        
         if (h.toUpperCase().includes('ROL') || h.toUpperCase().includes('PUESTO')) {
           return `<td><span class="role-badge ${roleClass}">${display}</span></td>`;
         }
         if (h.toUpperCase().includes('NOMBRE') || h.toUpperCase().includes('ASESOR')) {
-          return `<td><strong>${display}</strong>${rol ? `<div class="small">${rol}</div>` : ''}</td>`;
+          return `<td><strong>${display}</strong>${rol ? `<div class="small" style="margin-top:4px;">${rol}</div>` : ''}</td>`;
         }
         if (h.toUpperCase().includes('CORREO') || h.toUpperCase().includes('EMAIL')) {
-          return `<td><a href="mailto:${val}" class="small">${display}</a></td>`;
+          return `<td><a href="mailto:${val}">${display}</a></td>`;
         }
         if (h.toUpperCase().includes('ZON') || h.toUpperCase().includes('ZONIFIC')) {
           return `<td class="small">${display}</td>`;
@@ -290,17 +434,17 @@ function renderTableAll() {
       }).join('')}
     </tr>`;
   }).join('');
+  
   recordCount.innerText = `${filteredData.length} registros`;
-
+  
   Array.from(tbody.querySelectorAll('tr')).forEach((tr) => {
-    tr.addEventListener('click', (e) => {
+    tr.addEventListener('click', () => {
       const idx = parseInt(tr.getAttribute('data-idx'),10);
       showDetails(filteredData[idx]);
     });
   });
 }
 
-/* Panel de detalle */
 function showDetails(row) {
   if (!row) { detailPanel.style.display='none'; detailPanel.setAttribute('aria-hidden','true'); return; }
   const email = row['CORREO'] || row['EMAIL'] || '';
@@ -308,8 +452,9 @@ function showDetails(row) {
   const zon = row['ZONIFICACION'] || row['ZONIFICACIÓN'] || '';
   const horario = row['HORARIO'] || row['DISPONIBILIDAD'] || '';
   const notas = row['NOTAS'] || row['COMENTARIOS'] || '';
-  detailPanel.innerHTML = `<strong>${row['NOMBRE'] || row['ASESOR'] || ''}</strong>
-    <div class="small">Rol: ${row['ROL'] || row['PUESTO'] || ''}</div>
+  
+  detailPanel.innerHTML = `<strong style="font-size:24px;">${row['NOMBRE'] || row['ASESOR'] || row['NOMBRE COMPLETO'] || 'Detalle'}</strong>
+    <div class="small" style="margin-bottom: 15px; font-size:16px;">Rol: ${row['ROL'] || row['PUESTO'] || 'N/A'}</div>
     ${zon ? `<div style="margin-top:6px"><strong>Zonificación</strong>: ${zon}</div>` : ''}
     <div style="margin-top:8px"><strong>Correo</strong>: <a href="mailto:${email}">${email}</a></div>
     <div style="margin-top:6px"><strong>Teléfono</strong>: ${tel}</div>
@@ -320,7 +465,6 @@ function showDetails(row) {
   detailPanel.setAttribute('aria-hidden','false');
 }
 
-/* Filtrado por búsqueda */
 function applyFilter() {
   const q = (searchInput.value || '').trim().toLowerCase();
   if (!q) { filteredData = currentData.slice(); renderTableAll(); return; }
@@ -330,17 +474,14 @@ function applyFilter() {
   renderTableAll();
 }
 
-/* Eventos */
 searchInput.addEventListener('input', () => {
   clearTimeout(window._deb);
   window._deb = setTimeout(applyFilter, 180);
 });
 areaSelect.addEventListener('change', (e) => loadData(e.target.value));
 
-/* Carga inicial: pestaña por defecto (la primera opción del selector) */
 loadData(areaSelect.value);
 
-/* Atajo accesible */
 document.addEventListener('keydown', (e) => {
   if (e.altKey && e.key === 'f') { e.preventDefault(); searchInput.focus(); }
 });
