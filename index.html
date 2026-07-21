@@ -113,7 +113,7 @@ th{ font-weight:700; color:var(--black); font-size:13px; background: var(--light
     <div class="logo">V</div>
     <div class="header-info">
       <h1>Dashboard de Garantías VENTO</h1>
-      <p>Evaluador de procedencia de servicios por fecha, kilometraje y tolerancia de distancia.</p>
+      <p>Evaluador de procedencia de servicios por fecha, kilometraje y tolerancia de distancia al CESVE.</p>
     </div>
   </div>
 
@@ -137,9 +137,9 @@ th{ font-weight:700; color:var(--black); font-size:13px; background: var(--light
 
   <!-- Módulo de Ubicación (CESVE) -->
   <div class="map-section">
-    <h3 style="margin:0; font-size: 18px;">Validación de Distancia al CESVE (Tolerancias)</h3>
+    <h3 style="margin:0; font-size: 18px;">Validación de Distancia al CESVE</h3>
     <p style="margin:0; color:var(--gray); font-size: 14px;">
-      Si el CESVE está a <strong>10km o menos</strong>, el sistema otorgará automáticamente una tolerancia de <strong>5 días y 50 km</strong>. Si está a más de 10km, se requerirá evaluación especial.
+      Si la distancia al CESVE es <strong>mayor a 10 km</strong>, se otorgará automáticamente una tolerancia de <strong>5 días o 50 km</strong>. Si sobrepasa esta tolerancia, el dictamen será <strong>No procedente</strong>.
     </p>
     <div class="map-controls">
       <div class="input-group">
@@ -166,12 +166,12 @@ th{ font-weight:700; color:var(--black); font-size:13px; background: var(--light
     <div class="card">
       <div class="kpi-container">
         <div class="kpi-box">
-          <div class="label">Dictamen de Servicios</div>
+          <div class="label">Dictamen General</div>
           <div id="warrantyBadge" class="status-pill status-warn" style="margin-top: 10px;">Pendiente de cálculo</div>
         </div>
         <div class="kpi-box">
           <div class="label">Tolerancia Aplicada</div>
-          <div id="tolBadge" class="value" style="font-size: 16px;">—</div>
+          <div id="tolBadge" class="value" style="font-size: 15px;">—</div>
         </div>
       </div>
       
@@ -239,7 +239,7 @@ let invoiceDate = null;
 let kmActual = 0;
 let state = []; 
 
-// Visualización de mapa por Google Maps Embed
+// Visualización de mapa
 $('btnMap').addEventListener('click', () => {
   const cpC = $('cpCliente').value.trim();
   const cpV = $('cpCesve').value.trim();
@@ -336,7 +336,7 @@ function renderTable(){
   });
 }
 
-// Re-evaluar ante cambios en la distancia al CESVE
+// Re-evaluar si cambia la distancia al CESVE
 $('distanciaKm').addEventListener('input', () => {
   if(state.length > 0) {
     const rows = tbody.querySelectorAll('tr');
@@ -351,17 +351,17 @@ function validateRow(tr, s){
   msgCell.className = 'msgCell';
 
   let dist = Number($('distanciaKm').value || 0);
-  let tolKm = (dist > 0 && dist <= 10) ? 50 : 0;
-  let tolDays = (dist > 0 && dist <= 10) ? 5 : 0;
   
-  if(dist > 0 && dist <= 10) {
-    $('tolBadge').textContent = '5 días / 50 km';
-    $('tolBadge').style.color = 'var(--black)';
-  } else if (dist > 10) {
-    $('tolBadge').textContent = 'Revisión Especial (>10 km)';
+  // REGLA: Si la distancia es MAYOR a 10km -> Tolerancia de 5 días / 50km
+  let hasTolerance = dist > 10;
+  let tolKm = hasTolerance ? 50 : 0;
+  let tolDays = hasTolerance ? 5 : 0;
+  
+  if(hasTolerance) {
+    $('tolBadge').textContent = '5 días / 50 km (Distancia > 10 km)';
     $('tolBadge').style.color = 'var(--orange)';
   } else {
-    $('tolBadge').textContent = 'Sin Tolerancia (0 km)';
+    $('tolBadge').textContent = 'Sin tolerancia (Distancia ≤ 10 km)';
     $('tolBadge').style.color = 'var(--gray)';
   }
 
@@ -377,7 +377,7 @@ function validateRow(tr, s){
     return false;
   }
 
-  // Lógica de Doble Validación con Tolerancias
+  // Validación de límites sumando tolerancia
   let maxKm = s.kmLimit + tolKm;
   let maxDate = addDays(s.fechaLimit, tolDays);
   
@@ -393,14 +393,8 @@ function validateRow(tr, s){
     if(overKm) motivo.push('Km');
     if(overDate) motivo.push('Tiempo');
     
-    if (dist > 10) {
-      msgCell.textContent = `Revisión Especial (Excede ${motivo.join(' y ')} - CP > 10km)`;
-      msgCell.classList.add('status-warn');
-    } else {
-      // Excedido aún con tolerancia -> No Procedente
-      msgCell.textContent = `No Procedente (Excede ${motivo.join(' y ')} con tolerancia)`;
-      msgCell.classList.add('status-bad');
-    }
+    msgCell.textContent = `No Procedente (Excede ${motivo.join(' y ')}${hasTolerance ? ' aún con tolerancia' : ''})`;
+    msgCell.classList.add('status-bad');
     return false;
   }
 
@@ -416,6 +410,10 @@ function recomputeSummary(){
   $('vigenciaInfo').textContent = `Hasta ${fmt(vigDate)} o 33,000 km`;
   
   let dist = Number($('distanciaKm').value || 0);
+  let hasTolerance = dist > 10;
+  let tolKm = hasTolerance ? 50 : 0;
+  let tolDays = hasTolerance ? 5 : 0;
+
   let htmlReasons = [];
   let finalStatus = 'Procedente';
   let badgeClass = 'status-ok';
@@ -426,8 +424,6 @@ function recomputeSummary(){
       finalStatus = 'No Procedente';
       badgeClass = 'status-bad';
     } else if (s.fecha && s.km) {
-      let tolKm = (dist > 0 && dist <= 10) ? 50 : 0;
-      let tolDays = (dist > 0 && dist <= 10) ? 5 : 0;
       let maxKm = s.kmLimit + tolKm;
       let maxDate = addDays(s.fechaLimit, tolDays);
       let overKm = Number(s.km) > maxKm;
@@ -438,20 +434,16 @@ function recomputeSummary(){
         if(overKm) motivo.push('kilometraje');
         if(overDate) motivo.push('tiempo');
 
-        if(dist > 10) {
-          htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Excedido en ${motivo.join(' y ')}, sujeto a revisión manual por distancia al CESVE mayor a 10 km.`);
-          if(finalStatus !== 'No Procedente') {
-            finalStatus = 'Requiere Revisión Especial';
-            badgeClass = 'status-warn';
-          }
-        } else {
-          htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Excedió el límite de ${motivo.join(' y ')} aún aplicando la tolerancia. Dictamen: <strong>No Procedente</strong>.`);
-          finalStatus = 'No Procedente';
-          badgeClass = 'status-bad';
+        htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Excedió el límite de ${motivo.join(' y ')}${hasTolerance ? ' aún con la tolerancia de 5 días / 50 km' : ''}. Dictamen: <strong>No Procedente</strong>.`);
+        finalStatus = 'No Procedente';
+        badgeClass = 'status-bad';
+      } else {
+        if(hasTolerance && (Number(s.km) > s.kmLimit || new Date(s.fecha) > new Date(s.fechaLimit))) {
+          htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Realizado dentro de la tolerancia otorgada por distancia > 10 km. Dictamen: <strong>Procedente</strong>.`);
         }
       }
     } else {
-      htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Faltan datos de captura.`);
+      htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Faltan datos de fecha/km.`);
       if(finalStatus !== 'No Procedente') {
         finalStatus = 'Información Incompleta';
         badgeClass = 'status-warn';
@@ -461,7 +453,7 @@ function recomputeSummary(){
 
   if(htmlReasons.length === 0) {
     if(state.length === 0) htmlReasons.push('Sin servicios requeridos a la fecha.');
-    else htmlReasons.push('Todos los servicios requeridos están en regla y dentro del plazo/tolerancia.');
+    else htmlReasons.push('Todos los servicios requeridos están en regla y son procedentes.');
   }
 
   const badge = $('warrantyBadge');
