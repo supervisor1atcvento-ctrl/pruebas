@@ -201,7 +201,7 @@ th{ font-weight:700; color:var(--black); font-size:13px; background: var(--light
       
       <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
       
-      <p style="font-size:13px; color:var(--gray); font-weight:600;">OBSERVACIONES:</p>
+      <p style="font-size:13px; color:var(--gray); font-weight:600;">OBSERVACIONES / MOTIVOS:</p>
       <div id="reasons" style="font-size:14px; color:var(--black); line-height: 1.5;"></div>
     </aside>
   </div>
@@ -225,7 +225,8 @@ const addMonths = (dateStr, months) => {
   d.setMonth(d.getMonth()+months); 
   return d; 
 };
-// Función para sumar días (para tolerancias)
+
+// Función para sumar días (tolerancias)
 const addDays = (dateObj, days) => {
   const d = new Date(dateObj);
   d.setDate(d.getDate() + days);
@@ -238,7 +239,7 @@ let invoiceDate = null;
 let kmActual = 0;
 let state = []; 
 
-// Lógica del Mapa
+// Visualización de mapa por Google Maps Embed
 $('btnMap').addEventListener('click', () => {
   const cpC = $('cpCliente').value.trim();
   const cpV = $('cpCesve').value.trim();
@@ -251,7 +252,7 @@ $('btnMap').addEventListener('click', () => {
   $('mapContainer').style.display = 'block';
 });
 
-// Evento Principal
+// Eventos del botón Calcular
 $('btnCalc').addEventListener('click', () => {
   invoiceDate = $('fechaFactura').value;
   kmActual = Number($('kmActual').value || 0);
@@ -273,7 +274,6 @@ $('btnReset').addEventListener('click', () => {
   recomputeSummary();
 });
 
-// Configurar servicios límite
 let allServices = [];
 function buildAllServices(){
   allServices = SERVICES.map(s => {
@@ -336,7 +336,7 @@ function renderTable(){
   });
 }
 
-// Evaluar línea por línea aplicando validación doble y tolerancia
+// Re-evaluar ante cambios en la distancia al CESVE
 $('distanciaKm').addEventListener('input', () => {
   if(state.length > 0) {
     const rows = tbody.querySelectorAll('tr');
@@ -358,14 +358,15 @@ function validateRow(tr, s){
     $('tolBadge').textContent = '5 días / 50 km';
     $('tolBadge').style.color = 'var(--black)';
   } else if (dist > 10) {
-    $('tolBadge').textContent = 'Caso a Revisión Especial';
+    $('tolBadge').textContent = 'Revisión Especial (>10 km)';
     $('tolBadge').style.color = 'var(--orange)';
   } else {
-    $('tolBadge').textContent = 'Sin Tolerancia (Distancia 0)';
+    $('tolBadge').textContent = 'Sin Tolerancia (0 km)';
+    $('tolBadge').style.color = 'var(--gray)';
   }
 
   if(!s.done) {
-    msgCell.textContent = 'Servicio No Realizado';
+    msgCell.textContent = 'No Procedente (No realizado)';
     msgCell.classList.add('status-bad');
     return false;
   }
@@ -376,33 +377,34 @@ function validateRow(tr, s){
     return false;
   }
 
-  // Lógica de Doble Validación
+  // Lógica de Doble Validación con Tolerancias
   let maxKm = s.kmLimit + tolKm;
   let maxDate = addDays(s.fechaLimit, tolDays);
   
   let usedKm = Number(s.km);
   let usedDate = new Date(s.fecha);
-  usedDate.setHours(23,59,59); // Cubrir todo el día
+  usedDate.setHours(23,59,59);
 
   let overKm = usedKm > maxKm;
   let overDate = usedDate > maxDate;
 
   if (overKm || overDate) {
+    let motivo = [];
+    if(overKm) motivo.push('Km');
+    if(overDate) motivo.push('Tiempo');
+    
     if (dist > 10) {
-      msgCell.textContent = 'Excede límite (Revisión por CP)';
+      msgCell.textContent = `Revisión Especial (Excede ${motivo.join(' y ')} - CP > 10km)`;
       msgCell.classList.add('status-warn');
-      return false;
     } else {
-      let motivo = [];
-      if(overKm) motivo.push('Km');
-      if(overDate) motivo.push('Tiempo');
-      msgCell.textContent = `No Procedente (Excede ${motivo.join(' y ')})`;
+      // Excedido aún con tolerancia -> No Procedente
+      msgCell.textContent = `No Procedente (Excede ${motivo.join(' y ')} con tolerancia)`;
       msgCell.classList.add('status-bad');
-      return false;
     }
+    return false;
   }
 
-  msgCell.textContent = 'Válido';
+  msgCell.textContent = 'Procedente';
   msgCell.classList.add('status-ok');
   return true;
 }
@@ -420,7 +422,7 @@ function recomputeSummary(){
 
   state.forEach(s => {
     if(!s.done) {
-      htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Requerido pero NO realizado.`);
+      htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Requerido pero NO realizado. Dictamen: <strong>No Procedente</strong>.`);
       finalStatus = 'No Procedente';
       badgeClass = 'status-bad';
     } else if (s.fecha && s.km) {
@@ -432,14 +434,18 @@ function recomputeSummary(){
       let overDate = new Date(s.fecha) > maxDate;
 
       if(overKm || overDate) {
+        let motivo = [];
+        if(overKm) motivo.push('kilometraje');
+        if(overDate) motivo.push('tiempo');
+
         if(dist > 10) {
-          htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Excedido, pero requiere revisión manual (Cliente a > 10km del CESVE).`);
+          htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Excedido en ${motivo.join(' y ')}, sujeto a revisión manual por distancia al CESVE mayor a 10 km.`);
           if(finalStatus !== 'No Procedente') {
             finalStatus = 'Requiere Revisión Especial';
             badgeClass = 'status-warn';
           }
         } else {
-          htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Excedió el límite permitido, aún considerando tolerancia.`);
+          htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Excedió el límite de ${motivo.join(' y ')} aún aplicando la tolerancia. Dictamen: <strong>No Procedente</strong>.`);
           finalStatus = 'No Procedente';
           badgeClass = 'status-bad';
         }
@@ -455,7 +461,7 @@ function recomputeSummary(){
 
   if(htmlReasons.length === 0) {
     if(state.length === 0) htmlReasons.push('Sin servicios requeridos a la fecha.');
-    else htmlReasons.push('Todos los servicios están en regla.');
+    else htmlReasons.push('Todos los servicios requeridos están en regla y dentro del plazo/tolerancia.');
   }
 
   const badge = $('warrantyBadge');
