@@ -4,6 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Calculadora VENTO — Servicios y Garantías</title>
+
+<!-- Librería para tomar captura de pantalla completa del DOM -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
 /* Paleta y tipografía VENTO (Negro, Blanco, Naranja) */
 :root{
@@ -26,7 +30,7 @@ body{
 }
 
 /* Layout General */
-.app{ max-width:1200px; margin:30px auto; padding:0 20px; }
+.app{ max-width:1200px; margin:30px auto; padding:20px; background: var(--light-gray); }
 .header{ 
   display:flex; gap:20px; align-items:center; margin-bottom:24px; 
   background: var(--white); padding: 20px; border-radius: var(--radius);
@@ -60,11 +64,13 @@ body{
   background: var(--orange); color:var(--white); border:0; cursor:pointer; 
   font-weight:700; padding: 12px 20px; border-radius: 8px; font-size: 15px;
   transition: transform 0.1s, box-shadow 0.2s;
-  display: inline-flex; align-items: center; justify-content: center;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
 }
 .btn:hover { box-shadow: 0 6px 15px rgba(242,143,23,0.3); transform: translateY(-1px); }
 .btn-outline { background: transparent; color: var(--black); border: 2px solid var(--black); }
 .btn-outline:hover { background: var(--black); color: var(--white); }
+.btn-black { background: var(--black); color: var(--white); }
+.btn-black:hover { background: #000; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
 
 /* Mapa y Ubicación */
 .map-section {
@@ -107,7 +113,7 @@ th{ font-weight:700; color:var(--black); font-size:13px; background: var(--light
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" id="captureArea">
   
   <div class="header">
     <div class="logo">V</div>
@@ -128,7 +134,10 @@ th{ font-weight:700; color:var(--black); font-size:13px; background: var(--light
       <input id="kmActual" class="input-number" type="number" min="0" value="0" />
     </div>
     <div class="input-group" style="justify-content: flex-end;">
-      <button id="btnCalc" class="btn">Generar Tabla de Servicios</button>
+      <button id="btnCalc" class="btn">Generar Tabla</button>
+    </div>
+    <div class="input-group" style="justify-content: flex-end;">
+      <button id="btnCopyCapture" class="btn btn-black">📸 Copiar Captura al Portapapeles</button>
     </div>
     <div class="input-group" style="justify-content: flex-end;">
       <button id="btnReset" class="btn btn-outline">Limpiar Todo</button>
@@ -154,7 +163,7 @@ th{ font-weight:700; color:var(--black); font-size:13px; background: var(--light
         <label>Distancia Real (km)</label>
         <input id="distanciaKm" class="input-number" type="number" value="0" min="0" />
       </div>
-      <button id="btnMap" class="btn" style="background: var(--black);">Ver Rutas en Mapa</button>
+      <button id="btnMap" class="btn btn-black">Ver Rutas en Mapa</button>
     </div>
     <div id="mapContainer" class="map-frame-container">
       <iframe id="mapFrame" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
@@ -219,14 +228,12 @@ const SERVICES = [
 const $ = id => document.getElementById(id);
 const tbody = document.querySelector('#svcTable tbody');
 
-// Función para sumar meses
 const addMonths = (dateStr, months) => { 
   const d = new Date(dateStr); 
   d.setMonth(d.getMonth()+months); 
   return d; 
 };
 
-// Función para sumar días (tolerancias)
 const addDays = (dateObj, days) => {
   const d = new Date(dateObj);
   d.setDate(d.getDate() + days);
@@ -238,6 +245,52 @@ const fmt = d => d ? new Date(d).toLocaleDateString('es-MX') : '-';
 let invoiceDate = null;
 let kmActual = 0;
 let state = []; 
+
+// Función para copiar la captura de pantalla completa
+$('btnCopyCapture').addEventListener('click', async () => {
+  const btn = $('btnCopyCapture');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Generando captura...';
+  btn.disabled = true;
+
+  try {
+    const area = $('captureArea');
+    const canvas = await html2canvas(area, {
+      scale: 2, // Mayor nitidez
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#f4f4f4'
+    });
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        alert('No se pudo generar la imagen.');
+        return;
+      }
+      try {
+        const item = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([item]);
+        alert('¡Captura copiada al portapapeles! Ya puedes ir a tu ticket y presionar Ctrl + V para pegarla.');
+      } catch (err) {
+        // Respaldo en caso de que el navegador bloquee copiar directo la imagen
+        const link = document.createElement('a');
+        link.download = `Dictamen_Garantia_Vento_${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        alert('Tu navegador no permitió copiar directamente al portapapeles, pero la imagen se descargó automáticamente para que la adjuntes a tu ticket.');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }, 'image/png');
+
+  } catch (error) {
+    console.error(error);
+    alert('Error al generar la captura.');
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+});
 
 // Visualización de mapa
 $('btnMap').addEventListener('click', () => {
@@ -377,7 +430,6 @@ function validateRow(tr, s){
     return false;
   }
 
-  // Validación de límites sumando tolerancia
   let maxKm = s.kmLimit + tolKm;
   let maxDate = addDays(s.fechaLimit, tolDays);
   
