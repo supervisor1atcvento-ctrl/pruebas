@@ -1,472 +1,402 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Calculadora VENTO — Servicios y Garantías</title>
-
+<meta charset="UTF-8">
+<title>Consulta Agencias y VIN - Detalle</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-/* Paleta y tipografía VENTO (Negro, Blanco, Naranja) */
-:root{
-  --white: #FFFFFF;    
-  --black: #231F20;    
-  --gray:  #616160;    
-  --light-gray: #f4f4f4;
-  --orange:#F28F17;    
-  --orange-light: rgba(242, 143, 23, 0.15);
-  --radius:12px;
-  --shadow: 0 8px 20px rgba(35,31,32,0.08);
+/* Paleta de colores estricta: Negro, Blanco, Naranja */
+:root {
+  --vento-black: #000000;
+  --vento-black-soft: #1a1a1a;
+  --vento-orange: #ff6600;
+  --vento-white: #ffffff;
+  --vento-bg: #f4f4f4;
+  --vento-border: #e0e0e0;
 }
 
-body{
-  margin:0;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  background: var(--light-gray);
-  color: var(--black);
-  -webkit-font-smoothing:antialiased;
+body { 
+  font-family: 'Segoe UI', Helvetica, Arial, sans-serif; 
+  background-color: var(--vento-bg); 
+  margin: 0; 
+  padding: 20px; 
+  color: var(--vento-black); 
 }
 
-/* Layout General */
-.app{ max-width:1200px; margin:30px auto; padding:0 20px; }
-.header{ 
-  display:flex; gap:20px; align-items:center; margin-bottom:24px; 
-  background: var(--white); padding: 20px; border-radius: var(--radius);
-  box-shadow: var(--shadow);
+.hub-header { 
+  background-color: var(--vento-black); 
+  color: var(--vento-white); 
+  padding: 16px 24px; 
+  border-radius: 8px; 
+  margin-bottom: 20px; 
+  border-left: 6px solid var(--vento-orange); 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
-.logo{
-  width:70px; height:70px; border-radius:12px;
-  background: var(--black);
-  display:flex; align-items:center; justify-content:center;
-  color:var(--orange); font-weight:800; font-size:32px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
+.brand-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--vento-orange); text-transform: uppercase; }
+.hub-title { font-size: 18px; font-weight: 800; margin-top: 4px; letter-spacing: 0.5px; }
+
+.search-container { 
+  background: var(--vento-white); 
+  padding: 20px; 
+  border-radius: 8px; 
+  margin-bottom: 20px; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+  text-align: center; 
+  border: 1px solid var(--vento-border);
 }
-.header-info h1 { font-size: 28px; font-weight:700; margin:0; color:var(--black); }
-.header-info p { margin: 4px 0 0; color:var(--gray); font-size: 15px; }
 
-/* Controles de Configuración */
-.config-panel {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px; background: var(--white); padding: 20px; border-radius: var(--radius);
-  margin-bottom: 24px; box-shadow: var(--shadow);
+.input-box input { 
+  padding: 12px 24px; 
+  border: 2px solid var(--vento-border); 
+  border-radius: 30px; 
+  font-size: 15px; 
+  font-weight: 600; 
+  width: 100%; 
+  max-width: 500px; 
+  text-align: center; 
+  outline: none; 
+  transition: all 0.3s ease; 
+  color: var(--vento-black);
 }
-.input-group { display: flex; flex-direction: column; gap: 6px; }
-.input-group label { font-size: 13px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
-.input, .input-number {
-  border-radius:8px; border:1px solid #ddd; padding:10px 12px;
-  font-size:15px; font-family:inherit; outline: none; transition: border 0.3s;
+
+.input-box input:focus { 
+  border-color: var(--vento-orange); 
+  box-shadow: 0 0 8px rgba(255, 102, 0, 0.2);
 }
-.input:focus, .input-number:focus { border-color: var(--orange); }
 
-.btn {
-  background: var(--orange); color:var(--white); border:0; cursor:pointer; 
-  font-weight:700; padding: 12px 20px; border-radius: 8px; font-size: 15px;
-  transition: transform 0.1s, box-shadow 0.2s;
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+#kiosco-container { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+  gap: 16px; 
 }
-.btn:hover { box-shadow: 0 6px 15px rgba(242,143,23,0.3); transform: translateY(-1px); }
-.btn-outline { background: transparent; color: var(--black); border: 2px solid var(--black); }
-.btn-outline:hover { background: var(--black); color: var(--white); }
-.btn-black { background: var(--black); color: var(--white); }
-.btn-black:hover { background: #000; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
 
-/* Mapa y Ubicación */
-.map-section {
-  background: var(--white); border-radius: var(--radius); padding: 20px;
-  box-shadow: var(--shadow); margin-bottom: 24px; display: grid; gap: 15px;
+.kiosco-card { 
+  background: var(--vento-white); 
+  border-radius: 8px; 
+  padding: 18px; 
+  border: 1px solid var(--vento-border); 
+  cursor: pointer; 
+  transition: all 0.2s ease; 
+  display: flex; 
+  flex-direction: column; 
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
-.map-controls { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
-.map-frame-container { width: 100%; height: 300px; border-radius: 8px; overflow: hidden; display: none; border: 1px solid #eee; }
 
-/* Grid principal */
-.grid{ display:grid; grid-template-columns: 1fr 300px; gap:24px; align-items:start; }
-
-/* Cards y KPIs */
-.card{ background: var(--white); border-radius:var(--radius); padding:20px; box-shadow: var(--shadow); }
-.kpi-container { display: flex; gap: 15px; margin-bottom: 20px; }
-.kpi-box { flex: 1; padding: 15px; border-radius: 8px; background: var(--light-gray); border-left: 4px solid var(--orange); }
-.kpi-box .label { font-size:12px; color:var(--gray); text-transform: uppercase; font-weight: 600; }
-.kpi-box .value { font-size:22px; font-weight:700; color:var(--black); margin-top:8px; }
-
-/* Tabla */
-.table-wrap{ overflow-x:auto; }
-table{ width:100%; border-collapse:collapse; font-size:14px; }
-th, td{ padding:12px 10px; border-bottom:1px solid #eee; text-align:left; vertical-align:middle; }
-th{ font-weight:700; color:var(--black); font-size:13px; background: var(--light-gray); }
-
-/* Estados */
-.status-pill{
-  display:inline-block; padding:6px 12px; border-radius:20px; font-weight:600; font-size:13px;
+.kiosco-card:hover { 
+  transform: translateY(-3px); 
+  border-color: var(--vento-orange); 
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1); 
 }
-.status-ok{ background: rgba(0, 180, 0, 0.1); color: #008000; }
-.status-bad{ background: rgba(220, 53, 69, 0.1); color: #dc3545; }
-.status-warn{ background: var(--orange-light); color: var(--orange); }
 
-.row-required td { border-left: 3px solid var(--orange); }
-.msgCell { font-weight: 600; }
-
-@media (max-width:980px){
-  .grid{ grid-template-columns:1fr; }
+.kiosco-card.selected { 
+  border-color: var(--vento-orange); 
+  border-width: 2px;
 }
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--vento-bg);
+}
+
+.card-id {
+  background-color: var(--vento-black);
+  color: var(--vento-white);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.card-name { 
+  font-size: 15px; 
+  font-weight: 800; 
+  color: var(--vento-black); 
+  line-height: 1.3;
+  width: 75%;
+}
+
+.card-data-row { 
+  font-size: 13px; 
+  margin-bottom: 8px; 
+  color: var(--vento-black-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge-orange { background-color: var(--vento-orange); color: var(--vento-white); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase;}
+.badge-black { background-color: var(--vento-black); color: var(--vento-white); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase;}
+
+.overlay-blur { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 999; display: none; }
+
+.panel-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 550px; max-width: 95vw; background: var(--vento-white); color: var(--vento-black); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.3); z-index: 1000; display: none; flex-direction: column; overflow: hidden; border: 1px solid var(--vento-border); }
+
+.modal-header { background: var(--vento-black); color: var(--vento-white); padding: 16px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--vento-orange); }
+.modal-body { padding: 20px; max-height: 65vh; overflow-y: auto; }
+.modal-close { background: none; border: none; color: var(--vento-white); font-size: 20px; cursor: pointer; transition: color 0.2s; }
+.modal-close:hover { color: var(--vento-orange); }
+
+.input-vin { width: 100%; padding: 14px; border-radius: 6px; border: 2px solid var(--vento-border); background: var(--vento-white); color: var(--vento-black); margin-top: 10px; box-sizing: border-box; font-weight: 700; font-size: 15px; outline: none; text-transform: uppercase; }
+.input-vin:focus { border-color: var(--vento-orange); }
+
+.result-box { margin-top: 15px; padding: 15px; border-radius: 6px; background: var(--vento-bg); border: 1px solid var(--vento-border); font-size: 14px; color: var(--vento-black); display: none; line-height: 1.5; }
+.result-box.warn { background: #fff3e0; border-color: var(--vento-orange); color: var(--vento-black); border-left: 4px solid var(--vento-orange); }
+.result-box.error { background: var(--vento-black); border-color: var(--vento-black); color: var(--vento-white); border-left: 4px solid var(--vento-orange); }
+
+.small-note { font-size: 11px; color: #666; margin-top: 12px; font-style: italic; text-align: center; }
 </style>
 </head>
 <body>
-<div class="app">
-  
-  <div class="header">
-    <div class="logo">V</div>
-    <div class="header-info">
-      <h1>Dashboard de Garantías VENTO</h1>
-      <p>Evaluador de procedencia de servicios por fecha, kilometraje y tolerancia de distancia al CESVE.</p>
+
+<div class="hub-header">
+  <div>
+    <div class="brand-title">VENTO MOTORCYCLES U.S.A.</div>
+    <div class="hub-title">CONSULTA DE AGENCIAS Y VIN</div>
+  </div>
+  <div id="reloj" style="font-size: 14px; font-weight: 700; color: var(--vento-white);"></div>
+</div>
+
+<div class="search-container">
+  <div class="input-box">
+    <input type="text" id="input-agencia" placeholder="Escribe el número de agencia o nombre a buscar..." onkeyup="filtrarKiosco()">
+  </div>
+</div>
+
+<div id="kiosco-container">
+  <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--vento-black); font-weight: 600;">
+    <i class="fa-solid fa-circle-notch fa-spin" style="color: var(--vento-orange); margin-right: 8px;"></i> Sincronizando bases de datos...
+  </div>
+</div>
+
+<div class="overlay-blur" id="overlay" onclick="cerrarModal()"></div>
+<div class="panel-modal" id="modal">
+  <div class="modal-header">
+    <div id="modal-titulo" style="font-weight:800; font-size: 16px;">Agencia</div>
+    <div>
+      <button class="modal-close" onclick="cerrarModal()" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
     </div>
   </div>
-
-  <!-- Configuración Inicial -->
-  <div class="config-panel">
-    <div class="input-group">
-      <label>Fecha de Factura</label>
-      <input id="fechaFactura" class="input" type="date" />
-    </div>
-    <div class="input-group">
-      <label>Kilometraje Actual de la Moto</label>
-      <input id="kmActual" class="input-number" type="number" min="0" value="0" />
-    </div>
-    <div class="input-group" style="justify-content: flex-end;">
-      <button id="btnCalc" class="btn">Generar Tabla de Servicios</button>
-    </div>
-    <div class="input-group" style="justify-content: flex-end;">
-      <button id="btnReset" class="btn btn-outline">Limpiar Todo</button>
-    </div>
-  </div>
-
-  <!-- Módulo de Ubicación (CESVE) -->
-  <div class="map-section">
-    <h3 style="margin:0; font-size: 18px;">Validación de Distancia al CESVE</h3>
-    <p style="margin:0; color:var(--gray); font-size: 14px;">
-      Si la distancia al CESVE es <strong>mayor a 10 km</strong>, se otorgará automáticamente una tolerancia de <strong>5 días o 50 km</strong>. Si sobrepasa esta tolerancia, el dictamen será <strong>No procedente</strong>.
-    </p>
-    <div class="map-controls">
-      <div class="input-group">
-        <label>CP Cliente</label>
-        <input id="cpCliente" class="input-number" type="text" placeholder="Ej. 50000" />
-      </div>
-      <div class="input-group">
-        <label>CP CESVE</label>
-        <input id="cpCesve" class="input-number" type="text" placeholder="Ej. 50100" />
-      </div>
-      <div class="input-group">
-        <label>Distancia Real (km)</label>
-        <input id="distanciaKm" class="input-number" type="number" value="0" min="0" />
-      </div>
-      <button id="btnMap" class="btn btn-black">Ver Rutas en Mapa</button>
-    </div>
-    <div id="mapContainer" class="map-frame-container">
-      <iframe id="mapFrame" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-    </div>
-  </div>
-
-  <!-- Contenido Principal -->
-  <div class="grid">
-    <div class="card">
-      <div class="kpi-container">
-        <div class="kpi-box">
-          <div class="label">Dictamen General</div>
-          <div id="warrantyBadge" class="status-pill status-warn" style="margin-top: 10px;">Pendiente de cálculo</div>
-        </div>
-        <div class="kpi-box">
-          <div class="label">Tolerancia Aplicada</div>
-          <div id="tolBadge" class="value" style="font-size: 15px;">—</div>
-        </div>
-      </div>
-      
-      <div class="table-wrap">
-        <table id="svcTable">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Km límite</th>
-              <th>Meses</th>
-              <th>Fecha límite</th>
-              <th>¿Realizado?</th>
-              <th>Fecha Realizado</th>
-              <th>Km Realizado</th>
-              <th>Estatus</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+  <div class="modal-body">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <div id="modal-info" style="font-size:14px; color:var(--vento-black); font-weight: 700;"></div>
+      <div id="modal-badge-rev"></div>
     </div>
     
-    <aside class="card aside">
-      <h3 style="margin-top:0;">Resumen del Dictamen</h3>
-      <p style="font-size:13px; color:var(--gray); font-weight:600;">VIGENCIA DE GARANTÍA:</p>
-      <div id="vigenciaInfo" style="font-size:14px; font-weight:700; color:var(--black);">—</div>
-      
-      <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
-      
-      <p style="font-size:13px; color:var(--gray); font-weight:600;">OBSERVACIONES / MOTIVOS:</p>
-      <div id="reasons" style="font-size:14px; color:var(--black); line-height: 1.5;"></div>
-    </aside>
+    <div style="background: var(--vento-bg); padding: 12px; border-radius: 6px; border-left: 4px solid var(--vento-orange); margin-bottom: 20px;">
+      <div style="font-size:12px; text-transform: uppercase; font-weight: 800; color: #666; margin-bottom: 4px;">Acción Base Dictaminada</div>
+      <div id="detalle-accion" style="font-size:15px; font-weight: 700; color:var(--vento-black);"></div>
+    </div>
+
+    <label style="display:block; font-weight:800; color:var(--vento-black); font-size: 15px;">Búsqueda de VIN en Base "Proyecto S"</label>
+    <input type="text" id="input-vin-modal" class="input-vin" placeholder="Ingresa los 17 caracteres del VIN..." onkeyup="auditarVinEnModal()">
+    
+    <div id="resultado-vin-box" class="result-box"></div>
+    <div class="small-note">Recuerda: El VIN debe tener exactamente 17 caracteres alfanuméricos.</div>
   </div>
 </div>
 
 <script>
-const SERVICES = [
-  {num:1, km:300, months:1},{num:2, km:2000, months:3},{num:3, km:4000, months:6},
-  {num:4, km:6000, months:9},{num:5, km:9000, months:12},{num:6, km:12000, months:15},
-  {num:7, km:15000, months:18},{num:8, km:18000, months:21},{num:9, km:21000, months:24},
-  {num:10, km:24000, months:27},{num:11, km:27000, months:30},{num:12, km:30000, months:33},
-  {num:13, km:33000, months:36}
-];
+// ==========================================
+// CONFIGURACIÓN DE COLUMNAS (Ajustar aquí)
+// ==========================================
+// Los índices de columnas en un CSV empiezan en 0. 
+// A=0, B=1, C=2, D=3... K=10, L=11, M=12, N=13, O=14
 
-const $ = id => document.getElementById(id);
-const tbody = document.querySelector('#svcTable tbody');
+const COL_AGENCIA_ID = 0;       // Columna A
+const COL_AGENCIA_NOMBRE = 1;   // Columna B
+const COL_ACCION_BASE = 11;     // <-- CAMBIAR AQUÍ si la "Acción base" se movió a la columna M (12) o N (13)
+const COL_ACCION_BASE_ALT = 13; // Alternativa por si viene en otra columna
+const COL_PUEDE_REPORTAR = 14;  // Columna O
 
-const addMonths = (dateStr, months) => { 
-  const d = new Date(dateStr); 
-  d.setMonth(d.getMonth()+months); 
-  return d; 
+// ==========================================
+
+const sheetId = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY';
+const urlAgencias = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Agencias`;
+const urlSeries = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Proyecto+S`;
+
+let cacheSeries = [];
+let agenciaActiva = null;
+
+window.onload = () => {
+  fetch(urlAgencias).then(r => r.text()).then(csv => procesarAgencias(csv)).catch(e => console.error(e));
+  fetch(urlSeries).then(r => r.text()).then(csv => procesarSeries(csv)).catch(e => console.error(e));
+  setInterval(() => { document.getElementById('reloj').innerText = new Date().toLocaleTimeString(); }, 1000);
 };
 
-const addDays = (dateObj, days) => {
-  const d = new Date(dateObj);
-  d.setDate(d.getDate() + days);
-  return d;
-}
-
-const fmt = d => d ? new Date(d).toLocaleDateString('es-MX') : '-';
-
-let invoiceDate = null;
-let kmActual = 0;
-let state = []; 
-
-// Visualización de mapa
-$('btnMap').addEventListener('click', () => {
-  const cpC = $('cpCliente').value.trim();
-  const cpV = $('cpCesve').value.trim();
-  if(!cpC || !cpV) {
-    alert("Ingresa ambos códigos postales para ver el mapa.");
-    return;
+function parsearLineaCSV(linea) {
+  let resultado = [];
+  let comillas = false;
+  let celda = '';
+  for (let i = 0; i < linea.length; i++) {
+    let char = linea[i];
+    if (char === '"') { comillas = !comillas; }
+    else if (char === ',' && !comillas) { resultado.push(celda.trim()); celda = ''; }
+    else { celda += char; }
   }
-  const mapUrl = `https://maps.google.com/maps?saddr=${cpC}&daddr=${cpV}&output=embed`;
-  $('mapFrame').src = mapUrl;
-  $('mapContainer').style.display = 'block';
-});
-
-// Eventos del botón Calcular
-$('btnCalc').addEventListener('click', () => {
-  invoiceDate = $('fechaFactura').value;
-  kmActual = Number($('kmActual').value || 0);
-  if(!invoiceDate){ alert('Ingresa la fecha de factura'); return; }
-  
-  buildAllServices();
-  buildRequiredList();
-  renderTable();
-  recomputeSummary();
-});
-
-$('btnReset').addEventListener('click', () => {
-  if(!confirm('¿Limpiar todos los datos?')) return;
-  $('fechaFactura').value=''; $('kmActual').value='0'; 
-  $('cpCliente').value=''; $('cpCesve').value=''; $('distanciaKm').value='0';
-  $('mapContainer').style.display = 'none';
-  tbody.innerHTML=''; 
-  invoiceDate = null; state = [];
-  recomputeSummary();
-});
-
-let allServices = [];
-function buildAllServices(){
-  allServices = SERVICES.map(s => {
-    const fechaLimit = addMonths(invoiceDate, s.months);
-    return { num: s.num, kmLimit: s.km, months: s.months, fechaLimit: fechaLimit.toISOString() };
-  });
+  resultado.push(celda.trim());
+  return resultado;
 }
 
-function buildRequiredList(){
-  const today = new Date();
-  state = allServices.filter(s => {
-    const requiredByKm = kmActual >= s.kmLimit;
-    const requiredByDate = today >= new Date(s.fechaLimit);
-    return requiredByKm || requiredByDate;
-  }).map(s => ({ ...s, required: true, done:false, fecha:'', km:'' }));
-}
-
-function renderTable(){
-  tbody.innerHTML = '';
-  if(state.length === 0){
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No hay servicios requeridos a la fecha.</td></tr>`;
-    return;
-  }
+function procesarAgencias(texto) {
+  const lineas = texto.split(/\r?\n/);
+  const container = document.getElementById('kiosco-container');
+  container.innerHTML = '';
   
-  state.forEach(s => {
-    const tr = document.createElement('tr');
-    tr.className = 'row-required';
-    tr.innerHTML = `
-      <td><strong>${s.num}</strong></td>
-      <td>${s.kmLimit.toLocaleString()} km</td>
-      <td>${s.months}</td>
-      <td>${fmt(s.fechaLimit)}</td>
-      <td>
-        <select class="input selDone">
-          <option value="no" selected>No</option>
-          <option value="si">Sí</option>
-        </select>
-      </td>
-      <td><input class="input inpDate" type="date" disabled></td>
-      <td><input class="input inpKm" type="number" min="0" disabled placeholder="Km"></td>
-      <td class="msgCell"></td>
+  for(let i = 1; i < lineas.length; i++) {
+    if(!lineas[i]) continue;
+    const col = parsearLineaCSV(lineas[i]);
+    if(col.length < 2 || !col[COL_AGENCIA_NOMBRE]) continue;
+    
+    const id = col[COL_AGENCIA_ID].replace(/"/g, '').trim();
+    const nombre = col[COL_AGENCIA_NOMBRE].replace(/"/g, '').trim();
+    
+    // Extracción de Acción Base basada en la configuración superior
+    let accionBase = (col[COL_ACCION_BASE] || '').replace(/"/g, '').trim();
+    let accionBaseAlt = (col[COL_ACCION_BASE_ALT] || '').replace(/"/g, '').trim();
+    let accionFinal = accionBase || accionBaseAlt || 'No especificada';
+    
+    const puede = (col[COL_PUEDE_REPORTAR] || '').replace(/"/g, '').trim().toUpperCase();
+    
+    const card = document.createElement('div');
+    card.className = 'kiosco-card';
+    card.setAttribute('data-id', id);
+    card.setAttribute('data-search', nombre.toLowerCase());
+    
+    // Asignación de colores corporativos en etiquetas
+    const classPuede = (puede === 'SI') ? 'badge-orange' : 'badge-black';
+    const txtPuede = (puede === 'SI') ? 'SÍ REPORTA' : 'NO REPORTA';
+    
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-name">${nombre}</div>
+        <div class="card-id">#${id}</div>
+      </div>
+      <div class="card-data-row">
+        <span><b>Acción Base:</b></span>
+        <span style="text-align: right; font-weight: 600;">${accionFinal}</span>
+      </div>
+      <div class="card-data-row">
+        <span><b>Rev. General:</b></span>
+        <span class="${classPuede}">${txtPuede}</span>
+      </div>
     `;
-    tbody.appendChild(tr);
     
-    const selDone = tr.querySelector('.selDone');
-    const inpDate = tr.querySelector('.inpDate');
-    const inpKm = tr.querySelector('.inpKm');
-    
-    selDone.addEventListener('change', () => {
-      s.done = selDone.value === 'si';
-      inpDate.disabled = !s.done;
-      inpKm.disabled = !s.done;
-      if(!s.done) { s.fecha = ''; s.km = ''; inpDate.value = ''; inpKm.value = ''; }
-      validateRow(tr,s); recomputeSummary();
+    card.onclick = () => {
+      document.querySelectorAll('.kiosco-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      agenciaActiva = { id, nombre, accionBase: accionFinal, puede, txtPuede, classPuede };
+      abrirModalConAgencia();
+    };
+    container.appendChild(card);
+  }
+}
+
+function procesarSeries(texto) {
+  const lineas = texto.split(/\r?\n/);
+  for(let i = 1; i < lineas.length; i++) {
+    if(!lineas[i]) continue;
+    const col = parsearLineaCSV(lineas[i]);
+    if(col.length <= 5 || !col[5]) continue;
+    cacheSeries.push({
+      vin: (col[5] || '').replace(/"/g, '').trim().toLowerCase(),
+      originalVin: (col[5] || '').replace(/"/g, '').trim(),
+      modelo: (col[3] || '').replace(/"/g, '').trim(),
+      fechaRecepcion: (col[7] || '').replace(/"/g, '').trim(),
+      accion: (col[11] || '').replace(/"/g, '').trim()
     });
-    inpDate.addEventListener('change', () => { s.fecha = inpDate.value; validateRow(tr,s); recomputeSummary(); });
-    inpKm.addEventListener('input', () => { s.km = inpKm.value; validateRow(tr,s); recomputeSummary(); });
-    
-    validateRow(tr,s);
+  }
+}
+
+function filtrarKiosco() {
+  const val = document.getElementById('input-agencia').value.trim();
+  const esNum = /^\d+$/.test(val);
+  document.querySelectorAll('.kiosco-card').forEach(c => {
+    const match = esNum ? c.getAttribute('data-id') === val : c.getAttribute('data-search').includes(val.toLowerCase());
+    c.style.display = (val === '' || match) ? 'flex' : 'none';
   });
 }
 
-// Re-evaluar si cambia la distancia al CESVE
-$('distanciaKm').addEventListener('input', () => {
-  if(state.length > 0) {
-    const rows = tbody.querySelectorAll('tr');
-    state.forEach((s, i) => validateRow(rows[i], s));
-    recomputeSummary();
+function abrirModalConAgencia() {
+  if(!agenciaActiva) return;
+  document.getElementById('modal-titulo').innerText = agenciaActiva.nombre;
+  document.getElementById('modal-info').innerHTML = `Agencia ID: <span style="background: var(--vento-black); color: var(--vento-white); padding: 2px 6px; border-radius: 4px;">${agenciaActiva.id}</span>`;
+  document.getElementById('modal-badge-rev').innerHTML = `<span class="${agenciaActiva.classPuede}">${agenciaActiva.txtPuede}</span>`;
+  document.getElementById('detalle-accion').innerText = agenciaActiva.accionBase;
+  
+  document.getElementById('input-vin-modal').value = '';
+  const rb = document.getElementById('resultado-vin-box');
+  rb.style.display = 'none';
+  rb.className = 'result-box';
+  rb.innerHTML = '';
+  
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('input-vin-modal').focus(), 120);
+}
+
+function cerrarModal() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('modal').style.display = 'none';
+  document.querySelectorAll('.kiosco-card').forEach(c => c.classList.remove('selected'));
+  agenciaActiva = null;
+}
+
+function limpiarVIN(v) {
+  return v.replace(/[\s\-]/g, '').replace(/[^a-zA-Z0-9]/g, '');
+}
+
+function auditarVinEnModal() {
+  const raw = document.getElementById('input-vin-modal').value;
+  const vinClean = limpiarVIN(raw).toLowerCase();
+  const respuestaBox = document.getElementById('resultado-vin-box');
+  
+  if(vinClean.length === 0) { respuestaBox.style.display = 'none'; respuestaBox.className = 'result-box'; respuestaBox.innerHTML = ''; return; }
+  
+  if (vinClean.length < 17) {
+    const faltan = 17 - vinClean.length;
+    respuestaBox.style.display = 'block';
+    respuestaBox.className = 'result-box warn';
+    respuestaBox.innerHTML = `⚠️ <b>VIN incompleto:</b> faltan <b>${faltan}</b> dígitos.`;
+    return;
   }
-});
-
-function validateRow(tr, s){
-  const msgCell = tr.querySelector('.msgCell');
-  msgCell.textContent = '';
-  msgCell.className = 'msgCell';
-
-  let dist = Number($('distanciaKm').value || 0);
   
-  let hasTolerance = dist > 10;
-  let tolKm = hasTolerance ? 50 : 0;
-  let tolDays = hasTolerance ? 5 : 0;
+  if (vinClean.length > 17) {
+    respuestaBox.style.display = 'block';
+    respuestaBox.className = 'result-box warn';
+    respuestaBox.innerHTML = `⚠️ <b>VIN excedido:</b> contiene <b>${vinClean.length}</b> caracteres (Solo se permiten 17).`;
+    return;
+  }
   
-  if(hasTolerance) {
-    $('tolBadge').textContent = '5 días / 50 km (Distancia > 10 km)';
-    $('tolBadge').style.color = 'var(--orange)';
+  const registro = cacheSeries.find(s => s.vin === vinClean || s.vin.includes(vinClean));
+  respuestaBox.style.display = 'block';
+  
+  if (registro) {
+    respuestaBox.className = 'result-box';
+    respuestaBox.innerHTML = `
+      <div style="font-weight: 800; margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px;">✅ Unidad Localizada</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div><b>Modelo:</b><br> ${registro.modelo || 'N/A'}</div>
+        <div><b>VIN:</b><br> ${registro.originalVin}</div>
+        <div><b>Recepción:</b><br> ${registro.fechaRecepcion || 'N/A'}</div>
+        <div><b>Dictamen:</b><br> ${registro.accion || 'N/A'}</div>
+      </div>
+    `;
   } else {
-    $('tolBadge').textContent = 'Sin tolerancia (Distancia ≤ 10 km)';
-    $('tolBadge').style.color = 'var(--gray)';
+    respuestaBox.className = 'result-box error';
+    respuestaBox.innerHTML = `
+      <div style="font-weight: 800; font-size: 15px; margin-bottom: 4px;">❌ VIN no localizado</div>
+      <div>Será necesario solicitar el <b>Check List</b> y cotización correspondiente a la agencia para continuar.</div>
+    `;
   }
-
-  if(!s.done) {
-    msgCell.textContent = 'No Procedente (No realizado)';
-    msgCell.classList.add('status-bad');
-    return false;
-  }
-
-  if(!s.fecha || !s.km) {
-    msgCell.textContent = 'Faltan Datos';
-    msgCell.classList.add('status-warn');
-    return false;
-  }
-
-  let maxKm = s.kmLimit + tolKm;
-  let maxDate = addDays(s.fechaLimit, tolDays);
-  
-  let usedKm = Number(s.km);
-  let usedDate = new Date(s.fecha);
-  usedDate.setHours(23,59,59);
-
-  let overKm = usedKm > maxKm;
-  let overDate = usedDate > maxDate;
-
-  if (overKm || overDate) {
-    let motivo = [];
-    if(overKm) motivo.push('Km');
-    if(overDate) motivo.push('Tiempo');
-    
-    msgCell.textContent = `No Procedente (Excede ${motivo.join(' y ')}${hasTolerance ? ' aún con tolerancia' : ''})`;
-    msgCell.classList.add('status-bad');
-    return false;
-  }
-
-  msgCell.textContent = 'Procedente';
-  msgCell.classList.add('status-ok');
-  return true;
-}
-
-function recomputeSummary(){
-  if(!invoiceDate) return;
-  
-  const vigDate = addMonths(invoiceDate,36);
-  $('vigenciaInfo').textContent = `Hasta ${fmt(vigDate)} o 33,000 km`;
-  
-  let dist = Number($('distanciaKm').value || 0);
-  let hasTolerance = dist > 10;
-  let tolKm = hasTolerance ? 50 : 0;
-  let tolDays = hasTolerance ? 5 : 0;
-
-  let htmlReasons = [];
-  let hasNoProcedente = false;
-  let hasIncomplete = false;
-
-  state.forEach(s => {
-    if(!s.done) {
-      htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Requerido pero NO realizado. Dictamen: <strong>No Procedente</strong>.`);
-      hasNoProcedente = true;
-    } else if (s.fecha && s.km) {
-      let maxKm = s.kmLimit + tolKm;
-      let maxDate = addDays(s.fechaLimit, tolDays);
-      let overKm = Number(s.km) > maxKm;
-      let overDate = new Date(s.fecha) > maxDate;
-
-      if(overKm || overDate) {
-        let motivo = [];
-        if(overKm) motivo.push('kilometraje');
-        if(overDate) motivo.push('tiempo');
-
-        htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Excedió el límite de ${motivo.join(' y ')}${hasTolerance ? ' aún con la tolerancia de 5 días / 50 km' : ''}. Dictamen: <strong>No Procedente</strong>.`);
-        hasNoProcedente = true;
-      } else {
-        if(hasTolerance && (Number(s.km) > s.kmLimit || new Date(s.fecha) > new Date(s.fechaLimit))) {
-          htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Realizado dentro de la tolerancia otorgada por distancia > 10 km. Dictamen: <strong>Procedente</strong>.`);
-        }
-      }
-    } else {
-      htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Faltan datos de fecha/km.`);
-      hasIncomplete = true;
-    }
-  });
-
-  if(htmlReasons.length === 0) {
-    if(state.length === 0) htmlReasons.push('Sin servicios requeridos a la fecha.');
-    else htmlReasons.push('Todos los servicios requeridos están en regla y son procedentes.');
-  }
-
-  // LÓGICA DEL DICTAMEN GENERAL
-  let finalStatus = 'Procedente';
-  let badgeClass = 'status-ok';
-
-  if (hasNoProcedente) {
-    // Basta con que al menos un servicio NO sea procedente para marcar todo el dictamen como NO procedente
-    finalStatus = 'No Procedente';
-    badgeClass = 'status-bad';
-  } else if (hasIncomplete) {
-    finalStatus = 'Información Incompleta';
-    badgeClass = 'status-warn';
-  }
-
-  const badge = $('warrantyBadge');
-  badge.textContent = finalStatus;
-  badge.className = `status-pill ${badgeClass}`;
-  $('reasons').innerHTML = htmlReasons.join('<br>');
 }
 </script>
 </body>
