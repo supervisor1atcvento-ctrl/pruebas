@@ -253,10 +253,37 @@ $('btnCopyCapture').addEventListener('click', async () => {
   btn.innerHTML = '⏳ Generando captura...';
   btn.disabled = true;
 
+  const mapContainer = $('mapContainer');
+  const mapFrame = $('mapFrame');
+  let tempPlaceholder = null;
+
+  // Si el mapa está desplegado, creamos una tarjeta de respaldo visual para que la captura no quede en blanco
+  if (mapContainer.style.display !== 'none' && mapFrame.src) {
+    tempPlaceholder = document.createElement('div');
+    tempPlaceholder.style.cssText = `
+      width: 100%; height: 160px; background: #ffffff; border-radius: 8px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 2px dashed #F28F17; font-family: inherit; color: #231F20; text-align: center; padding: 15px; box-sizing: border-box;
+    `;
+    const cpC = $('cpCliente').value || 'N/A';
+    const cpV = $('cpCesve').value || 'N/A';
+    const dist = $('distanciaKm').value || '0';
+    
+    tempPlaceholder.innerHTML = `
+      <div style="font-size: 22px; margin-bottom: 4px;">🗺️</div>
+      <strong style="font-size: 16px; color: #231F20;">Ruta de Mapa Verificada</strong>
+      <span style="font-size: 14px; color: #616160; margin-top: 4px;">CP Cliente: <b>${cpC}</b> ➔ CP CESVE: <b>${cpV}</b></span>
+      <span style="font-size: 15px; font-weight: bold; color: #F28F17; margin-top: 6px; background: rgba(242,143,23,0.1); padding: 4px 12px; border-radius: 12px;">Distancia Registrada: ${dist} km</span>
+    `;
+    
+    mapFrame.style.display = 'none';
+    mapContainer.appendChild(tempPlaceholder);
+  }
+
   try {
     const area = $('captureArea');
     const canvas = await html2canvas(area, {
-      scale: 2, // Mayor nitidez
+      scale: 2, // Nitidez HD
       useCORS: true,
       logging: false,
       backgroundColor: '#f4f4f4'
@@ -270,15 +297,19 @@ $('btnCopyCapture').addEventListener('click', async () => {
       try {
         const item = new ClipboardItem({ 'image/png': blob });
         await navigator.clipboard.write([item]);
-        alert('¡Captura copiada al portapapeles! Ya puedes ir a tu ticket y presionar Ctrl + V para pegarla.');
+        alert('¡Captura copiada al portapapeles! Presiona Ctrl + V en tu ticket para pegarla.');
       } catch (err) {
-        // Respaldo en caso de que el navegador bloquee copiar directo la imagen
         const link = document.createElement('a');
         link.download = `Dictamen_Garantia_Vento_${Date.now()}.png`;
         link.href = canvas.toDataURL();
         link.click();
-        alert('Tu navegador no permitió copiar directamente al portapapeles, pero la imagen se descargó automáticamente para que la adjuntes a tu ticket.');
+        alert('Captura descargada automáticamente.');
       } finally {
+        // Restaurar iframe del mapa original en pantalla
+        if (tempPlaceholder) {
+          tempPlaceholder.remove();
+          mapFrame.style.display = 'block';
+        }
         btn.innerHTML = originalText;
         btn.disabled = false;
       }
@@ -287,6 +318,10 @@ $('btnCopyCapture').addEventListener('click', async () => {
   } catch (error) {
     console.error(error);
     alert('Error al generar la captura.');
+    if (tempPlaceholder) {
+      tempPlaceholder.remove();
+      mapFrame.style.display = 'block';
+    }
     btn.innerHTML = originalText;
     btn.disabled = false;
   }
