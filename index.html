@@ -1,490 +1,468 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Directorio Post Venta - Vento Motorcycles</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<title>Calculadora VENTO — Servicios y Garantías</title>
 <style>
-/* 
-  Lineamientos Institucionales:
-  - Título: Segoe UI 38 (negritas)
-  - Subtítulo: Segoe UI Semibold 32
-  - Contenido: Segoe UI 28 (Ajustado proporcionalmente para tabla de datos web)
-  - Paleta: Blanco (#FFFFFF), Negro (#231F20), Gris (#616160), Naranja (#F28F17)
-*/
-:root {
-  --vento-black: #231F20;
-  --vento-white: #FFFFFF;
-  --vento-grey:  #616160;
-  --vento-orange:#F28F17;
-  --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-* { box-sizing: border-box; }
-body {
-  font-family: var(--font-family);
-  background: var(--vento-white);
-  margin: 0;
-  padding: 0;
-  color: var(--vento-black);
-}
-.top-bar {
-  background-color: var(--vento-black);
-  height: 8px;
-  width: 100%;
-  border-bottom: 4px solid var(--vento-orange);
-}
-.container {
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 20px;
-}
-.header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 20px 0 30px 0;
-  border-bottom: 2px solid var(--vento-grey);
-  margin-bottom: 30px;
-}
-.header-titles h1 {
-  margin: 0;
-  font-size: 38px;
-  font-weight: bold;
-  color: var(--vento-black);
-  line-height: 1.2;
-}
-.header-titles h2 {
-  margin: 5px 0 0 0;
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--vento-grey);
-}
-.logo-container {
-  text-align: right;
-}
-.logo-text {
-  font-size: 38px;
-  font-weight: 900;
-  font-style: italic;
-  color: var(--vento-black);
-  letter-spacing: -1px;
-  margin: 0;
-  line-height: 1;
-}
-.logo-sub {
-  font-size: 14px;
-  letter-spacing: 3px;
-  color: var(--vento-black);
-  font-weight: 600;
-}
-.controls {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  background: #f7f7f7;
-  padding: 25px;
-  border-radius: 0;
-  border-left: 6px solid var(--vento-orange);
-}
-.control {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 250px;
-}
-.control label {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--vento-black);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-select, input[type="text"] {
-  padding: 14px;
-  border: 1px solid var(--vento-grey);
-  border-radius: 0;
-  font-size: 18px;
-  font-family: var(--font-family);
-  color: var(--vento-black);
-}
-select:focus, input[type="text"]:focus {
-  outline: none;
-  border-color: var(--vento-orange);
-  box-shadow: 0 0 0 2px rgba(242, 143, 23, 0.2);
-}
-.table-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-.badge {
-  background: var(--vento-black);
-  padding: 8px 16px;
-  color: var(--vento-white);
-  font-weight: bold;
-  font-size: 16px;
-}
-.table-wrap {
-  overflow-x: auto;
-  border: 1px solid #e0e0e0;
-}
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 18px; /* Acercándonos a los 28px de contenido, ajustado a legibilidad web */
-}
-th, td {
-  padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
-  text-align: left;
-  vertical-align: middle;
-}
-th {
-  background: var(--vento-black);
-  color: var(--vento-white);
-  font-size: 16px;
-  font-weight: 600;
-  text-transform: uppercase;
-  position: sticky;
-  top: 0;
-}
-tr:nth-child(even) { background: #fafafa; }
-tr:hover { background: rgba(242, 143, 23, 0.05); cursor: pointer; }
-.role-badge {
-  display: inline-block;
-  padding: 6px 12px;
-  font-size: 14px;
-  font-weight: bold;
-  color: var(--vento-white);
-  text-transform: uppercase;
-}
-.role-supervisor { background: var(--vento-black); }
-.role-asesor { background: var(--vento-orange); }
-.role-gerente { background: var(--vento-grey); }
-
-.highlight { 
-  background: rgba(242, 143, 23, 0.3); 
-  padding: 2px 4px; 
-}
-.small { font-size: 14px; color: var(--vento-grey); }
-a { color: var(--vento-orange); text-decoration: none; font-weight: bold; }
-a:hover { text-decoration: underline; color: var(--vento-black); }
-
-#loader { 
-  color: var(--vento-orange); 
-  font-weight: bold; 
-  padding: 20px 0; 
-  font-size: 18px;
+/* Paleta y tipografía VENTO (Negro, Blanco, Naranja) */
+:root{
+  --white: #FFFFFF;    
+  --black: #231F20;    
+  --gray:  #616160;    
+  --light-gray: #f4f4f4;
+  --orange:#F28F17;    
+  --orange-light: rgba(242, 143, 23, 0.15);
+  --radius:12px;
+  --shadow: 0 8px 20px rgba(35,31,32,0.08);
 }
 
-.details {
-  background: #f7f7f7;
-  padding: 20px;
-  border-left: 6px solid var(--vento-orange);
-  margin-top: 15px;
-  font-size: 18px;
+body{
+  margin:0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--light-gray);
+  color: var(--black);
+  -webkit-font-smoothing:antialiased;
 }
-.details strong {
-  color: var(--vento-black);
+
+/* Layout General */
+.app{ max-width:1200px; margin:30px auto; padding:0 20px; }
+.header{ 
+  display:flex; gap:20px; align-items:center; margin-bottom:24px; 
+  background: var(--white); padding: 20px; border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
-@media(max-width:800px){
-  .header-section { flex-direction: column; align-items: flex-start; gap: 20px; }
-  .header-titles h1 { font-size: 32px; }
-  .header-titles h2 { font-size: 26px; }
+.logo{
+  width:70px; height:70px; border-radius:12px;
+  background: var(--black);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--orange); font-weight:800; font-size:32px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.header-info h1 { font-size: 28px; font-weight:700; margin:0; color:var(--black); }
+.header-info p { margin: 4px 0 0; color:var(--gray); font-size: 15px; }
+
+/* Controles de Configuración */
+.config-panel {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px; background: var(--white); padding: 20px; border-radius: var(--radius);
+  margin-bottom: 24px; box-shadow: var(--shadow);
+}
+.input-group { display: flex; flex-direction: column; gap: 6px; }
+.input-group label { font-size: 13px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
+.input, .input-number {
+  border-radius:8px; border:1px solid #ddd; padding:10px 12px;
+  font-size:15px; font-family:inherit; outline: none; transition: border 0.3s;
+}
+.input:focus, .input-number:focus { border-color: var(--orange); }
+
+.btn {
+  background: var(--orange); color:var(--white); border:0; cursor:pointer; 
+  font-weight:700; padding: 12px 20px; border-radius: 8px; font-size: 15px;
+  transition: transform 0.1s, box-shadow 0.2s;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.btn:hover { box-shadow: 0 6px 15px rgba(242,143,23,0.3); transform: translateY(-1px); }
+.btn-outline { background: transparent; color: var(--black); border: 2px solid var(--black); }
+.btn-outline:hover { background: var(--black); color: var(--white); }
+
+/* Mapa y Ubicación */
+.map-section {
+  background: var(--white); border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow); margin-bottom: 24px; display: grid; gap: 15px;
+}
+.map-controls { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
+.map-frame-container { width: 100%; height: 300px; border-radius: 8px; overflow: hidden; display: none; border: 1px solid #eee; }
+
+/* Grid principal */
+.grid{ display:grid; grid-template-columns: 1fr 300px; gap:24px; align-items:start; }
+
+/* Cards y KPIs */
+.card{ background: var(--white); border-radius:var(--radius); padding:20px; box-shadow: var(--shadow); }
+.kpi-container { display: flex; gap: 15px; margin-bottom: 20px; }
+.kpi-box { flex: 1; padding: 15px; border-radius: 8px; background: var(--light-gray); border-left: 4px solid var(--orange); }
+.kpi-box .label { font-size:12px; color:var(--gray); text-transform: uppercase; font-weight: 600; }
+.kpi-box .value { font-size:22px; font-weight:700; color:var(--black); margin-top:8px; }
+
+/* Tabla */
+.table-wrap{ overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; font-size:14px; }
+th, td{ padding:12px 10px; border-bottom:1px solid #eee; text-align:left; vertical-align:middle; }
+th{ font-weight:700; color:var(--black); font-size:13px; background: var(--light-gray); }
+
+/* Estados */
+.status-pill{
+  display:inline-block; padding:6px 12px; border-radius:20px; font-weight:600; font-size:13px;
+}
+.status-ok{ background: rgba(0, 180, 0, 0.1); color: #008000; }
+.status-bad{ background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+.status-warn{ background: var(--orange-light); color: var(--orange); }
+
+.row-required td { border-left: 3px solid var(--orange); }
+.msgCell { font-weight: 600; }
+
+@media (max-width:980px){
+  .grid{ grid-template-columns:1fr; }
 }
 </style>
 </head>
 <body>
-<div class="top-bar"></div>
-<div class="container" role="application" aria-label="Directorio Post Venta">
+<div class="app">
   
-  <div class="header-section">
-    <div class="header-titles">
-      <h1>Directorio Post Venta</h1>
-      <h2>Zonificación de Equipo y Áreas</h2>
-    </div>
-    <div class="logo-container">
-      <div class="logo-text">VENTO</div>
-      <div class="logo-sub">MOTORCYCLES U.S.A</div>
+  <div class="header">
+    <div class="logo">V</div>
+    <div class="header-info">
+      <h1>Dashboard de Garantías VENTO</h1>
+      <p>Evaluador de procedencia de servicios por fecha, kilometraje y tolerancia de distancia.</p>
     </div>
   </div>
 
-  <div class="controls" aria-hidden="false">
-    <div class="control">
-      <label for="area-select">Seleccionar Pestaña</label>
-      <select id="area-select" aria-label="Seleccionar pestaña">
-        <option value="ATENCION A CLIENTES">Atención a Clientes</option>
-        <option value="REPARACIONES TIENDAS">Reparaciones Tiendas</option>
-        <option value="REPARACIONES AGENCIAS">Reparaciones Agencias</option>
-        <option value="REPARACIONES CEDIS">Reparaciones CEDIS</option>
-        <option value="ARMADOS Y ACTIVADOS">Armados y Activados</option>
-        <option value="GARANTIAS">Garantías</option>
-        <option value="COTIZACIONES">Cotizaciones</option>
-        <option value="PAGOS A CESVE">Pagos a CESVE</option>
-        <option value="REGIONALES">Regionales</option>
-        <option value="VENTOMAN COPPEL">Ventoman Coppel</option>
-        <option value="VENTOMAN VENTO">Ventoman Vento</option>
-        <option value="INGENIERIA POSTVENTA">Ingeniería Postventa</option>
-        <option value="STAFF">Staff</option>
-        <option value="AMERICAN PISTON">American Piston</option>
-        <option value="REFACCIONES">Refacciones</option>
-        <option value="STAFF - COMPLETO">Staff - Completo</option>
-      </select>
+  <!-- Configuración Inicial -->
+  <div class="config-panel">
+    <div class="input-group">
+      <label>Fecha de Factura</label>
+      <input id="fechaFactura" class="input" type="date" />
     </div>
-    <div class="control" style="flex:2">
-      <label for="search-input">Buscar persona, correo o rol</label>
-      <input type="text" id="search-input" placeholder="Escribe para buscar (Ej. Asesor, Nombre)..." aria-label="Buscar persona correo o rol">
+    <div class="input-group">
+      <label>Kilometraje Actual de la Moto</label>
+      <input id="kmActual" class="input-number" type="number" min="0" value="0" />
+    </div>
+    <div class="input-group" style="justify-content: flex-end;">
+      <button id="btnCalc" class="btn">Generar Tabla de Servicios</button>
+    </div>
+    <div class="input-group" style="justify-content: flex-end;">
+      <button id="btnReset" class="btn btn-outline">Limpiar Todo</button>
     </div>
   </div>
 
-  <div>
-    <div class="table-actions">
-      <div class="small" id="info-note">Vista completa consolidada. Selecciona una fila para ver detalles completos.</div>
-      <div class="badge" id="record-count">0 registros</div>
+  <!-- Módulo de Ubicación (CESVE) -->
+  <div class="map-section">
+    <h3 style="margin:0; font-size: 18px;">Validación de Distancia al CESVE (Tolerancias)</h3>
+    <p style="margin:0; color:var(--gray); font-size: 14px;">
+      Si el CESVE está a <strong>10km o menos</strong>, el sistema otorgará automáticamente una tolerancia de <strong>5 días y 50 km</strong>. Si está a más de 10km, se requerirá evaluación especial.
+    </p>
+    <div class="map-controls">
+      <div class="input-group">
+        <label>CP Cliente</label>
+        <input id="cpCliente" class="input-number" type="text" placeholder="Ej. 50000" />
+      </div>
+      <div class="input-group">
+        <label>CP CESVE</label>
+        <input id="cpCesve" class="input-number" type="text" placeholder="Ej. 50100" />
+      </div>
+      <div class="input-group">
+        <label>Distancia Real (km)</label>
+        <input id="distanciaKm" class="input-number" type="number" value="0" min="0" />
+      </div>
+      <button id="btnMap" class="btn" style="background: var(--black);">Ver Rutas en Mapa</button>
+    </div>
+    <div id="mapContainer" class="map-frame-container">
+      <iframe id="mapFrame" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="grid">
+    <div class="card">
+      <div class="kpi-container">
+        <div class="kpi-box">
+          <div class="label">Dictamen de Servicios</div>
+          <div id="warrantyBadge" class="status-pill status-warn" style="margin-top: 10px;">Pendiente de cálculo</div>
+        </div>
+        <div class="kpi-box">
+          <div class="label">Tolerancia Aplicada</div>
+          <div id="tolBadge" class="value" style="font-size: 16px;">—</div>
+        </div>
+      </div>
+      
+      <div class="table-wrap">
+        <table id="svcTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Km límite</th>
+              <th>Meses</th>
+              <th>Fecha límite</th>
+              <th>¿Realizado?</th>
+              <th>Fecha Realizado</th>
+              <th>Km Realizado</th>
+              <th>Estatus</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
     
-    <div id="loader">Conectando y descargando datos desde Google Sheets...</div>
-    
-    <div class="table-wrap">
-      <table id="data-table" class="table" style="display:none" aria-live="polite">
-        <thead id="table-head"></thead>
-        <tbody id="table-body"></tbody>
-      </table>
-    </div>
-    
-    <div id="detail-panel" style="display:none" class="details" aria-hidden="true"></div>
+    <aside class="card aside">
+      <h3 style="margin-top:0;">Resumen del Dictamen</h3>
+      <p style="font-size:13px; color:var(--gray); font-weight:600;">VIGENCIA DE GARANTÍA:</p>
+      <div id="vigenciaInfo" style="font-size:14px; font-weight:700; color:var(--black);">—</div>
+      
+      <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
+      
+      <p style="font-size:13px; color:var(--gray); font-weight:600;">OBSERVACIONES:</p>
+      <div id="reasons" style="font-size:14px; color:var(--black); line-height: 1.5;"></div>
+    </aside>
   </div>
 </div>
 
 <script>
-const SHEET_ID = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
-let currentData = [], currentHeaders = [], filteredData = [];
+const SERVICES = [
+  {num:1, km:300, months:1},{num:2, km:2000, months:3},{num:3, km:4000, months:6},
+  {num:4, km:6000, months:9},{num:5, km:9000, months:12},{num:6, km:12000, months:15},
+  {num:7, km:15000, months:18},{num:8, km:18000, months:21},{num:9, km:21000, months:24},
+  {num:10, km:24000, months:27},{num:11, km:27000, months:30},{num:12, km:30000, months:33},
+  {num:13, km:33000, months:36}
+];
 
-const areaSelect = document.getElementById('area-select');
-const searchInput = document.getElementById('search-input');
-const table = document.getElementById('data-table');
-const thead = document.getElementById('table-head');
-const tbody = document.getElementById('table-body');
-const loader = document.getElementById('loader');
-const recordCount = document.getElementById('record-count');
-const detailPanel = document.getElementById('detail-panel');
+const $ = id => document.getElementById(id);
+const tbody = document.querySelector('#svcTable tbody');
 
-function fillMergedCells(rawData) {
-  if (!rawData || rawData.length === 0) return rawData;
-  const numRows = rawData.length;
-  const numCols = Math.max(...rawData.map(r => r.length));
-  for (let i = 0; i < numRows; i++) {
-    rawData[i] = rawData[i] || [];
-    for (let j = 0; j < numCols; j++) {
-      if (typeof rawData[i][j] === 'undefined') rawData[i][j] = '';
-    }
-  }
-  for (let col = 0; col < numCols; col++) {
-    let last = '';
-    for (let row = 0; row < numRows; row++) {
-      if (rawData[row][col] !== '' && rawData[row][col] !== null) {
-        last = rawData[row][col];
-      } else {
-        rawData[row][col] = last;
-      }
-    }
-  }
-  return rawData;
+// Función para sumar meses
+const addMonths = (dateStr, months) => { 
+  const d = new Date(dateStr); 
+  d.setMonth(d.getMonth()+months); 
+  return d; 
+};
+// Función para sumar días (para tolerancias)
+const addDays = (dateObj, days) => {
+  const d = new Date(dateObj);
+  d.setDate(d.getDate() + days);
+  return d;
 }
 
-function isExcludedRow(row) {
-  if (!row) return false;
-  const excludeList = ['ESPECIALISTAS DE REPARACIONES', 'SOPORTE TECNCO - GARANTIAS MOTOR, TRANSMISION Y BATERIAS'];
-  const nameFields = ['NOMBRE','NOMBRE COMPLETO','ASESOR','ANALISTA'];
-  for (const f of nameFields) {
-    const v = (row[f] || '').toString().trim().toUpperCase();
-    if (!v) continue;
-    for (const ex of excludeList) {
-      const exNorm = ex.toString().trim().toUpperCase();
-      if (v === exNorm) return true;
-      if (v.includes(exNorm)) return true;
-    }
-  }
-  return false;
-}
+const fmt = d => d ? new Date(d).toLocaleDateString('es-MX') : '-';
 
-function normalizeHeaders(rawHeaderRow) {
-  const headers = rawHeaderRow.map(h => (h || '').toString().trim());
-  for (let i = 0; i < headers.length; i++) {
-    if (!headers[i] || headers[i] === '') {
-      headers[i] = i > 0 ? headers[i-1] : ''; 
-    }
-  }
-  return headers;
-}
+let invoiceDate = null;
+let kmActual = 0;
+let state = []; 
 
-function buildRowsFromRaw(rawRows, headers) {
-  const rows = [];
-  for (let r = 0; r < rawRows.length; r++) {
-    const raw = rawRows[r];
-    const rowObj = {};
-    for (let c = 0; c < headers.length; c++) {
-      const key = headers[c] || ''; 
-      if (!key) continue; 
-      const val = (raw[c] || '').toString().trim();
-      if (!rowObj[key]) {
-        rowObj[key] = val;
-      } else {
-        if (val && val.length > 0) {
-          const existing = rowObj[key];
-          if (!existing.split(',').map(s=>s.trim()).includes(val)) {
-            rowObj[key] = existing ? `${existing}, ${val}` : val;
-          }
-        }
-      }
-    }
-    rows.push(rowObj);
+// Lógica del Mapa
+$('btnMap').addEventListener('click', () => {
+  const cpC = $('cpCliente').value.trim();
+  const cpV = $('cpCesve').value.trim();
+  if(!cpC || !cpV) {
+    alert("Ingresa ambos códigos postales para ver el mapa.");
+    return;
   }
-  return rows;
-}
+  const mapUrl = `https://maps.google.com/maps?saddr=${cpC}&daddr=${cpV}&output=embed`;
+  $('mapFrame').src = mapUrl;
+  $('mapContainer').style.display = 'block';
+});
 
-function loadData(sheetName) {
-  loader.style.display = 'block';
-  table.style.display = 'none';
-  detailPanel.style.display = 'none';
-  searchInput.value = '';
+// Evento Principal
+$('btnCalc').addEventListener('click', () => {
+  invoiceDate = $('fechaFactura').value;
+  kmActual = Number($('kmActual').value || 0);
+  if(!invoiceDate){ alert('Ingresa la fecha de factura'); return; }
   
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-  
-  Papa.parse(url, {
-    download: true, header: false, skipEmptyLines: true,
-    complete: function(results) {
-      let rawData = results.data || [];
-      rawData = fillMergedCells(rawData);
-      
-      let headerRowIndex = -1;
-      for (let i = 0; i < Math.min(10, rawData.length); i++) {
-        const rowStr = rawData[i].join("").toUpperCase();
-        if (rowStr.includes("CORREO") || rowStr.includes("ASESOR") || rowStr.includes("GERENTE") || rowStr.includes("NOMBRE") || rowStr.includes("ANALISTA")) {
-          headerRowIndex = i;
-          break;
-        }
-      }
-      if (headerRowIndex !== -1) {
-        const rawHeaderRow = rawData[headerRowIndex];
-        const headers = normalizeHeaders(rawHeaderRow);
-        
-        const rawRows = [];
-        for (let r = headerRowIndex + 1; r < rawData.length; r++) {
-          rawRows.push(rawData[r]);
-        }
-        
-        const builtRows = buildRowsFromRaw(rawRows, headers);
-        const nonEmpty = builtRows.filter(row => {
-          const hasData = Object.values(row).some(v => v && v.toString().trim() !== '');
-          return hasData && !isExcludedRow(row);
-        });
-        currentData = nonEmpty;
-        
-        if (currentData.length > 0) {
-          const keys = Object.keys(currentData[0]);
-          currentHeaders = keys;
-        } else {
-          currentHeaders = headers.filter(h => h && h !== '');
-        }
-      } else {
-        currentHeaders = [];
-        currentData = [];
-      }
-      filteredData = currentData.slice();
-      renderTableAll();
-      loader.style.display = 'none';
-      table.style.display = 'table';
-    },
-    error: function(err) {
-      loader.innerHTML = '<span style="color:var(--vento-orange);">No se pudo conectar. Verifica permisos de lectura.</span>';
-      console.error(err);
-    }
+  buildAllServices();
+  buildRequiredList();
+  renderTable();
+  recomputeSummary();
+});
+
+$('btnReset').addEventListener('click', () => {
+  if(!confirm('¿Limpiar todos los datos?')) return;
+  $('fechaFactura').value=''; $('kmActual').value='0'; 
+  $('cpCliente').value=''; $('cpCesve').value=''; $('distanciaKm').value='0';
+  $('mapContainer').style.display = 'none';
+  tbody.innerHTML=''; 
+  invoiceDate = null; state = [];
+  recomputeSummary();
+});
+
+// Configurar servicios límite
+let allServices = [];
+function buildAllServices(){
+  allServices = SERVICES.map(s => {
+    const fechaLimit = addMonths(invoiceDate, s.months);
+    return { num: s.num, kmLimit: s.km, months: s.months, fechaLimit: fechaLimit.toISOString() };
   });
 }
 
-function renderTableAll() {
-  thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th data-col="${h}">${h}</th>`).join('') + '</tr>';
-  tbody.innerHTML = filteredData.map((row, idx) => {
-    const rol = row['ROL'] || row['PUESTO'] || '';
-    const roleClass = (rol.toLowerCase().includes('supervisor')) ? 'role-supervisor' : (rol.toLowerCase().includes('asesor') ? 'role-asesor' : 'role-gerente');
+function buildRequiredList(){
+  const today = new Date();
+  state = allServices.filter(s => {
+    const requiredByKm = kmActual >= s.kmLimit;
+    const requiredByDate = today >= new Date(s.fechaLimit);
+    return requiredByKm || requiredByDate;
+  }).map(s => ({ ...s, required: true, done:false, fecha:'', km:'' }));
+}
+
+function renderTable(){
+  tbody.innerHTML = '';
+  if(state.length === 0){
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No hay servicios requeridos a la fecha.</td></tr>`;
+    return;
+  }
+  
+  state.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.className = 'row-required';
+    tr.innerHTML = `
+      <td><strong>${s.num}</strong></td>
+      <td>${s.kmLimit.toLocaleString()} km</td>
+      <td>${s.months}</td>
+      <td>${fmt(s.fechaLimit)}</td>
+      <td>
+        <select class="input selDone">
+          <option value="no" selected>No</option>
+          <option value="si">Sí</option>
+        </select>
+      </td>
+      <td><input class="input inpDate" type="date" disabled></td>
+      <td><input class="input inpKm" type="number" min="0" disabled placeholder="Km"></td>
+      <td class="msgCell"></td>
+    `;
+    tbody.appendChild(tr);
     
-    return `<tr data-idx="${idx}">
-      ${currentHeaders.filter(h=>h).map(h => {
-        const val = row[h] || '';
-        const q = (searchInput.value||'').trim().toLowerCase();
-        const display = q && val.toString().toLowerCase().includes(q) ? val.toString().replace(new RegExp(q,'ig'), m=>`<span class="highlight">${m}</span>`) : val;
-        
-        if (h.toUpperCase().includes('ROL') || h.toUpperCase().includes('PUESTO')) {
-          return `<td><span class="role-badge ${roleClass}">${display}</span></td>`;
-        }
-        if (h.toUpperCase().includes('NOMBRE') || h.toUpperCase().includes('ASESOR')) {
-          return `<td><strong>${display}</strong>${rol ? `<div class="small" style="margin-top:4px;">${rol}</div>` : ''}</td>`;
-        }
-        if (h.toUpperCase().includes('CORREO') || h.toUpperCase().includes('EMAIL')) {
-          return `<td><a href="mailto:${val}">${display}</a></td>`;
-        }
-        if (h.toUpperCase().includes('ZON') || h.toUpperCase().includes('ZONIFIC')) {
-          return `<td class="small">${display}</td>`;
-        }
-        return `<td>${display}</td>`;
-      }).join('')}
-    </tr>`;
-  }).join('');
-  
-  recordCount.innerText = `${filteredData.length} registros`;
-  
-  Array.from(tbody.querySelectorAll('tr')).forEach((tr) => {
-    tr.addEventListener('click', () => {
-      const idx = parseInt(tr.getAttribute('data-idx'),10);
-      showDetails(filteredData[idx]);
+    const selDone = tr.querySelector('.selDone');
+    const inpDate = tr.querySelector('.inpDate');
+    const inpKm = tr.querySelector('.inpKm');
+    
+    selDone.addEventListener('change', () => {
+      s.done = selDone.value === 'si';
+      inpDate.disabled = !s.done;
+      inpKm.disabled = !s.done;
+      if(!s.done) { s.fecha = ''; s.km = ''; inpDate.value = ''; inpKm.value = ''; }
+      validateRow(tr,s); recomputeSummary();
     });
+    inpDate.addEventListener('change', () => { s.fecha = inpDate.value; validateRow(tr,s); recomputeSummary(); });
+    inpKm.addEventListener('input', () => { s.km = inpKm.value; validateRow(tr,s); recomputeSummary(); });
+    
+    validateRow(tr,s);
   });
 }
 
-function showDetails(row) {
-  if (!row) { detailPanel.style.display='none'; detailPanel.setAttribute('aria-hidden','true'); return; }
-  const email = row['CORREO'] || row['EMAIL'] || '';
-  const tel = row['TEL'] || row['TELEFONO'] || row['CELULAR'] || '';
-  const zon = row['ZONIFICACION'] || row['ZONIFICACIÓN'] || '';
-  const horario = row['HORARIO'] || row['DISPONIBILIDAD'] || '';
-  const notas = row['NOTAS'] || row['COMENTARIOS'] || '';
+// Evaluar línea por línea aplicando validación doble y tolerancia
+$('distanciaKm').addEventListener('input', () => {
+  if(state.length > 0) {
+    const rows = tbody.querySelectorAll('tr');
+    state.forEach((s, i) => validateRow(rows[i], s));
+    recomputeSummary();
+  }
+});
+
+function validateRow(tr, s){
+  const msgCell = tr.querySelector('.msgCell');
+  msgCell.textContent = '';
+  msgCell.className = 'msgCell';
+
+  let dist = Number($('distanciaKm').value || 0);
+  let tolKm = (dist > 0 && dist <= 10) ? 50 : 0;
+  let tolDays = (dist > 0 && dist <= 10) ? 5 : 0;
   
-  detailPanel.innerHTML = `<strong style="font-size:24px;">${row['NOMBRE'] || row['ASESOR'] || row['NOMBRE COMPLETO'] || 'Detalle'}</strong>
-    <div class="small" style="margin-bottom: 15px; font-size:16px;">Rol: ${row['ROL'] || row['PUESTO'] || 'N/A'}</div>
-    ${zon ? `<div style="margin-top:6px"><strong>Zonificación</strong>: ${zon}</div>` : ''}
-    <div style="margin-top:8px"><strong>Correo</strong>: <a href="mailto:${email}">${email}</a></div>
-    <div style="margin-top:6px"><strong>Teléfono</strong>: ${tel}</div>
-    ${horario ? `<div style="margin-top:6px"><strong>Horario</strong>: ${horario}</div>` : ''}
-    ${notas ? `<div style="margin-top:8px"><strong>Notas</strong>: ${notas}</div>` : ''}
-  `;
-  detailPanel.style.display = 'block';
-  detailPanel.setAttribute('aria-hidden','false');
+  if(dist > 0 && dist <= 10) {
+    $('tolBadge').textContent = '5 días / 50 km';
+    $('tolBadge').style.color = 'var(--black)';
+  } else if (dist > 10) {
+    $('tolBadge').textContent = 'Caso a Revisión Especial';
+    $('tolBadge').style.color = 'var(--orange)';
+  } else {
+    $('tolBadge').textContent = 'Sin Tolerancia (Distancia 0)';
+  }
+
+  if(!s.done) {
+    msgCell.textContent = 'Servicio No Realizado';
+    msgCell.classList.add('status-bad');
+    return false;
+  }
+
+  if(!s.fecha || !s.km) {
+    msgCell.textContent = 'Faltan Datos';
+    msgCell.classList.add('status-warn');
+    return false;
+  }
+
+  // Lógica de Doble Validación
+  let maxKm = s.kmLimit + tolKm;
+  let maxDate = addDays(s.fechaLimit, tolDays);
+  
+  let usedKm = Number(s.km);
+  let usedDate = new Date(s.fecha);
+  usedDate.setHours(23,59,59); // Cubrir todo el día
+
+  let overKm = usedKm > maxKm;
+  let overDate = usedDate > maxDate;
+
+  if (overKm || overDate) {
+    if (dist > 10) {
+      msgCell.textContent = 'Excede límite (Revisión por CP)';
+      msgCell.classList.add('status-warn');
+      return false;
+    } else {
+      let motivo = [];
+      if(overKm) motivo.push('Km');
+      if(overDate) motivo.push('Tiempo');
+      msgCell.textContent = `No Procedente (Excede ${motivo.join(' y ')})`;
+      msgCell.classList.add('status-bad');
+      return false;
+    }
+  }
+
+  msgCell.textContent = 'Válido';
+  msgCell.classList.add('status-ok');
+  return true;
 }
 
-function applyFilter() {
-  const q = (searchInput.value || '').trim().toLowerCase();
-  if (!q) { filteredData = currentData.slice(); renderTableAll(); return; }
-  filteredData = currentData.filter(row => {
-    return Object.values(row).some(v => (v||'').toString().toLowerCase().includes(q));
+function recomputeSummary(){
+  if(!invoiceDate) return;
+  
+  const vigDate = addMonths(invoiceDate,36);
+  $('vigenciaInfo').textContent = `Hasta ${fmt(vigDate)} o 33,000 km`;
+  
+  let dist = Number($('distanciaKm').value || 0);
+  let htmlReasons = [];
+  let finalStatus = 'Procedente';
+  let badgeClass = 'status-ok';
+
+  state.forEach(s => {
+    if(!s.done) {
+      htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Requerido pero NO realizado.`);
+      finalStatus = 'No Procedente';
+      badgeClass = 'status-bad';
+    } else if (s.fecha && s.km) {
+      let tolKm = (dist > 0 && dist <= 10) ? 50 : 0;
+      let tolDays = (dist > 0 && dist <= 10) ? 5 : 0;
+      let maxKm = s.kmLimit + tolKm;
+      let maxDate = addDays(s.fechaLimit, tolDays);
+      let overKm = Number(s.km) > maxKm;
+      let overDate = new Date(s.fecha) > maxDate;
+
+      if(overKm || overDate) {
+        if(dist > 10) {
+          htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Excedido, pero requiere revisión manual (Cliente a > 10km del CESVE).`);
+          if(finalStatus !== 'No Procedente') {
+            finalStatus = 'Requiere Revisión Especial';
+            badgeClass = 'status-warn';
+          }
+        } else {
+          htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Excedió el límite permitido, aún considerando tolerancia.`);
+          finalStatus = 'No Procedente';
+          badgeClass = 'status-bad';
+        }
+      }
+    } else {
+      htmlReasons.push(`• <strong>Servicio ${s.num}:</strong> Faltan datos de captura.`);
+      if(finalStatus !== 'No Procedente') {
+        finalStatus = 'Información Incompleta';
+        badgeClass = 'status-warn';
+      }
+    }
   });
-  renderTableAll();
+
+  if(htmlReasons.length === 0) {
+    if(state.length === 0) htmlReasons.push('Sin servicios requeridos a la fecha.');
+    else htmlReasons.push('Todos los servicios están en regla.');
+  }
+
+  const badge = $('warrantyBadge');
+  badge.textContent = finalStatus;
+  badge.className = `status-pill ${badgeClass}`;
+  $('reasons').innerHTML = htmlReasons.join('<br>');
 }
-
-searchInput.addEventListener('input', () => {
-  clearTimeout(window._deb);
-  window._deb = setTimeout(applyFilter, 180);
-});
-areaSelect.addEventListener('change', (e) => loadData(e.target.value));
-
-loadData(areaSelect.value);
-
-document.addEventListener('keydown', (e) => {
-  if (e.altKey && e.key === 'f') { e.preventDefault(); searchInput.focus(); }
-});
 </script>
 </body>
 </html>
