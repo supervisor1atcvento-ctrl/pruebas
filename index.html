@@ -5,158 +5,185 @@
 <title>Consulta Agencias y VIN - Detalle</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-/* Paleta de colores suavizada: Negro suave (Gris oscuro), Blanco y Naranja claro */
+/* 
+  ESTÁNDARES INSTITUCIONALES VENTO
+  Tipografía: Segoe UI
+  Colores: Blanco (50%), Negro (30%), Gris (15%), Naranja (5%)
+*/
 :root {
-  --vento-dark: #334155; /* Negro suavizado / Gris oscuro */
-  --vento-dark-soft: #475569;
-  --vento-orange: #fb923c; /* Naranja más claro y amigable */
-  --vento-orange-light: #fff7ed;
-  --vento-white: #ffffff;
-  --vento-bg: #f8fafc;
-  --vento-border: #e2e8f0;
-  --vento-green: #10b981; /* Verde para el identificador positivo */
+  --vento-white: #FFFFFF;
+  --vento-black: #231F20;
+  --vento-gray: #616160;
+  --vento-orange: #F28F17;
+  --vento-green: #10b981; /* Regla especial: Positivo / Garantía */
 }
 
 body { 
   font-family: 'Segoe UI', Helvetica, Arial, sans-serif; 
-  background-color: var(--vento-bg); 
+  background-color: var(--vento-white); 
   margin: 0; 
-  padding: 20px; 
-  color: var(--vento-dark); 
+  padding: 40px; 
+  color: var(--vento-black); 
+  font-size: 28px; /* Contenido - Segoe UI 28 */
 }
 
+/* Encabezado */
 .hub-header { 
-  background-color: var(--vento-dark); 
-  color: var(--vento-white); 
-  padding: 16px 24px; 
-  border-radius: 8px; 
-  margin-bottom: 20px; 
-  border-left: 6px solid var(--vento-orange); 
+  background-color: var(--vento-white); 
+  color: var(--vento-black); 
+  padding: 20px 0; 
+  border-bottom: 8px solid var(--vento-black); 
+  margin-bottom: 40px; 
   display: flex; 
   justify-content: space-between; 
-  align-items: center; 
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  align-items: flex-end; 
+  position: relative;
 }
 
-.brand-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--vento-orange); text-transform: uppercase; }
-.hub-title { font-size: 18px; font-weight: 800; margin-top: 4px; letter-spacing: 0.5px; }
+/* Detalle naranja decorativo del 5% */
+.hub-header::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 15%;
+  height: 8px;
+  background-color: var(--vento-orange);
+}
 
+.brand-title { 
+  font-size: 28px; /* Contenido */
+  font-weight: 600; /* Semibold */
+  color: var(--vento-gray); 
+  text-transform: uppercase; 
+  margin-bottom: 5px;
+}
+
+.hub-title { 
+  font-size: 38px; /* Título - Segoe UI 38 */
+  font-weight: bold; /* Negritas */
+  color: var(--vento-black);
+  margin: 0;
+}
+
+/* Buscador */
 .search-container { 
   background: var(--vento-white); 
-  padding: 20px; 
-  border-radius: 8px; 
-  margin-bottom: 20px; 
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
-  text-align: center; 
-  border: 1px solid var(--vento-border);
+  padding: 0 0 30px 0; 
+  text-align: left; 
 }
 
 .input-box input { 
-  padding: 12px 24px; 
-  border: 2px solid var(--vento-border); 
-  border-radius: 30px; 
-  font-size: 15px; 
-  font-weight: 600; 
+  padding: 15px 25px; 
+  border: 3px solid var(--vento-gray); 
+  border-radius: 8px; 
+  font-size: 28px; /* Contenido */
+  font-family: 'Segoe UI', sans-serif;
   width: 100%; 
-  max-width: 500px; 
-  text-align: center; 
+  max-width: 800px; 
   outline: none; 
-  transition: all 0.3s ease; 
-  color: var(--vento-dark);
+  transition: border-color 0.3s ease; 
+  color: var(--vento-black);
 }
 
 .input-box input:focus { 
   border-color: var(--vento-orange); 
-  box-shadow: 0 0 0 3px var(--vento-orange-light);
 }
 
+/* Grid de Tarjetas (Ajustado para tipografía grande) */
 #kiosco-container { 
   display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-  gap: 16px; 
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); 
+  gap: 25px; 
 }
 
 .kiosco-card { 
   background: var(--vento-white); 
   border-radius: 8px; 
-  padding: 18px; 
-  border: 1px solid var(--vento-border); 
+  padding: 25px; 
+  border: 2px solid var(--vento-gray); 
   cursor: pointer; 
   transition: all 0.2s ease; 
   display: flex; 
   flex-direction: column; 
-  position: relative;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
 .kiosco-card:hover { 
-  transform: translateY(-2px); 
+  transform: translateY(-4px); 
   border-color: var(--vento-orange); 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+  box-shadow: 0 10px 20px rgba(35, 31, 32, 0.1); /* Sombra usando el negro institucional al 10% */
 }
 
 .kiosco-card.selected { 
   border-color: var(--vento-orange); 
-  border-width: 2px;
-  background-color: var(--vento-orange-light);
+  border-width: 3px;
 }
 
 .card-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--vento-border);
-  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--vento-gray);
 }
 
 .card-name { 
-  font-size: 15px; 
-  font-weight: 800; 
-  color: var(--vento-dark); 
-  line-height: 1.3;
+  font-size: 32px; /* Subtítulo - Segoe UI 32 */
+  font-weight: 600; /* Semibold */
+  color: var(--vento-black); 
+  line-height: 1.2;
 }
 
 .card-data-row { 
-  font-size: 13px; 
-  margin-bottom: 8px; 
-  color: var(--vento-dark-soft);
+  font-size: 28px; /* Contenido - Segoe UI 28 */
+  margin-bottom: 15px; 
+  color: var(--vento-gray);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.badge-orange { background-color: var(--vento-orange); color: var(--vento-white); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase;}
-.badge-dark { background-color: var(--vento-dark-soft); color: var(--vento-white); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase;}
+.card-data-row span:first-child {
+  font-weight: 600; /* Resalta las etiquetas */
+}
 
-.overlay-blur { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 999; display: none; }
+.badge-orange { background-color: var(--vento-orange); color: var(--vento-white); padding: 5px 15px; border-radius: 6px; font-weight: bold;}
+.badge-dark { background-color: var(--vento-black); color: var(--vento-white); padding: 5px 15px; border-radius: 6px; font-weight: bold;}
 
-.panel-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 550px; max-width: 95vw; background: var(--vento-white); color: var(--vento-dark); border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); z-index: 1000; display: none; flex-direction: column; overflow: hidden; border: 1px solid var(--vento-border); }
+/* Modal */
+.overlay-blur { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(35, 31, 32, 0.6); backdrop-filter: blur(4px); z-index: 999; display: none; }
 
-.modal-header { background: var(--vento-dark); color: var(--vento-white); padding: 16px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom: 4px solid var(--vento-orange); }
-.modal-body { padding: 24px; max-height: 65vh; overflow-y: auto; }
-.modal-close { background: none; border: none; color: #cbd5e1; font-size: 20px; cursor: pointer; transition: color 0.2s; }
-.modal-close:hover { color: var(--vento-white); }
+.panel-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; max-width: 90vw; background: var(--vento-white); color: var(--vento-black); border-radius: 8px; box-shadow: 0 20px 50px rgba(35, 31, 32, 0.4); z-index: 1000; display: none; flex-direction: column; overflow: hidden; border: 4px solid var(--vento-black); }
 
-.input-vin { width: 100%; padding: 14px; border-radius: 6px; border: 2px solid var(--vento-border); background: var(--vento-white); color: var(--vento-dark); margin-top: 10px; box-sizing: border-box; font-weight: 700; font-size: 15px; outline: none; text-transform: uppercase; }
-.input-vin:focus { border-color: var(--vento-orange); box-shadow: 0 0 0 3px var(--vento-orange-light); }
+.modal-header { background: var(--vento-white); color: var(--vento-black); padding: 25px 30px; display:flex; justify-content:space-between; align-items:center; border-bottom: 4px solid var(--vento-orange); }
 
-.result-box { margin-top: 15px; padding: 15px; border-radius: 6px; background: var(--vento-bg); border: 1px solid var(--vento-border); font-size: 14px; color: var(--vento-dark); display: none; line-height: 1.5; }
-.result-box.warn { background: var(--vento-orange-light); border-color: var(--vento-orange); color: var(--vento-dark); border-left: 4px solid var(--vento-orange); }
-.result-box.error { background: var(--vento-dark); border-color: var(--vento-dark); color: var(--vento-white); border-left: 4px solid var(--vento-orange); }
+.modal-header-title { font-size: 32px; font-weight: 600; color: var(--vento-black); } /* Subtítulo - Segoe UI 32 */
 
-.small-note { font-size: 12px; color: #64748b; margin-top: 12px; font-style: italic; text-align: center; }
+.modal-body { padding: 30px; max-height: 70vh; overflow-y: auto; }
+
+.modal-close { background: none; border: none; color: var(--vento-gray); font-size: 38px; cursor: pointer; transition: color 0.2s; }
+.modal-close:hover { color: var(--vento-orange); }
+
+.input-vin { width: 100%; padding: 15px 20px; border-radius: 8px; border: 3px solid var(--vento-gray); background: var(--vento-white); color: var(--vento-black); margin-top: 15px; margin-bottom: 10px; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; font-size: 28px; outline: none; text-transform: uppercase; }
+.input-vin:focus { border-color: var(--vento-orange); }
+
+/* Cajas de Resultados y Alertas */
+.result-box { margin-top: 20px; padding: 25px; border-radius: 8px; background: var(--vento-white); border: 2px solid var(--vento-gray); font-size: 28px; color: var(--vento-black); display: none; line-height: 1.4; }
+.result-box.warn { border-color: var(--vento-orange); border-left: 10px solid var(--vento-orange); }
+.result-box.error { background: var(--vento-black); border-color: var(--vento-black); color: var(--vento-white); border-left: 10px solid var(--vento-orange); }
+
+.detalle-accion-container { background: var(--vento-white); padding: 20px; border-radius: 8px; border-left: 10px solid var(--vento-orange); margin-bottom: 30px; border-top: 2px solid var(--vento-gray); border-right: 2px solid var(--vento-gray); border-bottom: 2px solid var(--vento-gray); }
+
+.small-note { font-size: 22px; color: var(--vento-gray); margin-top: 15px; font-style: italic; text-align: left; }
+
 </style>
 </head>
 <body>
 
 <div class="hub-header">
   <div>
-    <div class="brand-title">VENTO MOTORCYCLES U.S.A.</div>
+    <div class="brand-title">VENTO MOTORCYCLES U.S.A. - POSTVENTA</div>
     <div class="hub-title">CONSULTA DE AGENCIAS Y VIN</div>
   </div>
-  <div id="reloj" style="font-size: 14px; font-weight: 700; color: var(--vento-white);"></div>
+  <div id="reloj" style="font-size: 28px; font-weight: 600; color: var(--vento-gray);"></div>
 </div>
 
 <div class="search-container">
@@ -166,31 +193,31 @@ body {
 </div>
 
 <div id="kiosco-container">
-  <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--vento-dark); font-weight: 600;">
-    <i class="fa-solid fa-circle-notch fa-spin" style="color: var(--vento-orange); margin-right: 8px;"></i> Sincronizando bases de datos...
+  <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--vento-black); font-weight: 600; font-size: 32px;">
+    <i class="fa-solid fa-circle-notch fa-spin" style="color: var(--vento-orange); margin-right: 15px;"></i> Sincronizando bases de datos...
   </div>
 </div>
 
 <div class="overlay-blur" id="overlay" onclick="cerrarModal()"></div>
 <div class="panel-modal" id="modal">
   <div class="modal-header">
-    <div id="modal-titulo" style="font-weight:800; font-size: 16px;">Agencia</div>
+    <div id="modal-titulo" class="modal-header-title">Agencia</div>
     <div>
       <button class="modal-close" onclick="cerrarModal()" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
     </div>
   </div>
   <div class="modal-body">
-    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 15px;">
-      <div id="modal-badge-rev"></div>
+    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 25px;">
+      <div id="modal-badge-rev" style="font-size: 28px;"></div>
     </div>
     
-    <div style="background: var(--vento-bg); padding: 14px; border-radius: 6px; border-left: 4px solid var(--vento-orange); margin-bottom: 24px; border-top: 1px solid var(--vento-border); border-right: 1px solid var(--vento-border); border-bottom: 1px solid var(--vento-border);">
-      <div style="font-size:12px; text-transform: uppercase; font-weight: 800; color: #64748b; margin-bottom: 6px;">Acción Base Dictaminada</div>
-      <div id="detalle-accion" style="font-size:16px; font-weight: 800;"></div>
+    <div class="detalle-accion-container">
+      <div style="font-size:24px; text-transform: uppercase; font-weight: bold; color: var(--vento-gray); margin-bottom: 10px;">Acción Base Dictaminada</div>
+      <div id="detalle-accion" style="font-size:32px; font-weight: bold;"></div>
     </div>
 
-    <label style="display:block; font-weight:800; color:var(--vento-dark); font-size: 15px;">Búsqueda de VIN en Base "Proyecto S"</label>
-    <input type="text" id="input-vin-modal" class="input-vin" placeholder="Ingresa los 17 caracteres del VIN..." onkeyup="auditarVinEnModal()">
+    <label style="display:block; font-weight:bold; color:var(--vento-black); font-size: 32px;">Búsqueda de VIN en Base "Proyecto S"</label>
+    <input type="text" id="input-vin-modal" class="input-vin" placeholder="Ingresa los 17 caracteres..." onkeyup="auditarVinEnModal()">
     
     <div id="resultado-vin-box" class="result-box"></div>
     <div class="small-note">Recuerda: El VIN debe tener exactamente 17 caracteres alfanuméricos.</div>
@@ -202,9 +229,8 @@ body {
 // CONFIGURACIÓN DE COLUMNAS
 // ==========================================
 const COL_AGENCIA_NOMBRE = 1;   // Columna B
-const COL_ACCION_BASE = 13;     // Columna N (Índice 13) - Actualizado según solicitud
+const COL_ACCION_BASE = 13;     // Columna N (Índice 13)
 const COL_PUEDE_REPORTAR = 14;  // Columna O
-
 // ==========================================
 
 const sheetId = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY';
@@ -243,7 +269,6 @@ function procesarAgencias(texto) {
     if(!lineas[i]) continue;
     const col = parsearLineaCSV(lineas[i]);
     
-    // Validar que exista el nombre de la agencia
     if(col.length <= COL_AGENCIA_NOMBRE || !col[COL_AGENCIA_NOMBRE]) continue;
     
     const nombre = col[COL_AGENCIA_NOMBRE].replace(/"/g, '').trim();
@@ -259,20 +284,19 @@ function procesarAgencias(texto) {
     const classPuede = (puede === 'SI') ? 'badge-orange' : 'badge-dark';
     const txtPuede = (puede === 'SI') ? 'SÍ REPORTA' : 'NO REPORTA';
     
-    // Validar si es PASA COMO GARANTIA para pintarlo verde
     const esGarantia = accionFinal.toUpperCase().includes('PASA COMO GARANTIA');
-    const colorAccionStyle = esGarantia ? `color: var(--vento-green); font-weight: 800;` : `color: var(--vento-dark); font-weight: 600;`;
+    const colorAccionStyle = esGarantia ? `color: var(--vento-green); font-weight: bold;` : `color: var(--vento-black);`;
     
     card.innerHTML = `
       <div class="card-header">
         <div class="card-name">${nombre}</div>
       </div>
       <div class="card-data-row">
-        <span><b>Acción Base:</b></span>
+        <span>Acción Base:</span>
         <span style="text-align: right; ${colorAccionStyle}">${accionFinal}</span>
       </div>
       <div class="card-data-row">
-        <span><b>Rev. General:</b></span>
+        <span>Rev. General:</span>
         <span class="${classPuede}">${txtPuede}</span>
       </div>
     `;
@@ -306,7 +330,6 @@ function procesarSeries(texto) {
 function filtrarKiosco() {
   const val = document.getElementById('input-agencia').value.trim().toLowerCase();
   document.querySelectorAll('.kiosco-card').forEach(c => {
-    // Solo buscamos por el nombre ya que eliminamos el ID (Columna 0)
     const match = c.getAttribute('data-search').includes(val);
     c.style.display = (val === '' || match) ? 'flex' : 'none';
   });
@@ -319,11 +342,11 @@ function abrirModalConAgencia() {
   
   const detalleAccion = document.getElementById('detalle-accion');
   detalleAccion.innerText = agenciaActiva.accionBase;
-  // Aplicar color verde en el modal si cumple la condición
+  
   if(agenciaActiva.esGarantia) {
     detalleAccion.style.color = 'var(--vento-green)';
   } else {
-    detalleAccion.style.color = 'var(--vento-dark)';
+    detalleAccion.style.color = 'var(--vento-black)';
   }
   
   document.getElementById('input-vin-modal').value = '';
@@ -366,7 +389,7 @@ function auditarVinEnModal() {
   if (vinClean.length > 17) {
     respuestaBox.style.display = 'block';
     respuestaBox.className = 'result-box warn';
-    respuestaBox.innerHTML = `⚠️ <b>VIN excedido:</b> contiene <b>${vinClean.length}</b> caracteres (Solo se permiten 17).`;
+    respuestaBox.innerHTML = `⚠️ <b>VIN excedido:</b> contiene <b>${vinClean.length}</b> caracteres (Solo 17).`;
     return;
   }
   
@@ -376,18 +399,18 @@ function auditarVinEnModal() {
   if (registro) {
     respuestaBox.className = 'result-box';
     respuestaBox.innerHTML = `
-      <div style="font-weight: 800; margin-bottom: 12px; border-bottom: 1px solid var(--vento-border); padding-bottom: 6px; color: var(--vento-green);">✅ Unidad Localizada</div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div><b style="color: #64748b; font-size: 12px; text-transform: uppercase;">Modelo</b><br> <span style="font-weight: 600;">${registro.modelo || 'N/A'}</span></div>
-        <div><b style="color: #64748b; font-size: 12px; text-transform: uppercase;">VIN</b><br> <span style="font-weight: 600;">${registro.originalVin}</span></div>
-        <div><b style="color: #64748b; font-size: 12px; text-transform: uppercase;">Recepción</b><br> <span style="font-weight: 600;">${registro.fechaRecepcion || 'N/A'}</span></div>
-        <div><b style="color: #64748b; font-size: 12px; text-transform: uppercase;">Dictamen</b><br> <span style="font-weight: 600;">${registro.accion || 'N/A'}</span></div>
+      <div style="font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid var(--vento-gray); padding-bottom: 10px; color: var(--vento-green);">✅ Unidad Localizada</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div><b style="color: var(--vento-gray); font-size: 22px; text-transform: uppercase;">Modelo</b><br> <span>${registro.modelo || 'N/A'}</span></div>
+        <div><b style="color: var(--vento-gray); font-size: 22px; text-transform: uppercase;">VIN</b><br> <span>${registro.originalVin}</span></div>
+        <div><b style="color: var(--vento-gray); font-size: 22px; text-transform: uppercase;">Recepción</b><br> <span>${registro.fechaRecepcion || 'N/A'}</span></div>
+        <div><b style="color: var(--vento-gray); font-size: 22px; text-transform: uppercase;">Dictamen</b><br> <span>${registro.accion || 'N/A'}</span></div>
       </div>
     `;
   } else {
     respuestaBox.className = 'result-box error';
     respuestaBox.innerHTML = `
-      <div style="font-weight: 800; font-size: 15px; margin-bottom: 6px; color: var(--vento-orange);">❌ VIN no localizado</div>
+      <div style="font-weight: bold; font-size: 32px; margin-bottom: 10px; color: var(--vento-orange);">❌ VIN no localizado</div>
       <div>Será necesario solicitar el <b>Check List</b> y cotización correspondiente a la agencia para continuar.</div>
     `;
   }
