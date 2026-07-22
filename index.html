@@ -20,8 +20,8 @@
   --vento-gray-light: #E5E7EB;
   --vento-orange: #F28F17;
   --vento-orange-hover: #D97D11;
-  --vento-green: #10B981; /* Solo para acentos de éxito/garantía */
-  --vento-red: #EF4444;   /* Para errores/alertas */
+  --vento-green: #10B981; /* Acentos de éxito/garantía */
+  --vento-red: #EF4444;   /* Para errores/alertas/checklist */
   
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -129,6 +129,7 @@ body {
   display: grid; 
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
   gap: 20px; 
+  position: relative;
 }
 .kiosco-card { 
   background: var(--vento-white); 
@@ -179,7 +180,7 @@ body {
 .data-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 .data-label {
   font-size: 12px;
@@ -213,6 +214,57 @@ body {
   color: var(--vento-black); 
   border: 1px solid #D1D5DB;
 }
+.badge-green {
+  background-color: #ECFDF5;
+  color: #059669;
+  border: 1px solid #A7F3D0;
+}
+.badge-red {
+  background-color: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+/* Mensaje de Agencia No Encontrada */
+#no-results-msg {
+  grid-column: 1 / -1;
+  background: var(--vento-white);
+  border: 2px dashed var(--vento-gray-light);
+  padding: 40px 30px;
+  border-radius: var(--radius);
+  text-align: center;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+#no-results-msg i {
+  font-size: 40px;
+  color: var(--vento-orange);
+}
+.no-results-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--vento-black);
+}
+.no-results-text {
+  font-size: 15px;
+  color: var(--vento-gray-dark);
+  max-width: 650px;
+  line-height: 1.6;
+}
+.no-results-highlight {
+  color: #059669;
+  font-weight: 700;
+  background: #ECFDF5;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #A7F3D0;
+  display: inline-block;
+  margin-top: 4px;
+}
+
 /* Modal Moderno */
 .overlay-blur { 
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
@@ -300,7 +352,7 @@ body {
 .action-details {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 .action-label {
   font-size: 12px;
@@ -438,6 +490,18 @@ body {
       <i class="fa-solid fa-circle-notch fa-spin"></i>
       Sincronizando bases de datos operativas...
     </div>
+    
+    <!-- Contenedor dinámico de agencia no encontrada -->
+    <div id="no-results-msg">
+      <i class="fa-solid fa-store-slash"></i>
+      <div class="no-results-title">Agencia no localizada en el directorio</div>
+      <div class="no-results-text">
+        Actualmente nuestro sistema central abarca las sucursales VENTO de la <strong>1 a la 292</strong>. <br><br>
+        Si la agencia que buscas tiene una numeración superior, se clasifica como una <strong>agencia de reciente apertura</strong>, por lo que su validación automática será:
+        <br><span class="no-results-highlight">PASA COMO GARANTÍA</span>
+      </div>
+    </div>
+    
   </div>
 </main>
 <div class="overlay-blur" id="overlay" onclick="cerrarModal()"></div>
@@ -456,7 +520,7 @@ body {
       <i class="fa-solid fa-clipboard-check action-icon"></i>
       <div class="action-details">
         <span class="action-label">Acción Base Dictaminada</span>
-        <span id="detalle-accion" class="action-text"></span>
+        <div id="detalle-accion-container"></div>
       </div>
     </div>
     
@@ -511,7 +575,14 @@ function parsearLineaCSV(linea) { //[cite: 1]
 function procesarAgencias(texto) { //[cite: 1]
   const lineas = texto.split(/\r?\n/);
   const container = document.getElementById('kiosco-container');
-  container.innerHTML = '';
+  const noResultsMsg = document.getElementById('no-results-msg');
+  
+  // Limpiar contenedor (sin borrar el mensaje de no resultados)
+  Array.from(container.children).forEach(child => {
+    if (child.id !== 'no-results-msg') {
+      child.remove();
+    }
+  });
   
   for(let i = 1; i < lineas.length; i++) {
     if(!lineas[i]) continue;
@@ -529,22 +600,19 @@ function procesarAgencias(texto) { //[cite: 1]
     card.className = 'kiosco-card';
     card.setAttribute('data-search', nombre.toLowerCase());
     
-    // UI Lógica para Badges actualizada con los nuevos textos
-    const classPuede = (puede === 'SI') ? 'badge-orange' : 'badge-green';
+    // UI Lógica para Badges
+    const classPuede = (puede === 'SI') ? 'badge-orange' : 'badge-dark';
     const txtPuede = (puede === 'SI') ? '<i class="fa-solid fa-ban"></i> NO CUENTA CON KIT DE HERRAMIENTAS' : '<i class="fa-solid fa-check"></i> SÍ CUENTA CON KIT DE HERRAMIENTAS';
     
-    // Lógica para el color de la Acción Base
-    let colorAccionStyle = `color: var(--vento-black); font-weight: 600;`;
-    let colorAccionModal = 'var(--vento-white)'; // Color base para el modal (fondo negro)
-    
+    // Lógica para Acción Base como Badge
+    let classAccion = 'badge-dark';
     if (accionFinal.toUpperCase().includes('PASA COMO GARANTIA')) {
-      colorAccionStyle = `color: var(--vento-green); font-weight: 700;`;
-      colorAccionModal = 'var(--vento-green)';
+      classAccion = 'badge-green';
     } else if (accionFinal.toUpperCase().includes('SE REQUIERE CHECK LIST')) {
-      colorAccionStyle = `color: var(--vento-red); font-weight: 700;`;
-      colorAccionModal = 'var(--vento-red)';
+      classAccion = 'badge-red';
     }
     
+    // Renderizado del HTML con la acción base como Badge
     card.innerHTML = `
       <div class="card-header">
         <div class="card-name">${nombre}</div>
@@ -552,7 +620,7 @@ function procesarAgencias(texto) { //[cite: 1]
       <div class="card-body">
         <div class="data-group">
           <span class="data-label">Acción Base</span>
-          <span class="data-value" style="${colorAccionStyle}">${accionFinal}</span>
+          <span class="badge ${classAccion}">${accionFinal}</span>
         </div>
         <div style="margin-top: 8px;">
           <span class="badge ${classPuede}">${txtPuede}</span>
@@ -561,10 +629,12 @@ function procesarAgencias(texto) { //[cite: 1]
     `;
     
     card.onclick = () => {
-      agenciaActiva = { nombre, accionBase: accionFinal, puede, txtPuede, classPuede, colorAccionModal };
+      agenciaActiva = { nombre, accionBase: accionFinal, classAccion, puede, txtPuede, classPuede };
       abrirModalConAgencia();
     };
-    container.appendChild(card);
+    
+    // Insertamos la tarjeta antes del mensaje de no resultados
+    container.insertBefore(card, noResultsMsg);
   }
 }
 
@@ -586,10 +656,23 @@ function procesarSeries(texto) { //[cite: 1]
 
 function filtrarKiosco() { //[cite: 1]
   const val = document.getElementById('input-agencia').value.trim().toLowerCase();
+  let tarjetasVisibles = 0;
+  
   document.querySelectorAll('.kiosco-card').forEach(c => {
     const match = c.getAttribute('data-search').includes(val);
-    c.style.display = (val === '' || match) ? 'flex' : 'none';
+    if (val === '' || match) {
+      c.style.display = 'flex';
+      tarjetasVisibles++;
+    } else {
+      c.style.display = 'none';
+    }
   });
+  
+  // Mostrar u ocultar el mensaje de agencia no encontrada
+  const msjNoResultados = document.getElementById('no-results-msg');
+  if (msjNoResultados) {
+    msjNoResultados.style.display = (tarjetasVisibles === 0) ? 'flex' : 'none';
+  }
 }
 
 function abrirModalConAgencia() {
@@ -598,11 +681,9 @@ function abrirModalConAgencia() {
   document.getElementById('modal-titulo').innerText = agenciaActiva.nombre;
   document.getElementById('modal-badge-rev').innerHTML = `<span class="badge ${agenciaActiva.classPuede}">${agenciaActiva.txtPuede}</span>`;
   
-  const detalleAccion = document.getElementById('detalle-accion');
-  detalleAccion.innerText = agenciaActiva.accionBase;
-  
-  // Resaltado de acción base con el color determinado (verde, rojo o blanco)
-  detalleAccion.style.color = agenciaActiva.colorAccionModal;
+  // Inserción de la acción base como Badge dentro del modal
+  const contenedorAccion = document.getElementById('detalle-accion-container');
+  contenedorAccion.innerHTML = `<span class="badge ${agenciaActiva.classAccion}" style="font-size: 15px; padding: 8px 16px;">${agenciaActiva.accionBase}</span>`;
   
   // Resetear input y resultados
   const inputVin = document.getElementById('input-vin-modal');
