@@ -2,251 +2,559 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Consulta Agencias y VIN - Detalle</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta Agencias y VIN - Vento Postventa</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* 
-  ESTÁNDARES INSTITUCIONALES VENTO
-  Tipografía: Segoe UI
-  Colores: Blanco (50%), Negro (30%), Gris (15%), Naranja (5%)
+  ESTÁNDARES INSTITUCIONALES MODERNIZADOS
+  Tipografía: Inter (Moderna y legible para dashboards)
+  Colores: Blanco, Negro, Naranja institucional
 */
 :root {
   --vento-white: #FFFFFF;
-  --vento-black: #231F20;
-  --vento-gray: #616160;
+  --vento-bg: #F8F9FA;
+  --vento-black: #1A1A1A;
+  --vento-gray-dark: #4B5563;
+  --vento-gray-light: #E5E7EB;
   --vento-orange: #F28F17;
-  --vento-green: #10b981; /* Regla especial: Positivo / Garantía */
+  --vento-orange-hover: #D97D11;
+  --vento-green: #10B981; /* Solo para acentos de éxito/garantía */
+  --vento-red: #EF4444;   /* Para errores/alertas */
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --radius: 12px;
 }
 
 body { 
-  font-family: 'Segoe UI', Helvetica, Arial, sans-serif; 
-  background-color: var(--vento-white); 
+  font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+  background-color: var(--vento-bg); 
   margin: 0; 
-  padding: 40px; 
+  padding: 0; 
   color: var(--vento-black); 
-  font-size: 28px; /* Contenido - Segoe UI 28 */
+  font-size: 15px; 
+}
+
+/* Layout Principal */
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px;
 }
 
 /* Encabezado */
 .hub-header { 
   background-color: var(--vento-white); 
-  color: var(--vento-black); 
-  padding: 20px 0; 
-  border-bottom: 8px solid var(--vento-black); 
-  margin-bottom: 40px; 
+  padding: 20px 30px; 
+  border-bottom: 4px solid var(--vento-black); 
   display: flex; 
   justify-content: space-between; 
-  align-items: flex-end; 
-  position: relative;
+  align-items: center; 
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-/* Detalle naranja decorativo del 5% */
-.hub-header::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  width: 15%;
-  height: 8px;
-  background-color: var(--vento-orange);
+.brand-wrapper {
+  display: flex;
+  flex-direction: column;
 }
 
 .brand-title { 
-  font-size: 28px; /* Contenido */
-  font-weight: 600; /* Semibold */
-  color: var(--vento-gray); 
+  font-size: 13px; 
+  font-weight: 600; 
+  color: var(--vento-gray-dark); 
+  letter-spacing: 1px;
   text-transform: uppercase; 
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .hub-title { 
-  font-size: 38px; /* Título - Segoe UI 38 */
-  font-weight: bold; /* Negritas */
+  font-size: 24px; 
+  font-weight: 700; 
   color: var(--vento-black);
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Buscador */
-.search-container { 
-  background: var(--vento-white); 
-  padding: 0 0 30px 0; 
-  text-align: left; 
+.hub-title i {
+  color: var(--vento-orange);
+}
+
+.clock-display {
+  font-size: 15px; 
+  font-weight: 500; 
+  color: var(--vento-gray-dark);
+  background: var(--vento-bg);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--vento-gray-light);
+}
+
+/* Buscador Moderno */
+.search-section { 
+  margin: 30px 0; 
+  display: flex;
+  justify-content: center;
+}
+
+.input-box {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+}
+
+.input-box i {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--vento-gray-dark);
+  font-size: 18px;
 }
 
 .input-box input { 
-  padding: 15px 25px; 
-  border: 3px solid var(--vento-gray); 
-  border-radius: 8px; 
-  font-size: 28px; /* Contenido */
-  font-family: 'Segoe UI', sans-serif;
-  width: 100%; 
-  max-width: 800px; 
+  width: 100%;
+  padding: 16px 20px 16px 50px; 
+  border: 2px solid var(--vento-gray-light); 
+  border-radius: var(--radius); 
+  font-size: 16px; 
+  font-family: inherit;
+  box-sizing: border-box;
   outline: none; 
-  transition: border-color 0.3s ease; 
-  color: var(--vento-black);
+  transition: all 0.3s ease; 
+  background: var(--vento-white);
+  box-shadow: var(--shadow-sm);
 }
 
 .input-box input:focus { 
   border-color: var(--vento-orange); 
+  box-shadow: 0 0 0 4px rgba(242, 143, 23, 0.1);
 }
 
-/* Grid de Tarjetas (Ajustado para tipografía grande) */
+/* Grid de Tarjetas */
 #kiosco-container { 
   display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); 
-  gap: 25px; 
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+  gap: 20px; 
 }
 
 .kiosco-card { 
   background: var(--vento-white); 
-  border-radius: 8px; 
-  padding: 25px; 
-  border: 2px solid var(--vento-gray); 
+  border-radius: var(--radius); 
+  padding: 24px; 
+  border: 1px solid var(--vento-gray-light); 
   cursor: pointer; 
   transition: all 0.2s ease; 
   display: flex; 
-  flex-direction: column; 
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.kiosco-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
 }
 
 .kiosco-card:hover { 
   transform: translateY(-4px); 
   border-color: var(--vento-orange); 
-  box-shadow: 0 10px 20px rgba(35, 31, 32, 0.1); /* Sombra usando el negro institucional al 10% */
+  box-shadow: var(--shadow-lg); 
 }
 
-.kiosco-card.selected { 
-  border-color: var(--vento-orange); 
-  border-width: 3px;
+.kiosco-card:hover::before {
+  background-color: var(--vento-orange);
 }
 
 .card-header {
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid var(--vento-gray);
+  margin-bottom: 16px;
 }
 
 .card-name { 
-  font-size: 32px; /* Subtítulo - Segoe UI 32 */
-  font-weight: 600; /* Semibold */
+  font-size: 18px; 
+  font-weight: 700; 
   color: var(--vento-black); 
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
-.card-data-row { 
-  font-size: 28px; /* Contenido - Segoe UI 28 */
-  margin-bottom: 15px; 
-  color: var(--vento-gray);
+.card-body {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.data-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.data-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--vento-gray-dark);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.data-value {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Badges Modernos */
+.badge {
+  display: inline-flex;
   align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  width: fit-content;
 }
 
-.card-data-row span:first-child {
-  font-weight: 600; /* Resalta las etiquetas */
+.badge-orange { 
+  background-color: rgba(242, 143, 23, 0.1); 
+  color: var(--vento-orange-hover); 
+  border: 1px solid rgba(242, 143, 23, 0.2);
 }
 
-.badge-orange { background-color: var(--vento-orange); color: var(--vento-white); padding: 5px 15px; border-radius: 6px; font-weight: bold;}
-.badge-dark { background-color: var(--vento-black); color: var(--vento-white); padding: 5px 15px; border-radius: 6px; font-weight: bold;}
+.badge-dark { 
+  background-color: var(--vento-gray-light); 
+  color: var(--vento-black); 
+  border: 1px solid #D1D5DB;
+}
 
-/* Modal */
-.overlay-blur { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(35, 31, 32, 0.6); backdrop-filter: blur(4px); z-index: 999; display: none; }
+/* Modal Moderno */
+.overlay-blur { 
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+  background-color: rgba(26, 26, 26, 0.4); 
+  backdrop-filter: blur(6px); 
+  z-index: 999; 
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 
-.panel-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; max-width: 90vw; background: var(--vento-white); color: var(--vento-black); border-radius: 8px; box-shadow: 0 20px 50px rgba(35, 31, 32, 0.4); z-index: 1000; display: none; flex-direction: column; overflow: hidden; border: 4px solid var(--vento-black); }
+.panel-modal { 
+  position: fixed; top: 50%; left: 50%; 
+  transform: translate(-50%, -48%) scale(0.96); 
+  width: 650px; 
+  max-width: 90vw; 
+  background: var(--vento-white); 
+  border-radius: 16px; 
+  box-shadow: var(--shadow-lg); 
+  z-index: 1000; 
+  display: none; 
+  flex-direction: column; 
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-.modal-header { background: var(--vento-white); color: var(--vento-black); padding: 25px 30px; display:flex; justify-content:space-between; align-items:center; border-bottom: 4px solid var(--vento-orange); }
+.panel-modal.show {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
 
-.modal-header-title { font-size: 32px; font-weight: 600; color: var(--vento-black); } /* Subtítulo - Segoe UI 32 */
+.modal-header { 
+  padding: 24px 30px; 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:flex-start; 
+  border-bottom: 1px solid var(--vento-gray-light); 
+}
 
-.modal-body { padding: 30px; max-height: 70vh; overflow-y: auto; }
+.modal-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-.modal-close { background: none; border: none; color: var(--vento-gray); font-size: 38px; cursor: pointer; transition: color 0.2s; }
-.modal-close:hover { color: var(--vento-orange); }
+.modal-header-title { 
+  font-size: 22px; 
+  font-weight: 700; 
+  color: var(--vento-black); 
+}
 
-.input-vin { width: 100%; padding: 15px 20px; border-radius: 8px; border: 3px solid var(--vento-gray); background: var(--vento-white); color: var(--vento-black); margin-top: 15px; margin-bottom: 10px; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; font-size: 28px; outline: none; text-transform: uppercase; }
-.input-vin:focus { border-color: var(--vento-orange); }
+.modal-close { 
+  background: var(--vento-gray-light); 
+  border: none; 
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--vento-gray-dark); 
+  font-size: 16px; 
+  cursor: pointer; 
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-/* Cajas de Resultados y Alertas */
-.result-box { margin-top: 20px; padding: 25px; border-radius: 8px; background: var(--vento-white); border: 2px solid var(--vento-gray); font-size: 28px; color: var(--vento-black); display: none; line-height: 1.4; }
-.result-box.warn { border-color: var(--vento-orange); border-left: 10px solid var(--vento-orange); }
-.result-box.error { background: var(--vento-black); border-color: var(--vento-black); color: var(--vento-white); border-left: 10px solid var(--vento-orange); }
+.modal-close:hover { 
+  background: var(--vento-black);
+  color: var(--vento-white); 
+}
 
-.detalle-accion-container { background: var(--vento-white); padding: 20px; border-radius: 8px; border-left: 10px solid var(--vento-orange); margin-bottom: 30px; border-top: 2px solid var(--vento-gray); border-right: 2px solid var(--vento-gray); border-bottom: 2px solid var(--vento-gray); }
+.modal-body { 
+  padding: 30px; 
+  max-height: 75vh; 
+  overflow-y: auto; 
+}
 
-.small-note { font-size: 22px; color: var(--vento-gray); margin-top: 15px; font-style: italic; text-align: left; }
+/* Sección Acción Base */
+.action-box {
+  background: var(--vento-black);
+  color: var(--vento-white);
+  padding: 20px;
+  border-radius: var(--radius);
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-left: 6px solid var(--vento-orange);
+}
 
+.action-icon {
+  font-size: 24px;
+  color: var(--vento-orange);
+}
+
+.action-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.action-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9CA3AF;
+  font-weight: 600;
+}
+
+.action-text {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Input VIN */
+.vin-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--vento-black);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-vin { 
+  width: 100%; 
+  padding: 16px 20px; 
+  border-radius: var(--radius); 
+  border: 2px solid var(--vento-gray-light); 
+  background: #F9FAFB; 
+  color: var(--vento-black); 
+  box-sizing: border-box; 
+  font-family: 'Inter', sans-serif; 
+  font-size: 18px; 
+  font-weight: 500;
+  outline: none; 
+  text-transform: uppercase; 
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.input-vin:focus { 
+  border-color: var(--vento-orange); 
+  background: var(--vento-white);
+  box-shadow: 0 0 0 4px rgba(242, 143, 23, 0.1);
+}
+
+.input-vin::placeholder {
+  color: #9CA3AF;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
+.small-note { 
+  font-size: 13px; 
+  color: var(--vento-gray-dark); 
+  margin-top: 10px; 
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Resultados VIN */
+.result-box { 
+  margin-top: 20px; 
+  padding: 20px; 
+  border-radius: var(--radius); 
+  font-size: 14px; 
+  display: none; 
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-box.warn { 
+  background-color: #FEF3C7;
+  border: 1px solid #F59E0B;
+  color: #92400E;
+}
+
+.result-box.success {
+  background-color: #ECFDF5;
+  border: 1px solid #34D399;
+  color: #065F46;
+}
+
+.result-box.error { 
+  background-color: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  color: #991B1B;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 15px;
+  background: rgba(255,255,255,0.5);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Loader */
+.loader-container {
+  grid-column: 1/-1; 
+  text-align: center; 
+  padding: 60px; 
+  color: var(--vento-gray-dark); 
+  font-weight: 500; 
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.loader-container i {
+  font-size: 32px;
+  color: var(--vento-orange);
+}
 </style>
 </head>
 <body>
 
-<div class="hub-header">
-  <div>
-    <div class="brand-title">VENTO MOTORCYCLES U.S.A. - POSTVENTA</div>
-    <div class="hub-title">CONSULTA DE AGENCIAS Y VIN</div>
+<header class="hub-header">
+  <div class="brand-wrapper">
+    <div class="brand-title">VENTO MOTORCYCLES U.S.A.</div>
+    <div class="hub-title"><i class="fa-solid fa-motorcycle"></i> Validación de Postventa</div>
   </div>
-  <div id="reloj" style="font-size: 28px; font-weight: 600; color: var(--vento-gray);"></div>
-</div>
+  <div id="reloj" class="clock-display"></div>
+</header>
 
-<div class="search-container">
-  <div class="input-box">
-    <input type="text" id="input-agencia" placeholder="Escribe el nombre de la agencia a buscar..." onkeyup="filtrarKiosco()">
+<main class="app-container">
+  <div class="search-section">
+    <div class="input-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="input-agencia" placeholder="Buscar agencia por nombre o ubicación..." onkeyup="filtrarKiosco()">
+    </div>
   </div>
-</div>
 
-<div id="kiosco-container">
-  <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--vento-black); font-weight: 600; font-size: 32px;">
-    <i class="fa-solid fa-circle-notch fa-spin" style="color: var(--vento-orange); margin-right: 15px;"></i> Sincronizando bases de datos...
+  <div id="kiosco-container">
+    <div class="loader-container">
+      <i class="fa-solid fa-circle-notch fa-spin"></i>
+      Sincronizando bases de datos operativas...
+    </div>
   </div>
-</div>
+</main>
 
 <div class="overlay-blur" id="overlay" onclick="cerrarModal()"></div>
 <div class="panel-modal" id="modal">
   <div class="modal-header">
-    <div id="modal-titulo" class="modal-header-title">Agencia</div>
-    <div>
-      <button class="modal-close" onclick="cerrarModal()" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+    <div class="modal-header-content">
+      <div id="modal-badge-rev"></div>
+      <div id="modal-titulo" class="modal-header-title">Agencia</div>
     </div>
+    <button class="modal-close" onclick="cerrarModal()" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
   </div>
+  
   <div class="modal-body">
-    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 25px;">
-      <div id="modal-badge-rev" style="font-size: 28px;"></div>
+    
+    <div class="action-box">
+      <i class="fa-solid fa-clipboard-check action-icon"></i>
+      <div class="action-details">
+        <span class="action-label">Acción Base Dictaminada</span>
+        <span id="detalle-accion" class="action-text"></span>
+      </div>
     </div>
     
-    <div class="detalle-accion-container">
-      <div style="font-size:24px; text-transform: uppercase; font-weight: bold; color: var(--vento-gray); margin-bottom: 10px;">Acción Base Dictaminada</div>
-      <div id="detalle-accion" style="font-size:32px; font-weight: bold;"></div>
+    <div class="vin-section-title">
+      <i class="fa-solid fa-barcode" style="color: var(--vento-orange);"></i> 
+      Validación de VIN (Proyecto S)
     </div>
-
-    <label style="display:block; font-weight:bold; color:var(--vento-black); font-size: 32px;">Búsqueda de VIN en Base "Proyecto S"</label>
-    <input type="text" id="input-vin-modal" class="input-vin" placeholder="Ingresa los 17 caracteres..." onkeyup="auditarVinEnModal()">
+    
+    <input type="text" id="input-vin-modal" class="input-vin" placeholder="Ingresa los 17 caracteres de la moto..." onkeyup="auditarVinEnModal()" maxlength="17">
+    <div class="small-note"><i class="fa-solid fa-circle-info"></i> El VIN debe contener exactamente 17 caracteres alfanuméricos.</div>
     
     <div id="resultado-vin-box" class="result-box"></div>
-    <div class="small-note">Recuerda: El VIN debe tener exactamente 17 caracteres alfanuméricos.</div>
+    
   </div>
 </div>
 
 <script>
 // ==========================================
-// CONFIGURACIÓN DE COLUMNAS
+// CONFIGURACIÓN DE COLUMNAS (MANTENIDA INTACTA)
 // ==========================================
 const COL_AGENCIA_NOMBRE = 1;   // Columna B
 const COL_ACCION_BASE = 13;     // Columna N (Índice 13)
-const COL_PUEDE_REPORTAR = 14;  // Columna O
+const COL_PUEDE_REPORTAR = 14;  // Columna O[cite: 1]
 // ==========================================
-
-const sheetId = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY';
-const urlAgencias = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Agencias`;
-const urlSeries = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Proyecto+S`;
-
+const sheetId = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY'; //[cite: 1]
+const urlAgencias = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Agencias`; //[cite: 1]
+const urlSeries = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Proyecto+S`; //[cite: 1]
 let cacheSeries = [];
 let agenciaActiva = null;
 
 window.onload = () => {
-  fetch(urlAgencias).then(r => r.text()).then(csv => procesarAgencias(csv)).catch(e => console.error(e));
-  fetch(urlSeries).then(r => r.text()).then(csv => procesarSeries(csv)).catch(e => console.error(e));
-  setInterval(() => { document.getElementById('reloj').innerText = new Date().toLocaleTimeString(); }, 1000);
+  fetch(urlAgencias).then(r => r.text()).then(csv => procesarAgencias(csv)).catch(e => console.error(e)); //[cite: 1]
+  fetch(urlSeries).then(r => r.text()).then(csv => procesarSeries(csv)).catch(e => console.error(e)); //[cite: 1]
+  setInterval(() => { 
+    document.getElementById('reloj').innerText = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); 
+  }, 1000);
 };
 
-function parsearLineaCSV(linea) {
+function parsearLineaCSV(linea) { //[cite: 1]
   let resultado = [];
   let comillas = false;
   let celda = '';
@@ -260,7 +568,7 @@ function parsearLineaCSV(linea) {
   return resultado;
 }
 
-function procesarAgencias(texto) {
+function procesarAgencias(texto) { //[cite: 1]
   const lineas = texto.split(/\r?\n/);
   const container = document.getElementById('kiosco-container');
   container.innerHTML = '';
@@ -281,29 +589,29 @@ function procesarAgencias(texto) {
     card.className = 'kiosco-card';
     card.setAttribute('data-search', nombre.toLowerCase());
     
+    // UI Lógica para Badges
     const classPuede = (puede === 'SI') ? 'badge-orange' : 'badge-dark';
-    const txtPuede = (puede === 'SI') ? 'SÍ REPORTA' : 'NO REPORTA';
+    const txtPuede = (puede === 'SI') ? '<i class="fa-solid fa-check"></i> SÍ REPORTA' : '<i class="fa-solid fa-ban"></i> NO REPORTA';
     
     const esGarantia = accionFinal.toUpperCase().includes('PASA COMO GARANTIA');
-    const colorAccionStyle = esGarantia ? `color: var(--vento-green); font-weight: bold;` : `color: var(--vento-black);`;
+    const colorAccionStyle = esGarantia ? `color: var(--vento-green); font-weight: 700;` : `color: var(--vento-black); font-weight: 600;`;
     
     card.innerHTML = `
       <div class="card-header">
         <div class="card-name">${nombre}</div>
       </div>
-      <div class="card-data-row">
-        <span>Acción Base:</span>
-        <span style="text-align: right; ${colorAccionStyle}">${accionFinal}</span>
-      </div>
-      <div class="card-data-row">
-        <span>Rev. General:</span>
-        <span class="${classPuede}">${txtPuede}</span>
+      <div class="card-body">
+        <div class="data-group">
+          <span class="data-label">Acción Base</span>
+          <span class="data-value" style="${colorAccionStyle}">${accionFinal}</span>
+        </div>
+        <div style="margin-top: 8px;">
+          <span class="badge ${classPuede}">${txtPuede}</span>
+        </div>
       </div>
     `;
     
     card.onclick = () => {
-      document.querySelectorAll('.kiosco-card').forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
       agenciaActiva = { nombre, accionBase: accionFinal, puede, txtPuede, classPuede, esGarantia };
       abrirModalConAgencia();
     };
@@ -311,23 +619,23 @@ function procesarAgencias(texto) {
   }
 }
 
-function procesarSeries(texto) {
+function procesarSeries(texto) { //[cite: 1]
   const lineas = texto.split(/\r?\n/);
   for(let i = 1; i < lineas.length; i++) {
     if(!lineas[i]) continue;
     const col = parsearLineaCSV(lineas[i]);
-    if(col.length <= 5 || !col[5]) continue;
+    if(col.length <= 5 || !col[5]) continue; //[cite: 1]
     cacheSeries.push({
-      vin: (col[5] || '').replace(/"/g, '').trim().toLowerCase(),
-      originalVin: (col[5] || '').replace(/"/g, '').trim(),
-      modelo: (col[3] || '').replace(/"/g, '').trim(),
-      fechaRecepcion: (col[7] || '').replace(/"/g, '').trim(),
-      accion: (col[11] || '').replace(/"/g, '').trim()
+      vin: (col[5] || '').replace(/"/g, '').trim().toLowerCase(), //[cite: 1]
+      originalVin: (col[5] || '').replace(/"/g, '').trim(), //[cite: 1]
+      modelo: (col[3] || '').replace(/"/g, '').trim(), //[cite: 1]
+      fechaRecepcion: (col[7] || '').replace(/"/g, '').trim(), //[cite: 1]
+      accion: (col[11] || '').replace(/"/g, '').trim() //[cite: 1]
     });
   }
 }
 
-function filtrarKiosco() {
+function filtrarKiosco() { //[cite: 1]
   const val = document.getElementById('input-agencia').value.trim().toLowerCase();
   document.querySelectorAll('.kiosco-card').forEach(c => {
     const match = c.getAttribute('data-search').includes(val);
@@ -337,81 +645,121 @@ function filtrarKiosco() {
 
 function abrirModalConAgencia() {
   if(!agenciaActiva) return;
+  
   document.getElementById('modal-titulo').innerText = agenciaActiva.nombre;
-  document.getElementById('modal-badge-rev').innerHTML = `<span class="${agenciaActiva.classPuede}">${agenciaActiva.txtPuede}</span>`;
+  document.getElementById('modal-badge-rev').innerHTML = `<span class="badge ${agenciaActiva.classPuede}">${agenciaActiva.txtPuede}</span>`;
   
   const detalleAccion = document.getElementById('detalle-accion');
   detalleAccion.innerText = agenciaActiva.accionBase;
   
+  // Resaltado si es garantía
   if(agenciaActiva.esGarantia) {
     detalleAccion.style.color = 'var(--vento-green)';
   } else {
-    detalleAccion.style.color = 'var(--vento-black)';
+    detalleAccion.style.color = 'var(--vento-white)';
   }
   
-  document.getElementById('input-vin-modal').value = '';
+  // Resetear input y resultados
+  const inputVin = document.getElementById('input-vin-modal');
+  inputVin.value = '';
+  
   const rb = document.getElementById('resultado-vin-box');
   rb.style.display = 'none';
   rb.className = 'result-box';
   rb.innerHTML = '';
   
+  // Mostrar modal con animación
   document.getElementById('overlay').style.display = 'block';
-  document.getElementById('modal').style.display = 'flex';
-  setTimeout(() => document.getElementById('input-vin-modal').focus(), 120);
+  const modal = document.getElementById('modal');
+  modal.style.display = 'flex';
+  
+  // Pequeño timeout para permitir la transición CSS
+  setTimeout(() => {
+    document.getElementById('overlay').style.opacity = '1';
+    modal.classList.add('show');
+    inputVin.focus();
+  }, 10);
 }
 
 function cerrarModal() {
-  document.getElementById('overlay').style.display = 'none';
-  document.getElementById('modal').style.display = 'none';
-  document.querySelectorAll('.kiosco-card').forEach(c => c.classList.remove('selected'));
-  agenciaActiva = null;
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal');
+  
+  overlay.style.opacity = '0';
+  modal.classList.remove('show');
+  
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    modal.style.display = 'none';
+    agenciaActiva = null;
+  }, 300); // Tiempo de la transición CSS
 }
 
-function limpiarVIN(v) {
+function limpiarVIN(v) { //[cite: 1]
   return v.replace(/[\s\-]/g, '').replace(/[^a-zA-Z0-9]/g, '');
 }
 
-function auditarVinEnModal() {
+function auditarVinEnModal() { //[cite: 1]
   const raw = document.getElementById('input-vin-modal').value;
-  const vinClean = limpiarVIN(raw).toLowerCase();
+  const vinClean = limpiarVIN(raw).toLowerCase(); //[cite: 1]
   const respuestaBox = document.getElementById('resultado-vin-box');
   
-  if(vinClean.length === 0) { respuestaBox.style.display = 'none'; respuestaBox.className = 'result-box'; respuestaBox.innerHTML = ''; return; }
+  if(vinClean.length === 0) { 
+    respuestaBox.style.display = 'none'; 
+    respuestaBox.className = 'result-box'; 
+    return; 
+  }
   
-  if (vinClean.length < 17) {
+  if (vinClean.length < 17) { //[cite: 1]
     const faltan = 17 - vinClean.length;
     respuestaBox.style.display = 'block';
     respuestaBox.className = 'result-box warn';
-    respuestaBox.innerHTML = `⚠️ <b>VIN incompleto:</b> faltan <b>${faltan}</b> dígitos.`;
+    respuestaBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <b>VIN incompleto:</b> faltan <b>${faltan}</b> dígitos para los 17 requeridos.`;
     return;
   }
   
-  if (vinClean.length > 17) {
+  if (vinClean.length > 17) { //[cite: 1]
     respuestaBox.style.display = 'block';
     respuestaBox.className = 'result-box warn';
-    respuestaBox.innerHTML = `⚠️ <b>VIN excedido:</b> contiene <b>${vinClean.length}</b> caracteres (Solo 17).`;
+    respuestaBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <b>VIN excedido:</b> contiene <b>${vinClean.length}</b> caracteres.`;
     return;
   }
   
-  const registro = cacheSeries.find(s => s.vin === vinClean || s.vin.includes(vinClean));
+  const registro = cacheSeries.find(s => s.vin === vinClean || s.vin.includes(vinClean)); //[cite: 1]
   respuestaBox.style.display = 'block';
   
   if (registro) {
-    respuestaBox.className = 'result-box';
+    respuestaBox.className = 'result-box success';
     respuestaBox.innerHTML = `
-      <div style="font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid var(--vento-gray); padding-bottom: 10px; color: var(--vento-green);">✅ Unidad Localizada</div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        <div><b style="color: var(--vento-gray); font-size: 22px; text-transform: uppercase;">Modelo</b><br> <span>${registro.modelo || 'N/A'}</span></div>
-        <div><b style="color: var(--vento-gray); font-size: 22px; text-transform: uppercase;">VIN</b><br> <span>${registro.originalVin}</span></div>
-        <div><b style="color: var(--vento-gray); font-size: 22px; text-transform: uppercase;">Recepción</b><br> <span>${registro.fechaRecepcion || 'N/A'}</span></div>
-        <div><b style="color: var(--vento-gray); font-size: 22px; text-transform: uppercase;">Dictamen</b><br> <span>${registro.accion || 'N/A'}</span></div>
+      <div style="font-size: 16px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-circle-check"></i> Unidad Localizada en Proyecto S
+      </div>
+      <div class="result-grid">
+        <div class="result-item">
+          <span class="data-label">Modelo</span>
+          <span class="data-value">${registro.modelo || 'N/A'}</span>
+        </div>
+        <div class="result-item">
+          <span class="data-label">VIN Registrado</span>
+          <span class="data-value" style="font-family: monospace; font-size: 16px;">${registro.originalVin}</span>
+        </div>
+        <div class="result-item">
+          <span class="data-label">Recepción</span>
+          <span class="data-value">${registro.fechaRecepcion || 'N/A'}</span>
+        </div>
+        <div class="result-item">
+          <span class="data-label">Dictamen</span>
+          <span class="data-value" style="font-weight: 700;">${registro.accion || 'N/A'}</span>
+        </div>
       </div>
     `;
   } else {
     respuestaBox.className = 'result-box error';
     respuestaBox.innerHTML = `
-      <div style="font-weight: bold; font-size: 32px; margin-bottom: 10px; color: var(--vento-orange);">❌ VIN no localizado</div>
-      <div>Será necesario solicitar el <b>Check List</b> y cotización correspondiente a la agencia para continuar.</div>
+      <div style="font-size: 16px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-circle-xmark"></i> VIN no localizado
+      </div>
+      <div style="line-height: 1.5;">Será necesario solicitar el <b>Check List</b> y la cotización correspondiente a la agencia para poder continuar con el proceso.</div>
     `;
   }
 }
