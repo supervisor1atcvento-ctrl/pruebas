@@ -542,23 +542,23 @@ body {
 // ==========================================
 const COL_AGENCIA_NOMBRE = 1;   // Columna B
 const COL_ACCION_BASE = 13;     // Columna N (Índice 13)
-const COL_PUEDE_REPORTAR = 14;  // Columna O[cite: 1]
+const COL_PUEDE_REPORTAR = 14;  // Columna O
 // ==========================================
-const sheetId = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY'; //[cite: 1]
-const urlAgencias = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Agencias`; //[cite: 1]
-const urlSeries = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Proyecto+S`; //[cite: 1]
+const sheetId = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY'; 
+const urlAgencias = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Agencias`; 
+const urlSeries = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Proyecto+S`; 
 let cacheSeries = [];
 let agenciaActiva = null;
 
 window.onload = () => {
-  fetch(urlAgencias).then(r => r.text()).then(csv => procesarAgencias(csv)).catch(e => console.error(e)); //[cite: 1]
-  fetch(urlSeries).then(r => r.text()).then(csv => procesarSeries(csv)).catch(e => console.error(e)); //[cite: 1]
+  fetch(urlAgencias).then(r => r.text()).then(csv => procesarAgencias(csv)).catch(e => console.error(e)); 
+  fetch(urlSeries).then(r => r.text()).then(csv => procesarSeries(csv)).catch(e => console.error(e)); 
   setInterval(() => { 
     document.getElementById('reloj').innerText = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); 
   }, 1000);
 };
 
-function parsearLineaCSV(linea) { //[cite: 1]
+function parsearLineaCSV(linea) { 
   let resultado = [];
   let comillas = false;
   let celda = '';
@@ -572,7 +572,7 @@ function parsearLineaCSV(linea) { //[cite: 1]
   return resultado;
 }
 
-function procesarAgencias(texto) { //[cite: 1]
+function procesarAgencias(texto) { 
   const lineas = texto.split(/\r?\n/);
   const container = document.getElementById('kiosco-container');
   const noResultsMsg = document.getElementById('no-results-msg');
@@ -601,12 +601,12 @@ function procesarAgencias(texto) { //[cite: 1]
     card.setAttribute('data-search', nombre.toLowerCase());
     
     // UI Lógica para Badges
-    const classPuede = (puede === 'SI') ? 'badge-red' : 'badge-green';
+    const classPuede = (puede === 'SI') ? 'badge-orange' : 'badge-dark';
     const txtPuede = (puede === 'SI') ? '<i class="fa-solid fa-ban"></i> NO CUENTA CON KIT DE HERRAMIENTAS' : '<i class="fa-solid fa-check"></i> SÍ CUENTA CON KIT DE HERRAMIENTAS';
     
     // Lógica para Acción Base como Badge
     let classAccion = 'badge-dark';
-    if (accionFinal.toUpperCase().includes('PASA COMO GARANTIA')) {
+    if (accionFinal.toUpperCase().includes('PASA COMO GARANTIA') || accionFinal.toUpperCase().includes('PASA POR GARANTIA')) {
       classAccion = 'badge-green';
     } else if (accionFinal.toUpperCase().includes('SE REQUIERE CHECK LIST')) {
       classAccion = 'badge-red';
@@ -638,23 +638,23 @@ function procesarAgencias(texto) { //[cite: 1]
   }
 }
 
-function procesarSeries(texto) { //[cite: 1]
+function procesarSeries(texto) { 
   const lineas = texto.split(/\r?\n/);
   for(let i = 1; i < lineas.length; i++) {
     if(!lineas[i]) continue;
     const col = parsearLineaCSV(lineas[i]);
-    if(col.length <= 5 || !col[5]) continue; //[cite: 1]
+    if(col.length <= 5 || !col[5]) continue; 
     cacheSeries.push({
-      vin: (col[5] || '').replace(/"/g, '').trim().toLowerCase(), //[cite: 1]
-      originalVin: (col[5] || '').replace(/"/g, '').trim(), //[cite: 1]
-      modelo: (col[3] || '').replace(/"/g, '').trim(), //[cite: 1]
-      fechaRecepcion: (col[7] || '').replace(/"/g, '').trim(), //[cite: 1]
-      accion: (col[11] || '').replace(/"/g, '').trim() //[cite: 1]
+      vin: (col[5] || '').replace(/"/g, '').trim().toLowerCase(), 
+      originalVin: (col[5] || '').replace(/"/g, '').trim(), 
+      modelo: (col[3] || '').replace(/"/g, '').trim(), 
+      fechaRecepcion: (col[7] || '').replace(/"/g, '').trim(), 
+      accion: (col[11] || '').replace(/"/g, '').trim() 
     });
   }
 }
 
-function filtrarKiosco() { //[cite: 1]
+function filtrarKiosco() { 
   const val = document.getElementById('input-agencia').value.trim().toLowerCase();
   let tarjetasVisibles = 0;
   
@@ -721,13 +721,13 @@ function cerrarModal() {
   }, 300); // Tiempo de la transición CSS
 }
 
-function limpiarVIN(v) { //[cite: 1]
+function limpiarVIN(v) { 
   return v.replace(/[\s\-]/g, '').replace(/[^a-zA-Z0-9]/g, '');
 }
 
-function auditarVinEnModal() { //[cite: 1]
+function auditarVinEnModal() { 
   const raw = document.getElementById('input-vin-modal').value;
-  const vinClean = limpiarVIN(raw).toLowerCase(); //[cite: 1]
+  const vinClean = limpiarVIN(raw).toLowerCase(); 
   const respuestaBox = document.getElementById('resultado-vin-box');
   
   if(vinClean.length === 0) { 
@@ -736,7 +736,7 @@ function auditarVinEnModal() { //[cite: 1]
     return; 
   }
   
-  if (vinClean.length < 17) { //[cite: 1]
+  if (vinClean.length < 17) { 
     const faltan = 17 - vinClean.length;
     respuestaBox.style.display = 'block';
     respuestaBox.className = 'result-box warn';
@@ -744,21 +744,35 @@ function auditarVinEnModal() { //[cite: 1]
     return;
   }
   
-  if (vinClean.length > 17) { //[cite: 1]
+  if (vinClean.length > 17) { 
     respuestaBox.style.display = 'block';
     respuestaBox.className = 'result-box warn';
     respuestaBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <b>VIN excedido:</b> contiene <b>${vinClean.length}</b> caracteres.`;
     return;
   }
   
-  const registro = cacheSeries.find(s => s.vin === vinClean || s.vin.includes(vinClean)); //[cite: 1]
+  const registro = cacheSeries.find(s => s.vin === vinClean || s.vin.includes(vinClean)); 
   respuestaBox.style.display = 'block';
   
   if (registro) {
-    respuestaBox.className = 'result-box success';
+    const accionUpper = (registro.accion || '').toUpperCase();
+    
+    // Lógica dinámica para asignar color e ícono al recuadro de resultados del VIN
+    let boxClass = 'result-box success'; // Por defecto verde
+    let titleIcon = '<i class="fa-solid fa-circle-check"></i>';
+    
+    if (accionUpper.includes('SE REQUIERE CHECK LIST')) {
+      boxClass = 'result-box error'; // Cambia a fondo/bordes rojos
+      titleIcon = '<i class="fa-solid fa-triangle-exclamation"></i>'; // Cambia el ícono a advertencia
+    } else if (accionUpper.includes('PASA POR GARANTIA') || accionUpper.includes('PASA COMO GARANTIA')) {
+      boxClass = 'result-box success';
+      titleIcon = '<i class="fa-solid fa-circle-check"></i>';
+    }
+
+    respuestaBox.className = boxClass;
     respuestaBox.innerHTML = `
       <div style="font-size: 16px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-        <i class="fa-solid fa-circle-check"></i> Unidad Localizada en Proyecto S
+        ${titleIcon} Unidad Localizada en Proyecto S
       </div>
       <div class="result-grid">
         <div class="result-item">
