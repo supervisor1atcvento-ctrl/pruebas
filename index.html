@@ -28,7 +28,6 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --radius: 12px;
 }
-
 body { 
   font-family: 'Inter', system-ui, -apple-system, sans-serif; 
   background-color: var(--vento-bg); 
@@ -37,14 +36,12 @@ body {
   color: var(--vento-black); 
   font-size: 15px; 
 }
-
 /* Layout Principal */
 .app-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 30px;
 }
-
 /* Encabezado */
 .hub-header { 
   background-color: var(--vento-white); 
@@ -58,12 +55,10 @@ body {
   top: 0;
   z-index: 100;
 }
-
 .brand-wrapper {
   display: flex;
   flex-direction: column;
 }
-
 .brand-title { 
   font-size: 13px; 
   font-weight: 600; 
@@ -72,7 +67,6 @@ body {
   text-transform: uppercase; 
   margin-bottom: 4px;
 }
-
 .hub-title { 
   font-size: 24px; 
   font-weight: 700; 
@@ -82,11 +76,9 @@ body {
   align-items: center;
   gap: 10px;
 }
-
 .hub-title i {
   color: var(--vento-orange);
 }
-
 .clock-display {
   font-size: 15px; 
   font-weight: 500; 
@@ -96,20 +88,17 @@ body {
   border-radius: 20px;
   border: 1px solid var(--vento-gray-light);
 }
-
 /* Buscador Moderno */
 .search-section { 
   margin: 30px 0; 
   display: flex;
   justify-content: center;
 }
-
 .input-box {
   position: relative;
   width: 100%;
   max-width: 600px;
 }
-
 .input-box i {
   position: absolute;
   left: 20px;
@@ -118,7 +107,6 @@ body {
   color: var(--vento-gray-dark);
   font-size: 18px;
 }
-
 .input-box input { 
   width: 100%;
   padding: 16px 20px 16px 50px; 
@@ -132,19 +120,16 @@ body {
   background: var(--vento-white);
   box-shadow: var(--shadow-sm);
 }
-
 .input-box input:focus { 
   border-color: var(--vento-orange); 
   box-shadow: 0 0 0 4px rgba(242, 143, 23, 0.1);
 }
-
 /* Grid de Tarjetas */
 #kiosco-container { 
   display: grid; 
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
   gap: 20px; 
 }
-
 .kiosco-card { 
   background: var(--vento-white); 
   border-radius: var(--radius); 
@@ -158,7 +143,6 @@ body {
   position: relative;
   overflow: hidden;
 }
-
 .kiosco-card::before {
   content: '';
   position: absolute;
@@ -169,41 +153,34 @@ body {
   background-color: transparent;
   transition: background-color 0.2s ease;
 }
-
 .kiosco-card:hover { 
   transform: translateY(-4px); 
   border-color: var(--vento-orange); 
   box-shadow: var(--shadow-lg); 
 }
-
 .kiosco-card:hover::before {
   background-color: var(--vento-orange);
 }
-
 .card-header {
   margin-bottom: 16px;
 }
-
 .card-name { 
   font-size: 18px; 
   font-weight: 700; 
   color: var(--vento-black); 
   line-height: 1.3;
 }
-
 .card-body {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-top: auto;
 }
-
 .data-group {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-
 .data-label {
   font-size: 12px;
   text-transform: uppercase;
@@ -211,12 +188,10 @@ body {
   font-weight: 600;
   letter-spacing: 0.5px;
 }
-
 .data-value {
   font-size: 15px;
   font-weight: 500;
 }
-
 /* Badges Modernos */
 .badge {
   display: inline-flex;
@@ -228,19 +203,16 @@ body {
   font-weight: 600;
   width: fit-content;
 }
-
 .badge-orange { 
   background-color: rgba(242, 143, 23, 0.1); 
   color: var(--vento-orange-hover); 
   border: 1px solid rgba(242, 143, 23, 0.2);
 }
-
 .badge-dark { 
   background-color: var(--vento-gray-light); 
   color: var(--vento-black); 
   border: 1px solid #D1D5DB;
 }
-
 /* Modal Moderno */
 .overlay-blur { 
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
@@ -251,7 +223,6 @@ body {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
-
 .panel-modal { 
   position: fixed; top: 50%; left: 50%; 
   transform: translate(-50%, -48%) scale(0.96); 
@@ -266,12 +237,10 @@ body {
   opacity: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .panel-modal.show {
   transform: translate(-50%, -50%) scale(1);
   opacity: 1;
 }
-
 .modal-header { 
   padding: 24px 30px; 
   display:flex; 
@@ -279,19 +248,16 @@ body {
   align-items:flex-start; 
   border-bottom: 1px solid var(--vento-gray-light); 
 }
-
 .modal-header-content {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-
 .modal-header-title { 
   font-size: 22px; 
   font-weight: 700; 
   color: var(--vento-black); 
 }
-
 .modal-close { 
   background: var(--vento-gray-light); 
   border: none; 
@@ -306,18 +272,15 @@ body {
   align-items: center;
   justify-content: center;
 }
-
 .modal-close:hover { 
   background: var(--vento-black);
   color: var(--vento-white); 
 }
-
 .modal-body { 
   padding: 30px; 
   max-height: 75vh; 
   overflow-y: auto; 
 }
-
 /* Sección Acción Base */
 .action-box {
   background: var(--vento-black);
@@ -330,18 +293,15 @@ body {
   gap: 15px;
   border-left: 6px solid var(--vento-orange);
 }
-
 .action-icon {
   font-size: 24px;
   color: var(--vento-orange);
 }
-
 .action-details {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-
 .action-label {
   font-size: 12px;
   text-transform: uppercase;
@@ -349,12 +309,10 @@ body {
   color: #9CA3AF;
   font-weight: 600;
 }
-
 .action-text {
   font-size: 18px;
   font-weight: 600;
 }
-
 /* Input VIN */
 .vin-section-title {
   font-size: 16px;
@@ -365,7 +323,6 @@ body {
   align-items: center;
   gap: 8px;
 }
-
 .input-vin { 
   width: 100%; 
   padding: 16px 20px; 
@@ -382,19 +339,16 @@ body {
   letter-spacing: 1px;
   transition: all 0.3s ease;
 }
-
 .input-vin:focus { 
   border-color: var(--vento-orange); 
   background: var(--vento-white);
   box-shadow: 0 0 0 4px rgba(242, 143, 23, 0.1);
 }
-
 .input-vin::placeholder {
   color: #9CA3AF;
   font-weight: 400;
   letter-spacing: normal;
 }
-
 .small-note { 
   font-size: 13px; 
   color: var(--vento-gray-dark); 
@@ -403,7 +357,6 @@ body {
   align-items: center;
   gap: 6px;
 }
-
 /* Resultados VIN */
 .result-box { 
   margin-top: 20px; 
@@ -413,30 +366,25 @@ body {
   display: none; 
   animation: slideDown 0.3s ease;
 }
-
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 .result-box.warn { 
   background-color: #FEF3C7;
   border: 1px solid #F59E0B;
   color: #92400E;
 }
-
 .result-box.success {
   background-color: #ECFDF5;
   border: 1px solid #34D399;
   color: #065F46;
 }
-
 .result-box.error { 
   background-color: #FEF2F2;
   border: 1px solid #FCA5A5;
   color: #991B1B;
 }
-
 .result-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -446,13 +394,11 @@ body {
   padding: 15px;
   border-radius: 8px;
 }
-
 .result-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-
 /* Loader */
 .loader-container {
   grid-column: 1/-1; 
@@ -466,7 +412,6 @@ body {
   align-items: center;
   gap: 15px;
 }
-
 .loader-container i {
   font-size: 32px;
   color: var(--vento-orange);
@@ -474,7 +419,6 @@ body {
 </style>
 </head>
 <body>
-
 <header class="hub-header">
   <div class="brand-wrapper">
     <div class="brand-title">VENTO MOTORCYCLES U.S.A.</div>
@@ -482,7 +426,6 @@ body {
   </div>
   <div id="reloj" class="clock-display"></div>
 </header>
-
 <main class="app-container">
   <div class="search-section">
     <div class="input-box">
@@ -490,7 +433,6 @@ body {
       <input type="text" id="input-agencia" placeholder="Buscar agencia por nombre o ubicación..." onkeyup="filtrarKiosco()">
     </div>
   </div>
-
   <div id="kiosco-container">
     <div class="loader-container">
       <i class="fa-solid fa-circle-notch fa-spin"></i>
@@ -498,7 +440,6 @@ body {
     </div>
   </div>
 </main>
-
 <div class="overlay-blur" id="overlay" onclick="cerrarModal()"></div>
 <div class="panel-modal" id="modal">
   <div class="modal-header">
@@ -531,10 +472,9 @@ body {
     
   </div>
 </div>
-
 <script>
 // ==========================================
-// CONFIGURACIÓN DE COLUMNAS (MANTENIDA INTACTA)
+// CONFIGURACIÓN DE COLUMNAS 
 // ==========================================
 const COL_AGENCIA_NOMBRE = 1;   // Columna B
 const COL_ACCION_BASE = 13;     // Columna N (Índice 13)
@@ -589,12 +529,21 @@ function procesarAgencias(texto) { //[cite: 1]
     card.className = 'kiosco-card';
     card.setAttribute('data-search', nombre.toLowerCase());
     
-    // UI Lógica para Badges
+    // UI Lógica para Badges actualizada con los nuevos textos
     const classPuede = (puede === 'SI') ? 'badge-orange' : 'badge-dark';
-    const txtPuede = (puede === 'SI') ? '<i class="fa-solid fa-check"></i> SÍ REPORTA' : '<i class="fa-solid fa-ban"></i> NO REPORTA';
+    const txtPuede = (puede === 'SI') ? '<i class="fa-solid fa-ban"></i> NO CUENTA CON KIT DE HERRAMIENTAS' : '<i class="fa-solid fa-check"></i> SÍ CUENTA CON KIT DE HERRAMIENTAS';
     
-    const esGarantia = accionFinal.toUpperCase().includes('PASA COMO GARANTIA');
-    const colorAccionStyle = esGarantia ? `color: var(--vento-green); font-weight: 700;` : `color: var(--vento-black); font-weight: 600;`;
+    // Lógica para el color de la Acción Base
+    let colorAccionStyle = `color: var(--vento-black); font-weight: 600;`;
+    let colorAccionModal = 'var(--vento-white)'; // Color base para el modal (fondo negro)
+    
+    if (accionFinal.toUpperCase().includes('PASA COMO GARANTIA')) {
+      colorAccionStyle = `color: var(--vento-green); font-weight: 700;`;
+      colorAccionModal = 'var(--vento-green)';
+    } else if (accionFinal.toUpperCase().includes('SE REQUIERE CHECK LIST')) {
+      colorAccionStyle = `color: var(--vento-red); font-weight: 700;`;
+      colorAccionModal = 'var(--vento-red)';
+    }
     
     card.innerHTML = `
       <div class="card-header">
@@ -612,7 +561,7 @@ function procesarAgencias(texto) { //[cite: 1]
     `;
     
     card.onclick = () => {
-      agenciaActiva = { nombre, accionBase: accionFinal, puede, txtPuede, classPuede, esGarantia };
+      agenciaActiva = { nombre, accionBase: accionFinal, puede, txtPuede, classPuede, colorAccionModal };
       abrirModalConAgencia();
     };
     container.appendChild(card);
@@ -652,12 +601,8 @@ function abrirModalConAgencia() {
   const detalleAccion = document.getElementById('detalle-accion');
   detalleAccion.innerText = agenciaActiva.accionBase;
   
-  // Resaltado si es garantía
-  if(agenciaActiva.esGarantia) {
-    detalleAccion.style.color = 'var(--vento-green)';
-  } else {
-    detalleAccion.style.color = 'var(--vento-white)';
-  }
+  // Resaltado de acción base con el color determinado (verde, rojo o blanco)
+  detalleAccion.style.color = agenciaActiva.colorAccionModal;
   
   // Resetear input y resultados
   const inputVin = document.getElementById('input-vin-modal');
