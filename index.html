@@ -129,10 +129,6 @@
         .metric-sub { font-size: 11px; font-weight: 600; color: var(--muted); }
         
         .score { font-size: 18px; padding: 6px 12px; border-radius: 8px; background: #FFF4E5; color: var(--vento-accent); font-weight: 700; display: inline-block; border: 1px solid rgba(242, 143, 23, 0.2); }
-        .status-pill { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; color: #fff; margin-top: 6px;}
-        .status-cumplido { background: var(--success); }
-        .status-cerca { background: var(--warning); color: #FFF; }
-        .status-lejos { background: var(--danger); }
         .top-highlight-1 td { background: rgba(255, 213, 74, 0.1); }
         .top-highlight-2 td { background: rgba(230, 238, 248, 0.4); }
         .top-highlight-3 td { background: rgba(255, 216, 181, 0.2); }
@@ -232,7 +228,7 @@
         <div class="rules-bar">
             <strong>📌 Reglas de Negocio (Filtros de validación para metas):</strong>
             <ul>
-                <li><strong>Tickets:</strong> Se contabilizan todos <strong>excluyendo</strong> aquellos en estatus <em>OPEN</em>, <em>PENDING</em> y <em>POR ASIGNAR CESVE</em>.</li>
+                <li><strong>Tickets:</strong> Se contabilizan los que cuentan con estatus <em>CANALIZADO</em>, descartando aquellos en estatus <em>Open, Pending o POR ASIGNAR CESVE</em>.</li>
                 <li><strong>Llamadas:</strong> Se cuentan con estatus <em>COMPLETED</em> y una duración <em>mayor o igual a 1 minuto (60 segundos)</em>.</li>
                 <li><strong>Chats:</strong> Se cuentan los atendidos por <em>AGENT</em> y con una duración <em>menor o igual a 5 minutos (300 segundos)</em>.</li>
             </ul>
@@ -284,7 +280,7 @@
         
         <div style="margin-top: 16px; color: var(--muted); font-size: 12px; background: var(--bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border);">
             <strong style="color: var(--vento-accent);">💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para visualizar la gráfica de constancia diaria.<br>
-            <div style="margin-top: 4px;"><strong>Indicadores de color (Barras):</strong> <span style="color: var(--success); font-weight: bold;">■ Verde</span> (En meta), <span style="color: var(--warning); font-weight: bold;">■ Amarillo</span> (Cerca, &ge;80%), <span style="color: var(--danger); font-weight: bold;">■ Rojo</span> (Rezago, &lt;80%).</div>
+            <div style="margin-top: 4px;"><strong>Indicadores de color en barras:</strong> <span style="color: var(--success); font-weight: bold;">■ Verde</span> (En meta), <span style="color: var(--warning); font-weight: bold;">■ Amarillo</span> (Cerca, &ge;80%), <span style="color: var(--danger); font-weight: bold;">■ Rojo</span> (Rezago, &lt;80%).</div>
         </div>
     </div>
     <footer>Dashboard Privado · Actualización automática programada (15 min)</footer>
@@ -316,7 +312,8 @@ const SHEETS = { tickets: 'Tickets_BD', chats: 'Chats_BD', calls: 'Llamadas_BD',
 const AUTO_REFRESH_MS = 15 * 60 * 1000;
 function letterToIndex(letter){ return letter.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0); }
 const COL = {
-    tickets: { advisor: letterToIndex('E'), date: letterToIndex('H'), status: letterToIndex('M') },
+    // ACTUALIZACIÓN DE COLUMNA I: Se agregó la definición para statusI correspondiente a la columna I
+    tickets: { advisor: letterToIndex('E'), date: letterToIndex('H'), statusI: letterToIndex('I'), status: letterToIndex('M') },
     chats: { advisor: letterToIndex('B'), duration: letterToIndex('C'), date: letterToIndex('I'), agentFlag: letterToIndex('M') },
     calls: { advisor: letterToIndex('B'), date: letterToIndex('C'), status: letterToIndex('D'), duration: letterToIndex('K') },
     asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') }
@@ -429,7 +426,7 @@ async function buildAliasAndMetaMaps(){
             const keyNorm=normalizeForKey(rawUser);
             const canonical=titleCase(keyNorm);
             const group=rawGroup?rawGroup:'OTROS';
-            const supervisor=rawSupervisor?rawSupervisor.toUpperCase():'OTROS';
+            const supervisor=rawSupervisor?rawSupervisor.toUpperCase:'OTROS';
             const modality = group && group.toLowerCase().includes('home') ? 'Home Office' : 'Presencial';
             
             metaMap[canonical]={group,supervisor,modality};
@@ -488,12 +485,17 @@ function buildLeaderboardRows(scoresArr) {
         const colorC = getBarColor(s.calls, expC);
         const colorCh = getBarColor(s.chats, expCh);
         
+        const sumReal = s.tickets + s.calls + s.chats;
+        const sumMeta = meta.tickets + meta.calls + meta.chats;
+        const sumExp = expT + expC + expCh;
+        
+        const pctRealOverall = sumMeta > 0 ? (sumReal / sumMeta) * 100 : 0;
+        const pctExpOverall = sumMeta > 0 ? (sumExp / sumMeta) * 100 : 0;
+        
         const tr = document.createElement('tr');
         if(idx === 0) tr.classList.add('top-highlight-1');
         else if(idx === 1) tr.classList.add('top-highlight-2');
         else if(idx === 2) tr.classList.add('top-highlight-3');
-        
-        /* AQUÍ SE ELIMINÓ EL PORCENTAJE DE LA META EN LA ÚLTIMA COLUMNA */
         tr.innerHTML = `
             <td style="font-weight: 700; color: var(--muted);">${idx + 1}</td>
             <td>
@@ -541,9 +543,12 @@ function getDailyChartData(advisorName, start, end) {
     cache.tickets.forEach(row => {
         if(mapAdvisorToCanonical(row[COL.tickets.advisor]) !== advisorName) return;
         
-        // MODIFICACIÓN: Excluir los estados solicitados
-        const tStatus = String(row[COL.tickets.status]||'').toUpperCase();
-        if(tStatus === 'OPEN' || tStatus === 'PENDING' || tStatus === 'POR ASIGNAR CESVE') return;
+        // ACTUALIZACIÓN LÓGICA DE TICKETS: Comprobamos el estatus de la columna I y la columna M
+        const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
+        const statusM = String(row[COL.tickets.status] || '').toUpperCase();
+        const invalidStatuses = ["OPEN", "PENDING", "POR ASIGNAR CESVE"];
+        
+        if (statusM !== 'CANALIZADO' || invalidStatuses.includes(statusI)) return;
         
         const parsed=parseDateFlexible(row[COL.tickets.date]);
         if(parsed && parsed>=start && parsed<=end){
@@ -640,12 +645,15 @@ function exportExcelMultiTabs() {
         if(activeGroup !== 'All' && meta.group !== activeGroup) return;
         if(selectedSupervisor && meta.supervisor.toUpperCase() !== selectedSupervisor.toUpperCase()) return;
         
-        // MODIFICACIÓN: Excluir los estados solicitados
-        const tStatus = String(row[COL.tickets.status]||'').toUpperCase();
-        if(tStatus !== 'OPEN' && tStatus !== 'PENDING' && tStatus !== 'POR ASIGNAR CESVE') {
+        // ACTUALIZACIÓN LÓGICA DE TICKETS: Comprobamos columna M y columna I
+        const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
+        const statusM = String(row[COL.tickets.status] || '').toUpperCase();
+        const invalidStatuses = ["OPEN", "PENDING", "POR ASIGNAR CESVE"];
+
+        if(statusM === 'CANALIZADO' && !invalidStatuses.includes(statusI)) {
             const d = parseDateFlexible(row[COL.tickets.date]);
             if(from && d < from) return; if(to && d > to) return;
-            wsTicketsData.push(row); 
+            wsTicketsData.push(row); // Insertar toda la fila original
         }
     });
     // 3. Matriz de datos para la pestaña "Chats Válidos"
@@ -662,7 +670,7 @@ function exportExcelMultiTabs() {
         if(String(row[COL.chats.agentFlag]||'').toUpperCase() === 'AGENT' && durSecs <= 300) {
             const d = parseDateFlexible(row[COL.chats.date]);
             if(from && d < from) return; if(to && d > to) return;
-            wsChatsData.push(row); 
+            wsChatsData.push(row); // Insertar toda la fila original
         }
     });
     // 4. Matriz de datos para la pestaña "Llamadas Válidas"
@@ -679,7 +687,7 @@ function exportExcelMultiTabs() {
         if(String(row[COL.calls.status]||'').toLowerCase() === 'completed' && durSecs >= 60) {
             const d = parseDateFlexible(row[COL.calls.date]);
             if(from && d < from) return; if(to && d > to) return;
-            wsCallsData.push(row); 
+            wsCallsData.push(row); // Insertar toda la fila original
         }
     });
     // Crear y configurar el documento Excel
@@ -717,9 +725,12 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
         if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
         if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
         
-        // MODIFICACIÓN: Excluir los estados solicitados
-        const tStatus = String(row[COL.tickets.status]||'').toUpperCase();
-        if(tStatus !== 'OPEN' && tStatus !== 'PENDING' && tStatus !== 'POR ASIGNAR CESVE'){
+        // ACTUALIZACIÓN LÓGICA DE TICKETS: Comprobamos columna M y columna I
+        const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
+        const statusM = String(row[COL.tickets.status] || '').toUpperCase();
+        const invalidStatuses = ["OPEN", "PENDING", "POR ASIGNAR CESVE"];
+
+        if(statusM === 'CANALIZADO' && !invalidStatuses.includes(statusI)){
             const d=parseDateFlexible(row[COL.tickets.date]);
             if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
             ensure(adv); counts[adv].tickets++;
@@ -741,7 +752,7 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
         const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
         if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
         if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
-        if(String(row[COL.calls.status]||'').toLowerCase()==='completed' && durationToSeconds(row[COL.calls.duration])>=60){ 
+        if(String(row[COL.calls.status]||'').toLowerCase()==='completed' && durationToSeconds(row[COL.calls.duration])>=60){
             const d=parseDateFlexible(row[COL.calls.date]);
             if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
             ensure(adv); counts[adv].calls++;
