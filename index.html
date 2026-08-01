@@ -228,7 +228,7 @@
         <div class="rules-bar">
             <strong>📌 Reglas de Negocio (Filtros de validación para metas):</strong>
             <ul>
-                <li><strong>Tickets:</strong> Se contabilizan los que cuentan con estatus <em>CANALIZADO</em>, descartando aquellos en estatus <em>Open, Pending o POR ASIGNAR CESVE</em>.</li>
+                <li><strong>Tickets:</strong> Se contabilizan los que cuentan con estatus <em>CANALIZADO</em>, descartando aquellos en estatus <em>Open, Pending </em>.</li>
                 <li><strong>Llamadas:</strong> Se cuentan con estatus <em>COMPLETED</em> y una duración <em>mayor o igual a 1 minuto (60 segundos)</em>.</li>
                 <li><strong>Chats:</strong> Se cuentan los atendidos por <em>AGENT</em> y con una duración <em>menor o igual a 5 minutos (300 segundos)</em>.</li>
             </ul>
@@ -546,7 +546,7 @@ function getDailyChartData(advisorName, start, end) {
         // ACTUALIZACIÓN LÓGICA DE TICKETS: Comprobamos el estatus de la columna I y la columna M
         const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
         const statusM = String(row[COL.tickets.status] || '').toUpperCase();
-        const invalidStatuses = ["OPEN", "PENDING", "POR ASIGNAR CESVE"];
+        const invalidStatuses = ["OPEN", "PENDING"];
         
         if (statusM !== 'CANALIZADO' || invalidStatuses.includes(statusI)) return;
         
@@ -648,7 +648,7 @@ function exportExcelMultiTabs() {
         // ACTUALIZACIÓN LÓGICA DE TICKETS: Comprobamos columna M y columna I
         const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
         const statusM = String(row[COL.tickets.status] || '').toUpperCase();
-        const invalidStatuses = ["OPEN", "PENDING", "POR ASIGNAR CESVE"];
+        const invalidStatuses = ["OPEN", "PENDING"];
 
         if(statusM === 'CANALIZADO' && !invalidStatuses.includes(statusI)) {
             const d = parseDateFlexible(row[COL.tickets.date]);
@@ -728,7 +728,7 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
         // ACTUALIZACIÓN LÓGICA DE TICKETS: Comprobamos columna M y columna I
         const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
         const statusM = String(row[COL.tickets.status] || '').toUpperCase();
-        const invalidStatuses = ["OPEN", "PENDING", "POR ASIGNAR CESVE"];
+        const invalidStatuses = ["OPEN", "PENDING"];
 
         if(statusM === 'CANALIZADO' && !invalidStatuses.includes(statusI)){
             const d=parseDateFlexible(row[COL.tickets.date]);
