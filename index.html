@@ -316,7 +316,7 @@ const COL = {
     tickets: { advisor: letterToIndex('E'), date: letterToIndex('H'), statusI: letterToIndex('I'), status: letterToIndex('M') },
     chats: { advisor: letterToIndex('B'), duration: letterToIndex('C'), date: letterToIndex('I'), agentFlag: letterToIndex('M') },
     calls: { advisor: letterToIndex('B'), date: letterToIndex('C'), status: letterToIndex('D'), duration: letterToIndex('K') },
-    asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') }
+    asesores: { supervisor: letterToIndex('D'), username: letterToIndex('B'), group: letterToIndex('E') } // <- COLUMNAS CORREGIDAS
 };
 /* ----------------- Estado Global ----------------- */
 let aliasMap = {}; let metaMap = {}; let cache = { tickets:[], chats:[], calls:[] };
@@ -426,7 +426,7 @@ async function buildAliasAndMetaMaps(){
             const keyNorm=normalizeForKey(rawUser);
             const canonical=titleCase(keyNorm);
             const group=rawGroup?rawGroup:'OTROS';
-            const supervisor=rawSupervisor?rawSupervisor.toUpperCase:'OTROS';
+            const supervisor=rawSupervisor?rawSupervisor.toUpperCase():'OTROS'; // <- PARÉNTESIS AGREGADOS
             const modality = group && group.toLowerCase().includes('home') ? 'Home Office' : 'Presencial';
             
             metaMap[canonical]={group,supervisor,modality};
@@ -453,49 +453,85 @@ function mapAdvisorToCanonical(raw){
     if(!metaMap[canonical]) metaMap[canonical]={group:'OTROS',supervisor:'OTROS',modality:'Presencial'};
     aliasMap[norm]=canonical; return canonical;
 }
-/* ----------------- Renderizado del Leaderboard ----------------- */
-function buildLeaderboardRows(scoresArr) {
+/* ----------------- Renderizado del Leaderboard (ACTUALIZADO DINÁMICO) ----------------- */
+function buildLeaderboardRows(scoresArr, filterFrom, filterTo) {
     const tbody = document.getElementById('leaderboardBody');
     tbody.innerHTML = '';
-    const year = (new Date()).getFullYear();
-    const month = (new Date()).getMonth();
+    
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
     
     const presTickets = Number(document.getElementById('goal_pres_tickets').textContent);
     const presChats = Number(document.getElementById('goal_pres_chats').textContent);
     const presCalls = Number(document.getElementById('goal_pres_calls').textContent);
     const hoTickets = Number(document.getElementById('goal_ho_tickets').textContent);
     const hoChats = Number(document.getElementById('goal_ho_chats').textContent);
+    
+    // Rango de fechas por defecto (Si no hay filtro, asume todo el mes)
+    let dStart = filterFrom || new Date(year, month, 1);
+    let dEnd = filterTo || new Date(year, month + 1, 0);
+    
     scoresArr.forEach((s, idx) => {
-        const meta = {
+        const monthlyMeta = {
             tickets: s.modality === 'Home Office' ? hoTickets : presTickets,
             calls: s.modality === 'Home Office' ? 0 : presCalls,
             chats: s.modality === 'Home Office' ? hoChats : presChats
         };
         
-        const workingDays = getWorkingDaysForMonth(s.modality, year, month);
-        const expT = expectedUntilToday(meta.tickets, workingDays);
-        const expC = expectedUntilToday(meta.calls, workingDays);
-        const expCh = expectedUntilToday(meta.chats, workingDays);
+        // 1. Obtener base de días laborales totales del mes
+        const refYear = dStart.getFullYear();
+        const refMonth = dStart.getMonth();
+        const totalWD = getWorkingDaysForMonth(s.modality, refYear, refMonth).length || 1;
         
-        const pctT = meta.tickets > 0 ? Math.min(100, (s.tickets / meta.tickets) * 100) : 0;
-        const pctC = meta.calls > 0 ? Math.min(100, (s.calls / meta.calls) * 100) : 0;
-        const pctCh = meta.chats > 0 ? Math.min(100, (s.chats / meta.chats) * 100) : 0;
+        // 2. Calcular días laborales dentro del rango filtrado
+        let filteredWD = 0;
+        let passedWD = 0; // Usado para el semáforo de colores esperado hasta el día de hoy
+        
+        let tempDate = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
+        const endD = new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate());
+        const todayD = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        
+        while(tempDate <= endD) {
+            const dow = tempDate.getDay();
+            let isWorking = false;
+            if (s.modality === 'Home Office') {
+                if (dow !== 4 && dow !== 5) isWorking = true;
+            } else {
+                if (dow !== 0) isWorking = true;
+            }
+            
+            if (isWorking) {
+                filteredWD++;
+                if (tempDate <= todayD) passedWD++;
+            }
+            tempDate.setDate(tempDate.getDate() + 1);
+        }
+        
+        // 3. Metas ajustadas al tamaño de días del periodo seleccionado (ej: Meta de 1 día)
+        const periodMetaT = (monthlyMeta.tickets / totalWD) * filteredWD;
+        const periodMetaC = (monthlyMeta.calls / totalWD) * filteredWD;
+        const periodMetaCh = (monthlyMeta.chats / totalWD) * filteredWD;
+        
+        // Pacing de semáforo (qué porcentaje debería llevar hasta hoy dentro de este filtro)
+        const expT = (monthlyMeta.tickets / totalWD) * passedWD;
+        const expC = (monthlyMeta.calls / totalWD) * passedWD;
+        const expCh = (monthlyMeta.chats / totalWD) * passedWD;
+        
+        // 4. Calcular el avance frente a la meta filtrada dinámica
+        const pctT = periodMetaT > 0 ? Math.min(100, (s.tickets / periodMetaT) * 100) : (s.tickets > 0 ? 100 : 0);
+        const pctC = periodMetaC > 0 ? Math.min(100, (s.calls / periodMetaC) * 100) : (s.calls > 0 ? 100 : 0);
+        const pctCh = periodMetaCh > 0 ? Math.min(100, (s.chats / periodMetaCh) * 100) : (s.chats > 0 ? 100 : 0);
         
         const colorT = getBarColor(s.tickets, expT);
         const colorC = getBarColor(s.calls, expC);
         const colorCh = getBarColor(s.chats, expCh);
-        
-        const sumReal = s.tickets + s.calls + s.chats;
-        const sumMeta = meta.tickets + meta.calls + meta.chats;
-        const sumExp = expT + expC + expCh;
-        
-        const pctRealOverall = sumMeta > 0 ? (sumReal / sumMeta) * 100 : 0;
-        const pctExpOverall = sumMeta > 0 ? (sumExp / sumMeta) * 100 : 0;
-        
+
         const tr = document.createElement('tr');
         if(idx === 0) tr.classList.add('top-highlight-1');
         else if(idx === 1) tr.classList.add('top-highlight-2');
         else if(idx === 2) tr.classList.add('top-highlight-3');
+        
         tr.innerHTML = `
             <td style="font-weight: 700; color: var(--muted);">${idx + 1}</td>
             <td>
@@ -504,18 +540,24 @@ function buildLeaderboardRows(scoresArr) {
             </td>
             <td class="col-metric">
                 <div class="metric-val">${s.tickets}</div>
-                <div class="rubro-bar-wrap" title="Meta: ${meta.tickets}"><div class="rubro-bar" style="width:${pctT}%; background-color:${colorT};"></div></div>
-                <div class="metric-sub">Real: ${Math.round(pctT)}% | Exp: ${Math.round((expT/meta.tickets)*100 || 0)}%</div>
+                <div class="rubro-bar-wrap" title="Meta Ajustada: ${Math.round(periodMetaT)}">
+                    <div class="rubro-bar" style="width:${pctT}%; background-color:${colorT};"></div>
+                </div>
+                <div class="metric-sub">Avance: ${Math.round(pctT)}% | Meta: ${Math.round(periodMetaT)}</div>
             </td>
             <td class="col-metric">
                 <div class="metric-val">${s.calls}</div>
-                <div class="rubro-bar-wrap" title="Meta: ${meta.calls}"><div class="rubro-bar" style="width:${pctC}%; background-color:${colorC};"></div></div>
-                <div class="metric-sub">Real: ${Math.round(pctC)}% | Exp: ${Math.round((expC/meta.calls)*100 || 0)}%</div>
+                <div class="rubro-bar-wrap" title="Meta Ajustada: ${Math.round(periodMetaC)}">
+                    <div class="rubro-bar" style="width:${pctC}%; background-color:${colorC};"></div>
+                </div>
+                <div class="metric-sub">Avance: ${Math.round(pctC)}% | Meta: ${Math.round(periodMetaC)}</div>
             </td>
             <td class="col-metric">
                 <div class="metric-val">${s.chats}</div>
-                <div class="rubro-bar-wrap" title="Meta: ${meta.chats}"><div class="rubro-bar" style="width:${pctCh}%; background-color:${colorCh};"></div></div>
-                <div class="metric-sub">Real: ${Math.round(pctCh)}% | Exp: ${Math.round((expCh/meta.chats)*100 || 0)}%</div>
+                <div class="rubro-bar-wrap" title="Meta Ajustada: ${Math.round(periodMetaCh)}">
+                    <div class="rubro-bar" style="width:${pctCh}%; background-color:${colorCh};"></div>
+                </div>
+                <div class="metric-sub">Avance: ${Math.round(pctCh)}% | Meta: ${Math.round(periodMetaCh)}</div>
             </td>
             <td style="text-align: right;">
                 <div class="score">${s.total.toFixed(0)} Pts</div>
@@ -649,7 +691,6 @@ function exportExcelMultiTabs() {
         const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
         const statusM = String(row[COL.tickets.status] || '').toUpperCase();
         const invalidStatuses = ["OPEN", "PENDING"];
-
         if(statusM === 'CANALIZADO' && !invalidStatuses.includes(statusI)) {
             const d = parseDateFlexible(row[COL.tickets.date]);
             if(from && d < from) return; if(to && d > to) return;
@@ -714,7 +755,7 @@ document.getElementById('downloadExcelTabsBtn').addEventListener('click', export
 document.getElementById('downloadRawSelect').addEventListener('change', function() {
     if (this.value) { exportRawBase(this.value); this.value = ""; }
 });
-/* ----------------- Motor de Análisis ----------------- */
+/* ----------------- Motor de Análisis (ACTUALIZADO DINÁMICO) ----------------- */
 function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervisor){
     const counts={};
     function ensure(name){ if(!counts[name]) counts[name]={tickets:0,chats:0,calls:0}; }
@@ -729,7 +770,6 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
         const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
         const statusM = String(row[COL.tickets.status] || '').toUpperCase();
         const invalidStatuses = ["OPEN", "PENDING"];
-
         if(statusM === 'CANALIZADO' && !invalidStatuses.includes(statusI)){
             const d=parseDateFlexible(row[COL.tickets.date]);
             if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
@@ -783,7 +823,8 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
     document.getElementById('statCalls').textContent = Object.values(counts).reduce((s,c)=>s+c.calls,0);
     document.getElementById('statChats').textContent = Object.values(counts).reduce((s,c)=>s+c.chats,0);
     
-    buildLeaderboardRows(arr);
+    // <- SE PASAN LOS FILTROS A LA FUNCIÓN DE LEADERBOARD
+    buildLeaderboardRows(arr, filterFrom, filterTo); 
 }
 function applyAllFilters() {
     let from = null, to = null;
