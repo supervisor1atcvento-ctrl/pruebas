@@ -849,19 +849,46 @@ function evaluarDictamenGlobal() {
 // Lógica de Captura y Copiado
 async function copiarCaptura() {
   const modalNode = document.getElementById('modal');
+  const modalBody = document.querySelector('.modal-body');
   const btn = document.getElementById('btn-captura');
   const originalText = btn.innerHTML;
   
   // Feedback inicial
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generando imagen...';
   
+  // 1. Guardar los estilos originales para restaurarlos después
+  const prevPosition = modalNode.style.position;
+  const prevTop = modalNode.style.top;
+  const prevTransform = modalNode.style.transform;
+  const prevMaxHeight = modalBody.style.maxHeight;
+  const prevOverflow = modalBody.style.overflowY;
+  
+  // 2. Expandir el modal a su tamaño real quitando el scroll
+  // Se cambia a posición absoluta para que no se corte con el límite inferior del monitor
+  modalNode.style.position = 'absolute';
+  modalNode.style.top = '20px'; 
+  modalNode.style.transform = 'translate(-50%, 0)'; 
+  modalBody.style.maxHeight = 'none';
+  modalBody.style.overflowY = 'visible';
+  
+  // Pequeña pausa (50 milisegundos) para que el navegador aplique los cambios visuales antes de la foto
+  await new Promise(resolve => setTimeout(resolve, 50));
+  
   try {
     const canvas = await html2canvas(modalNode, {
-      scale: 2, // Aumenta la resolución para que el texto sea muy nítido
+      scale: 2, 
       backgroundColor: "#FFFFFF",
-      // Excluye elementos que tengan la clase 'no-capture' (el propio botón)
+      // Le indicamos a html2canvas que considere la nueva altura total expandida
+      windowHeight: modalNode.scrollHeight + 100, 
       ignoreElements: (element) => element.classList.contains('no-capture')
     });
+    
+    // 3. Restaurar los estilos inmediatamente después de tomar la captura
+    modalNode.style.position = prevPosition;
+    modalNode.style.top = prevTop;
+    modalNode.style.transform = prevTransform;
+    modalBody.style.maxHeight = prevMaxHeight;
+    modalBody.style.overflowY = prevOverflow;
     
     // Convertir el canvas a formato Blob para usar el portapapeles web
     canvas.toBlob(async function(blob) {
@@ -897,6 +924,14 @@ async function copiarCaptura() {
   } catch (error) {
     console.error("Error en la librería html2canvas: ", error);
     alert("Hubo un error al generar la captura. Revisa la consola.");
+    
+    // Restaurar estilos también en caso de error
+    modalNode.style.position = prevPosition;
+    modalNode.style.top = prevTop;
+    modalNode.style.transform = prevTransform;
+    modalBody.style.maxHeight = prevMaxHeight;
+    modalBody.style.overflowY = prevOverflow;
+    
     btn.innerHTML = originalText;
   }
 }
