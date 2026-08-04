@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Consulta Agencias y VIN - Vento Postventa</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Librería para capturas de pantalla -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 /* 
   ESTÁNDARES INSTITUCIONALES VENTO
@@ -330,7 +332,7 @@ body {
 }
 .modal-body { 
   padding: 30px; 
-  max-height: 75vh; 
+  max-height: 80vh; 
   overflow-y: auto; 
 }
 
@@ -451,6 +453,33 @@ select.input-vin {
   flex-direction: column;
   gap: 4px;
 }
+
+/* Botón de Captura */
+.btn-capture {
+  width: 100%;
+  padding: 16px;
+  margin-top: 25px;
+  background-color: var(--vento-orange);
+  color: var(--vento-white);
+  border: 2px solid var(--vento-orange);
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Inter', sans-serif;
+}
+.btn-capture:hover {
+  background-color: var(--vento-black);
+  border-color: var(--vento-black);
+}
+
 /* Loader */
 .loader-container {
   grid-column: 1/-1; 
@@ -491,7 +520,6 @@ select.input-vin {
       Sincronizando bases de datos operativas...
     </div>
     
-    <!-- Contenedor dinámico de agencia no encontrada -->
     <div id="no-results-msg">
       <i class="fa-solid fa-store-slash"></i>
       <div class="no-results-title">Agencia no localizada en el directorio</div>
@@ -505,12 +533,15 @@ select.input-vin {
   </div>
 </main>
 <div class="overlay-blur" id="overlay" onclick="cerrarModal()"></div>
+
+<!-- Modal que será capturado -->
 <div class="panel-modal" id="modal">
   <div class="modal-header">
     <div class="modal-header-content">
       <div id="modal-badge-rev"></div>
       <div id="modal-titulo" class="modal-header-title">Agencia</div>
     </div>
+    <!-- No ocultamos la X en la captura ya que en tu ejemplo sí aparece -->
     <button class="modal-close" onclick="cerrarModal()" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
   </div>
   
@@ -543,6 +574,11 @@ select.input-vin {
     <div class="small-note"><i class="fa-solid fa-circle-info"></i> El número de serie validado en la base de datos sobrescribe la acción base de la agencia.</div>
     
     <div id="resultado-vin-box" class="result-box"></div>
+
+    <!-- Botón de captura (se le agrega la clase 'no-capture' para que desaparezca en la foto final) -->
+    <button id="btn-captura" class="btn-capture no-capture" onclick="copiarCaptura()" style="display: none;">
+      <i class="fa-solid fa-camera"></i> Copiar Dictamen al Portapapeles
+    </button>
     
   </div>
 </div>
@@ -550,9 +586,9 @@ select.input-vin {
 // ==========================================
 // CONFIGURACIÓN DE COLUMNAS 
 // ==========================================
-const COL_AGENCIA_NOMBRE = 1;   // Columna B
-const COL_ACCION_BASE = 13;     // Columna N 
-const COL_PUEDE_REPORTAR = 14;  // Columna O
+const COL_AGENCIA_NOMBRE = 1;   
+const COL_ACCION_BASE = 13;     
+const COL_PUEDE_REPORTAR = 14;  
 // ==========================================
 const sheetId = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY'; 
 const urlAgencias = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Agencias`; 
@@ -609,7 +645,6 @@ function procesarAgencias(texto) {
     card.className = 'kiosco-card';
     card.setAttribute('data-search', nombre.toLowerCase());
     
-    // Asignación con colores institucionales
     const classPuede = (puede === 'SI') ? 'badge-orange' : 'badge-black';
     const txtPuede = (puede === 'SI') ? '<i class="fa-solid fa-ban"></i> NO CUENTA CON KIT DE HERRAMIENTAS' : '<i class="fa-solid fa-check"></i> SÍ CUENTA CON KIT DE HERRAMIENTAS';
     
@@ -687,12 +722,11 @@ function abrirModalConAgencia() {
   document.getElementById('modal-titulo').innerText = agenciaActiva.nombre;
   document.getElementById('modal-badge-rev').innerHTML = `<span class="badge ${agenciaActiva.classPuede}">${agenciaActiva.txtPuede}</span>`;
   
-  // Reiniciar controles
   document.getElementById('select-armado').value = 'SIN_REGISTRO';
   document.getElementById('input-vin-modal').value = '';
   document.getElementById('resultado-vin-box').style.display = 'none';
+  document.getElementById('btn-captura').style.display = 'none';
   
-  // Calcular valores iniciales
   evaluarDictamenGlobal();
   
   document.getElementById('overlay').style.display = 'block';
@@ -724,11 +758,9 @@ function limpiarVIN(v) {
   return v.replace(/[\s\-]/g, '').replace(/[^a-zA-Z0-9]/g, '');
 }
 
-// LÓGICA UNIFICADA: ARMADO + VIN
 function evaluarDictamenGlobal() {
   if(!agenciaActiva) return;
 
-  // 1. Calcular Acción Base según origen de Armado
   const armado = document.getElementById('select-armado').value;
   let accionCalculada = agenciaActiva.accionBase;
 
@@ -738,7 +770,6 @@ function evaluarDictamenGlobal() {
     accionCalculada = 'PASA COMO GARANTIA';
   }
 
-  // Reflejar la Acción Base Calculada en el Badge
   const contenedorAccion = document.getElementById('detalle-accion-container');
   let classAccion = 'badge-white';
   if (accionCalculada.toUpperCase().includes('GARANTIA')) {
@@ -748,17 +779,19 @@ function evaluarDictamenGlobal() {
   }
   contenedorAccion.innerHTML = `<span class="badge ${classAccion}" style="font-size: 15px; padding: 8px 16px;">${accionCalculada}</span>`;
 
-  // 2. Evaluar número de serie (VIN)
   const rawVin = document.getElementById('input-vin-modal').value;
   const vinClean = limpiarVIN(rawVin).toLowerCase();
   const respuestaBox = document.getElementById('resultado-vin-box');
+  const btnCaptura = document.getElementById('btn-captura');
 
   if(vinClean.length === 0) { 
     respuestaBox.style.display = 'none'; 
+    btnCaptura.style.display = 'flex'; // Muestra el botón aunque no haya VIN (se basa en la agencia y armado)
     return; 
   }
 
   respuestaBox.style.display = 'block';
+  btnCaptura.style.display = 'flex';
 
   if (vinClean.length < 17) { 
     const faltan = 17 - vinClean.length;
@@ -773,14 +806,13 @@ function evaluarDictamenGlobal() {
     return;
   }
 
-  // Búsqueda en Proyecto S
   const registro = cacheSeries.find(s => s.vin === vinClean || s.vin.includes(vinClean)); 
   
-  let dictamenFinal = accionCalculada; // Por defecto lo que se calculó en el paso 1
+  let dictamenFinal = accionCalculada; 
   let htmlVin = '';
 
   if (registro) {
-    dictamenFinal = registro.accion || 'N/A'; // EL VIN TIENE MAYOR PESO Y SOBRESCRIBE
+    dictamenFinal = registro.accion || 'N/A'; 
     htmlVin = `
       <div style="font-size: 16px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--vento-orange);">
         <i class="fa-solid fa-star"></i> VIN Localizado - Regla de Base Aplicada
@@ -800,7 +832,6 @@ function evaluarDictamenGlobal() {
     `;
   }
 
-  // Estilos del cuadro de dictamen final
   let alertStyle = dictamenFinal.toUpperCase().includes('GARANTIA') 
     ? 'border-left: 8px solid var(--vento-black); background: var(--vento-white); color: var(--vento-black); border-top: 2px solid var(--vento-black); border-right: 2px solid var(--vento-black); border-bottom: 2px solid var(--vento-black);' 
     : 'border-left: 8px solid var(--vento-orange); background: var(--vento-black); color: var(--vento-white);';
@@ -813,6 +844,61 @@ function evaluarDictamenGlobal() {
       <span style="font-size: 24px; font-weight: 800;">${dictamenFinal}</span>
     </div>
   `;
+}
+
+// Lógica de Captura y Copiado
+async function copiarCaptura() {
+  const modalNode = document.getElementById('modal');
+  const btn = document.getElementById('btn-captura');
+  const originalText = btn.innerHTML;
+  
+  // Feedback inicial
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generando imagen...';
+  
+  try {
+    const canvas = await html2canvas(modalNode, {
+      scale: 2, // Aumenta la resolución para que el texto sea muy nítido
+      backgroundColor: "#FFFFFF",
+      // Excluye elementos que tengan la clase 'no-capture' (el propio botón)
+      ignoreElements: (element) => element.classList.contains('no-capture')
+    });
+    
+    // Convertir el canvas a formato Blob para usar el portapapeles web
+    canvas.toBlob(async function(blob) {
+      try {
+        const item = new ClipboardItem({ "image/png": blob });
+        await navigator.clipboard.write([item]);
+        
+        // Feedback de Éxito
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> ¡Copiado al Portapapeles!';
+        btn.style.backgroundColor = 'var(--vento-black)';
+        btn.style.borderColor = 'var(--vento-black)';
+        
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.style.backgroundColor = ''; 
+          btn.style.borderColor = '';
+        }, 3000);
+        
+      } catch (err) {
+        console.error("El navegador no soporta el copiado directo: ", err);
+        
+        // Fallback: Si el navegador bloquea el portapapeles, descarga la imagen automáticamente
+        const link = document.createElement('a');
+        link.download = 'Dictamen_Garantia.png';
+        link.href = canvas.toDataURL();
+        link.click();
+        
+        btn.innerHTML = '<i class="fa-solid fa-download"></i> Imagen Descargada';
+        setTimeout(() => { btn.innerHTML = originalText; }, 3000);
+      }
+    }, 'image/png');
+    
+  } catch (error) {
+    console.error("Error en la librería html2canvas: ", error);
+    alert("Hubo un error al generar la captura. Revisa la consola.");
+    btn.innerHTML = originalText;
+  }
 }
 </script>
 </body>
