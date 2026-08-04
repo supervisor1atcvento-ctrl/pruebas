@@ -702,10 +702,10 @@ function generarResumenPorAsesor(nombre){
   
   let msj = `*Resumen de Operación: ${nombre}*\n`;
   msj += `Tickets Totales: ${tickets.length}\n`;
-  msj += `🔴 Urgentes: ${urg}\n`;
-  msj += `🟡 Preventivos: ${prev}\n`;
-  msj += `🟠 Pendientes s/Tocar: ${pend}\n`;
-  msj += `🟢 En tiempo: ${enTiempo}\n`;
+  msj += `\u{1F534} Urgentes: ${urg}\n`;
+  msj += `\u{1F7E1} Preventivos: ${prev}\n`;
+  msj += `\u{1F7E0} Pendientes s/Tocar: ${pend}\n`;
+  msj += `\u{1F7E2} En tiempo: ${enTiempo}\n`;
   return msj;
 }
 
@@ -720,12 +720,14 @@ function enviarWhatsAppDesdeModal(){
     const enTiempo = dataFiltradaGlobal.filter(t => t.categoria === 'en-tiempo').length;
     msj = `*Resumen General ATC*\n`;
     msj += `Tickets Totales: ${dataFiltradaGlobal.length}\n`;
-    msj += `🔴 Urgentes: ${urg}\n`;
-    msj += `🟡 Preventivos: ${prev}\n`;
-    msj += `🟠 Pendientes s/Tocar: ${pend}\n`;
-    msj += `🟢 En tiempo: ${enTiempo}\n`;
+    msj += `\u{1F534} Urgentes: ${urg}\n`;
+    msj += `\u{1F7E1} Preventivos: ${prev}\n`;
+    msj += `\u{1F7E0} Pendientes s/Tocar: ${pend}\n`;
+    msj += `\u{1F7E2} En tiempo: ${enTiempo}\n`;
   }
-  const url = `https://wa.me/?text=${encodeURIComponent(msj)}`;
+  
+  // Usamos el endpoint API oficial de WhatsApp para garantizar compatibilidad de caracteres
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msj)}`;
   window.open(url, '_blank');
 }
 </script>
