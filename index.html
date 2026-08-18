@@ -1,1068 +1,749 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vento Postventa - Hub Integral</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- Librerías Externas -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Vento ATC — Muro Ejecutivo (Pendientes s/Tocar)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-/* ==========================================================================
-   ESTÁNDARES INSTITUCIONALES VENTO (Variables Globales)
-   ========================================================================== */
-:root {
-  --vento-white: #FFFFFF;
-  --vento-bg: #F8F9FA;
-  --vento-black: #1A1A1A;
-  --vento-dark: #231F20;
-  --vento-gray-dark: #4B5563;
-  --vento-gray: #616160;
-  --vento-gray-light: #E5E7EB;
-  --vento-orange: #F28F17;
-  --vento-orange-hover: #D97D11;
-  --vento-orange-light: rgba(242, 143, 23, 0.15);
-  
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --radius: 12px;
-  
-  --red: #ef4444;
-  --red-dark: #dc2626;
+:root{
+--white:#FFFFFF; --black:#231F20; --muted:#616160; --accent:#F28F17; --bg:#F7F8FA;
+--red:#FF6B6B; --yellow:#F6C85F; --orange:#F28F17; --green:#2ECC71;
+--font-sm:0.78rem; --font-md:0.95rem; --font-lg:1.25rem;
+--shadow-card:0 6px 18px rgba(35,31,32,0.06); --shadow-hover:0 12px 30px rgba(35,31,32,0.10);
+--radius:12px; --gap:12px; --header-h:64px; --top-h:160px;
 }
-
-* { box-sizing: border-box; }
-
-body { 
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; 
-  background-color: var(--vento-bg); 
-  margin: 0; 
-  padding: 0; 
-  color: var(--vento-black); 
-  font-size: 15px; 
-  -webkit-font-smoothing: antialiased;
+/* Reset & base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+margin:0; font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+background:var(--bg); color:var(--black); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+overflow:auto;
 }
-
-/* ==========================================================================
-   SISTEMA DE LOGIN
-   ========================================================================== */
-#login-view {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: var(--vento-dark);
-  color: var(--vento-white);
-  text-align: center;
+/* Header fixed */
+header{
+position:fixed; top:0; left:0; right:0; z-index:140; height:var(--header-h);
+display:flex; align-items:center; justify-content:space-between; padding:12px 18px;
+background:var(--white); border-bottom:1px solid rgba(35,31,32,0.04); box-shadow:var(--shadow-card);
 }
-.login-box {
-  background: var(--vento-white);
-  padding: 40px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  max-width: 400px;
-  width: 90%;
-  color: var(--vento-black);
-}
-.login-box h1 { margin-top: 0; font-size: 24px; font-weight: 800; color: var(--vento-black); }
-.login-box p { color: var(--vento-gray-dark); font-size: 14px; margin-bottom: 30px; }
-.dev-bypass { margin-top: 20px; font-size: 12px; color: var(--vento-gray); cursor: pointer; text-decoration: underline; }
+.brand{display:flex; gap:12px; align-items:center;}
+.logo{width:44px; height:44px; border-radius:10px; background:var(--accent); display:flex; align-items:center; justify-content:center; color:var(--white); font-weight:900; font-size:18px; box-shadow:0 6px 14px rgba(0,0,0,0.06);}
+header h1{margin:0; font-size:1.05rem; font-weight:800;}
+.header-actions{display:flex; gap:10px; align-items:center; color:var(--muted); flex-wrap:wrap; justify-content:flex-end;}
 
-/* ==========================================================================
-   LAYOUT PRINCIPAL (App View)
-   ========================================================================== */
-#app-view { display: none; height: 100vh; overflow: hidden; }
-
-/* Header Global */
-.hub-header { 
-  background-color: var(--vento-white); 
-  padding: 15px 30px; 
-  border-bottom: 4px solid var(--vento-black); 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  box-shadow: var(--shadow-sm);
-  z-index: 100;
-}
-.brand-wrapper { display: flex; flex-direction: column; }
-.brand-title { font-size: 12px; font-weight: 800; color: var(--vento-black); letter-spacing: 1px; text-transform: uppercase; }
-.hub-title { font-size: 20px; font-weight: 700; color: var(--vento-black); margin: 0; display: flex; align-items: center; gap: 8px; }
-.hub-title i { color: var(--vento-orange); }
-
-.user-profile { display: flex; align-items: center; gap: 15px; }
-.clock-display { font-size: 14px; font-weight: 600; color: var(--vento-black); background: var(--vento-bg); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--vento-gray-light); }
-.user-info { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
-.user-info img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--vento-orange); }
-.btn-logout { background: var(--vento-black); color: var(--vento-white); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; }
-
-/* Layout Contenido */
-.main-layout { display: flex; height: calc(100vh - 74px); }
-
-/* Sidebar de Navegación */
-.sidebar {
-  width: 250px;
-  background: var(--vento-white);
-  border-right: 1px solid var(--vento-gray-light);
-  padding: 20px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.nav-item {
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--vento-gray-dark);
+/* Filtros */
+.select-filter {
+  background-color: var(--white);
+  border: 1px solid rgba(35,31,32,0.12);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
+  color: var(--black);
+  font-size: 0.85rem;
+  max-width: 180px;
   cursor: pointer;
-  border-left: 4px solid transparent;
-  transition: all 0.2s;
+  outline: none;
 }
-.nav-item:hover { background: var(--vento-bg); color: var(--vento-black); }
-.nav-item.active {
-  background: var(--vento-orange-light);
-  color: var(--vento-black);
-  border-left-color: var(--vento-orange);
+.select-filter:focus {
+  border-color: var(--accent);
 }
-.nav-item i { width: 20px; text-align: center; font-size: 18px; color: var(--vento-orange); }
 
-/* Contenedor de Pestañas */
-.content-area {
-  flex: 1;
-  overflow-y: auto;
-  padding: 30px;
-  background: var(--vento-bg);
+/* Top KPIs fixed */
+.top-fixed{position:fixed; left:0; right:0; top:var(--header-h); z-index:130; background:linear-gradient(180deg,var(--white), #FBFBFB); border-bottom:1px solid rgba(35,31,32,0.04); box-shadow:0 8px 20px rgba(35,31,32,0.03);}
+.kpi-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; padding:12px 18px; max-width:1280px; margin:0 auto;}
+.kpi{background:var(--white); border-radius:12px; padding:12px; box-shadow:var(--shadow-card); transition:transform .18s ease, box-shadow .18s ease; cursor:pointer; display:flex; flex-direction:column; gap:6px;}
+.kpi:hover{transform:translateY(-6px); box-shadow:var(--shadow-hover);}
+.kpi .label{font-size:var(--font-sm); color:var(--muted); font-weight:700; text-transform:uppercase; display:flex; align-items:center; gap:8px;}
+.kpi .value{font-size:var(--font-lg); font-weight:900;}
+.kpi .meta{font-size:var(--font-sm); color:var(--muted);}
+/* KPI color mapping */
+.kpi.en-tiempo .value{color:var(--green);} .kpi.preventivo .value{color:var(--yellow);} .kpi.pendiente .value{color:var(--orange);} .kpi.urgente .value{color:var(--red);}
+/* Main content */
+.main{max-width:1280px; margin: calc(var(--header-h) + var(--top-h)) auto 48px; padding:18px;}
+.matrix-title{font-weight:800; margin:6px 0 12px; font-size:1rem;}
+/* Advisors row */
+.grid-asesores-wrap{position:relative; margin-bottom:18px;}
+.grid-asesores{display:flex; gap:12px; overflow-x:auto; overflow-y:hidden; padding:12px 8px; -webkit-overflow-scrolling:touch; scroll-behavior:smooth;}
+.card-asesor{box-sizing:border-box; flex:0 0 33.333%; min-width:220px; background:var(--white); border-radius:12px; padding:16px; box-shadow:var(--shadow-card); transition:transform .18s ease; display:flex; flex-direction:column; gap:12px; min-height:220px;}
+.card-asesor:hover{transform:translateY(-6px); box-shadow:var(--shadow-hover);}
+.card-row{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.card-row h4{margin:0; font-size:1rem; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.semaforo{width:12px; height:12px; border-radius:50%; display:inline-block; margin-right:8px; box-shadow:0 2px 6px rgba(0,0,0,0.06);}
+.semaforo.red{background:var(--red);} .semaforo.yellow{background:var(--yellow);} .semaforo.orange{background:var(--orange);} .semaforo.green{background:var(--green);}
+/* metrics */
+.metrics-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; flex:1;}
+.metric{background:#F3F4F6; border-radius:8px; padding:10px; display:flex; flex-direction:column; justify-content:center;}
+.metric .m-label{font-size:var(--font-sm); color:var(--muted); font-weight:700; text-transform:uppercase;}
+.metric .m-value{font-size:1.05rem; font-weight:900; margin-top:6px;}
+/* nav arrows */
+.nav-arrow{position:absolute; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:rgba(35,31,32,0.06); cursor:pointer; z-index:20;}
+.nav-left{left:6px;} .nav-right{right:6px;}
+/* Modal */
+.modal-overlay{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.42); backdrop-filter:blur(6px); z-index:160; padding:16px;}
+.modal-overlay.active{display:flex;}
+.modal{width:100%; max-width:980px; background:var(--white); border-radius:12px; box-shadow:var(--shadow-hover); max-height:86vh; display:flex; flex-direction:column; overflow:hidden;}
+.modal-head{padding:12px 16px; border-bottom:1px solid rgba(35,31,32,0.04); display:flex; justify-content:space-between; align-items:center; gap:12px;}
+.modal-body{padding:12px 16px; overflow:auto; -webkit-overflow-scrolling:touch;}
+.table-wrap{width:100%; overflow:auto;}
+table{width:100%; border-collapse:collapse; font-size:var(--font-md); min-width:720px;}
+th,td{padding:10px 12px; border-bottom:1px solid rgba(35,31,32,0.04); text-align:left; vertical-align:middle;}
+th{font-size:var(--font-sm); color:var(--muted); text-transform:uppercase;}
+.pill{padding:6px 8px; border-radius:8px; font-weight:800; display:inline-block;}
+.pill.red{background:rgba(255,107,107,0.08); color:var(--red); border:1px solid rgba(255,107,107,0.12);}
+.pill.yellow{background:rgba(246,200,95,0.08); color:var(--yellow); border:1px solid rgba(246,200,95,0.12);}
+.pill.orange{background:rgba(242,143,23,0.06); color:var(--orange); border:1px solid rgba(242,143,23,0.08);}
+.pill.green{background:rgba(46,204,113,0.06); color:var(--green); border:1px solid rgba(46,204,113,0.08);}
+/* buttons */
+.btn{background:var(--accent); color:var(--white); border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:800;}
+.btn.ghost{background:transparent; color:var(--muted); border:1px solid rgba(35,31,32,0.06);}
+/* responsive */
+@media (max-width:1000px){ .card-asesor{flex:0 0 300px; max-width:300px;} }
+@media (max-width:900px){ 
+  .header-actions { flex-wrap: wrap; justify-content: flex-start; }
+  .select-filter { max-width: 150px; font-size: 0.8rem; padding: 6px; }
+  header { height: auto; padding: 12px 18px; align-items: flex-start; flex-direction: column; gap: 12px; }
 }
-.tab-pane { display: none; animation: fadeIn 0.3s ease; }
-.tab-pane.active { display: block; }
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ==========================================================================
-   ESTILOS COMPARTIDOS
-   ========================================================================== */
-.card { background: var(--vento-white); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--vento-gray-light); margin-bottom: 24px; }
-.card-header { font-size: 18px; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--vento-gray-light); padding-bottom: 10px; }
-.input-box { position: relative; width: 100%; max-width: 600px; }
-.input-box i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--vento-gray-dark); font-size: 18px; }
-.input-box input { width: 100%; padding: 14px 20px 14px 50px; border: 2px solid var(--vento-gray-light); border-radius: var(--radius); font-size: 15px; font-weight: 500; font-family: inherit; outline: none; transition: all 0.3s ease; background: var(--vento-white); }
-.input-box input:focus { border-color: var(--vento-orange); box-shadow: 0 0 0 4px rgba(242, 143, 23, 0.15); }
-.badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; width: fit-content; text-transform: uppercase; }
-.badge-orange { background-color: var(--vento-orange); color: var(--vento-white); border: 1px solid var(--vento-orange-hover); }
-.badge-black { background-color: var(--vento-black); color: var(--vento-white); border: 1px solid var(--vento-black); }
-.badge-white { background-color: var(--vento-white); color: var(--vento-black); border: 1px solid var(--vento-gray-light); }
-.btn { background: var(--vento-orange); color: var(--vento-white); border: 0; cursor: pointer; font-weight: 700; padding: 12px 20px; border-radius: 8px; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-.btn:hover { background: var(--vento-orange-hover); transform: translateY(-1px); }
-.btn-black { background: var(--vento-black); color: var(--vento-white); }
-.btn-black:hover { background: #000; }
-.btn-outline { background: transparent; color: var(--vento-black); border: 2px solid var(--vento-black); }
-.loader-container { text-align: center; padding: 40px; color: var(--vento-black); font-weight: 700; font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
-.loader-container i { font-size: 32px; color: var(--vento-orange); }
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
-th { font-weight: 700; color: var(--vento-black); font-size: 13px; background: var(--vento-bg); text-transform: uppercase; }
-
-/* ==========================================================================
-   MODULOS ESPECIFICOS
-   ========================================================================== */
-/* Tab 1: Kiosco Agencias */
-#kiosco-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-.kiosco-card { background: var(--vento-white); border-radius: var(--radius); padding: 20px; border: 2px solid var(--vento-gray-light); cursor: pointer; transition: all 0.2s ease; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-.kiosco-card::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background-color: transparent; transition: background-color 0.2s ease; }
-.kiosco-card:hover { transform: translateY(-4px); border-color: var(--vento-black); box-shadow: var(--shadow-md); }
-.kiosco-card:hover::before { background-color: var(--vento-orange); }
-.kiosco-card .card-name { font-size: 16px; font-weight: 800; color: var(--vento-black); line-height: 1.3; margin-bottom: 12px; }
-.kiosco-card .data-label { font-size: 11px; text-transform: uppercase; color: var(--vento-gray-dark); font-weight: 700; margin-bottom: 4px; display: block; }
-
-/* Modal Tab 1 */
-.overlay-blur { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(26, 26, 26, 0.6); backdrop-filter: blur(6px); z-index: 999; display: none; opacity: 0; transition: opacity 0.3s ease; }
-.panel-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -48%) scale(0.96); width: 650px; max-width: 90vw; background: var(--vento-white); border-radius: 16px; box-shadow: var(--shadow-lg); border: 2px solid var(--vento-black); z-index: 1000; display: none; flex-direction: column; opacity: 0; transition: all 0.3s ease; }
-.panel-modal.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-.modal-header { padding: 20px 24px; display:flex; justify-content:space-between; align-items:flex-start; border-bottom: 2px solid var(--vento-black); background-color: var(--vento-bg); border-radius: 14px 14px 0 0; }
-.modal-close { background: var(--vento-white); border: 2px solid var(--vento-black); width: 32px; height: 32px; border-radius: 50%; color: var(--vento-black); font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.modal-close:hover { background: var(--vento-orange); color: var(--vento-white); }
-.modal-body { padding: 24px; max-height: 80vh; overflow-y: auto; }
-.input-vin { width: 100%; padding: 14px 16px; border-radius: 8px; border: 2px solid var(--vento-black); background: var(--vento-white); font-size: 15px; font-weight: 600; outline: none; margin-bottom: 10px; }
-.input-vin:focus { border-color: var(--vento-orange); }
-
-/* Tab 2: CESVE */
-.controls-grid { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field span { font-size: 12px; font-weight: 700; color: var(--vento-black); }
-.field input, .field select { width: 100%; border-radius: 6px; border: 2px solid var(--vento-gray-light); padding: 10px 14px; font-size: 13px; font-weight: 600; background: var(--vento-white); outline: none; }
-.field input:focus, .field select:focus { border-color: var(--vento-orange); }
-.results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; margin-top: 20px; }
-.result-card { background: var(--vento-white); border: 1px solid var(--vento-gray-light); border-radius: var(--radius); padding: 16px; border-left: 4px solid var(--vento-orange); box-shadow: var(--shadow-sm); }
-.result-title { margin: 0 0 4px 0; font-size: 15px; font-weight: 800; color: var(--vento-black); }
-.result-subtitle { margin: 0 0 12px 0; color: var(--vento-gray); font-size: 12px; font-style: italic; }
-.result-meta { font-size: 12px; border-top: 1px solid var(--vento-gray-light); padding-top: 8px; }
-
-/* Tab 3: Directorio */
-.dir-controls { display: flex; gap: 20px; background: var(--vento-bg); padding: 20px; border-radius: var(--radius); border-left: 4px solid var(--vento-orange); margin-bottom: 20px; }
-.role-supervisor { background: var(--vento-black); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-.role-asesor { background: var(--vento-orange); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-.dir-table-wrap { overflow-x: auto; background: var(--vento-white); border-radius: var(--radius); border: 1px solid var(--vento-gray-light); }
-.dir-table tr:hover { background: var(--vento-orange-light); cursor: pointer; }
-
-/* Tab 4: Calculadora */
-.calc-grid { display: grid; grid-template-columns: 1fr 300px; gap: 24px; align-items: start; }
-.calc-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-.kpi-container { display: flex; gap: 15px; margin-bottom: 20px; }
-.kpi-box { flex: 1; padding: 15px; border-radius: 8px; background: var(--vento-bg); border-left: 4px solid var(--vento-orange); }
-.status-pill { display: inline-block; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; }
-
-/* Utilidad para guardado local */
-.save-notification { position: fixed; bottom: 20px; right: 20px; background: var(--vento-black); color: var(--vento-white); padding: 15px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 2000; font-weight: 600; }
-.save-notification.show { transform: translateY(0); opacity: 1; }
-
+@media (max-width:700px){ .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));} .card-asesor{flex:0 0 260px; max-width:260px; min-height:180px;} .nav-arrow{display:none;} table{min-width:600px; font-size:0.9rem;} }
 </style>
 </head>
 <body>
-
-<!-- PANTALLA DE LOGIN -->
-<div id="login-view">
-  <div class="login-box">
-    <h1><i class="fa-solid fa-motorcycle" style="color: var(--vento-orange);"></i> VENTO Postventa</h1>
-    <p>Acceso exclusivo para personal autorizado</p>
-    
-    <!-- Configuración Google Identity Services -->
-    <!-- NOTA: Para producción, reemplazar client_id con el ID real de Google Cloud Console -->
-    <div id="g_id_onload"
-         data-client_id="TU_CLIENT_ID_DE_GOOGLE_AQUI.apps.googleusercontent.com"
-         data-context="signin"
-         data-ux_mode="popup"
-         data-callback="handleCredentialResponse"
-         data-auto_prompt="false">
-    </div>
-    <div class="g_id_signin"
-         data-type="standard"
-         data-shape="rectangular"
-         data-theme="outline"
-         data-text="signin_with"
-         data-size="large"
-         data-logo_alignment="left"
-         style="display: flex; justify-content: center;">
-    </div>
-    
-    <div class="dev-bypass" onclick="bypassLogin()">[Modo Desarrollador: Entrar sin cuenta]</div>
-  </div>
+<header id="appHeader">
+<div class="brand">
+<div class="logo">V</div>
+<h1>Vento — Muro ATC</h1>
 </div>
+<div class="header-actions">
+<!-- Controles de Filtros -->
+<select id="filterSupervisor" class="select-filter" onchange="onFilterChange('supervisor')" aria-label="Filtrar por Supervisor">
+  <option value="all">Todos los Supervisores</option>
+</select>
+<select id="filterAsesor" class="select-filter" onchange="onFilterChange('asesor')" aria-label="Filtrar por Asesor">
+  <option value="all">Todos los Asesores</option>
+</select>
 
-<!-- APLICACIÓN PRINCIPAL -->
-<div id="app-view">
-  
-  <header class="hub-header">
-    <div class="brand-wrapper">
-      <div class="brand-title">VENTO MOTORCYCLES U.S.A.</div>
-      <div class="hub-title"><i class="fa-solid fa-screwdriver-wrench"></i> Hub Postventa Central</div>
-    </div>
-    
-    <div class="user-profile">
-      <div id="global-clock" class="clock-display">00:00:00</div>
-      <div class="user-info">
-        <span id="user-name">Usuario</span>
-        <img id="user-avatar" src="https://ui-avatars.com/api/?name=Vento&background=F28F17&color=fff" alt="Avatar">
-      </div>
-      <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
-    </div>
-  </header>
-
-  <div class="main-layout">
-    
-    <!-- SIDEBAR -->
-    <nav class="sidebar">
-      <div class="nav-item active" onclick="switchTab('tab-agencias', this)">
-        <i class="fa-solid fa-store"></i> Kiosco Agencias
-      </div>
-      <div class="nav-item" onclick="switchTab('tab-cesve', this)">
-        <i class="fa-solid fa-map-location-dot"></i> Buscador CESVE
-      </div>
-      <div class="nav-item" onclick="switchTab('tab-directorio', this)">
-        <i class="fa-solid fa-address-book"></i> Directorio Personal
-      </div>
-      <div class="nav-item" onclick="switchTab('tab-calculadora', this)">
-        <i class="fa-solid fa-calculator"></i> Calc. Garantías
-      </div>
-      <div class="nav-item" onclick="switchTab('tab-historial', this)">
-        <i class="fa-solid fa-clock-rotate-left"></i> Mi Historial Local
-      </div>
-    </nav>
-
-    <!-- CONTENT AREA -->
-    <main class="content-area">
-      
-      <!-- ==========================================
-           TAB 1: KIOSCO AGENCIAS Y VIN
-           ========================================== -->
-      <div id="tab-agencias" class="tab-pane active">
-        <div class="card" style="display: flex; justify-content: center; background: transparent; border: none; box-shadow: none; padding: 0;">
-          <div class="input-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="kiosco-search" placeholder="Buscar agencia por nombre o ubicación..." onkeyup="tab1FiltrarKiosco()">
-          </div>
-        </div>
-        
-        <div id="kiosco-grid">
-          <div class="loader-container" id="kiosco-loader">
-            <i class="fa-solid fa-circle-notch fa-spin"></i>
-            Sincronizando base de Agencias y Proyecto S...
-          </div>
-        </div>
-      </div>
-
-      <!-- ==========================================
-           TAB 2: BUSCADOR CESVE
-           ========================================== -->
-      <div id="tab-cesve" class="tab-pane">
-        <div class="card controls-card">
-          <div class="controls-grid">
-            <label class="field">
-              <span>Buscar Texto Libre</span>
-              <input id="cesve-search" type="search" placeholder="Razón social, ciudad, correo o ID" />
-            </label>
-            <label class="field">
-              <span>Estado</span>
-              <select id="cesve-state" onchange="tab2ActualizarMunicipios()"><option value="">Todos los estados</option></select>
-            </label>
-            <label class="field">
-              <span>Municipio / Ciudad</span>
-              <select id="cesve-city"><option value="">Todas las ciudades</option></select>
-            </label>
-            <div class="field actions">
-              <button class="btn btn-black" onclick="tab2LimpiarFiltros()"><i class="fa-solid fa-filter-circle-xmark"></i> Limpiar</button>
-            </div>
-          </div>
-        </div>
-        <div id="cesve-loader" class="loader-container" style="display:none;">
-           <i class="fa-solid fa-spinner fa-spin"></i> Cargando base BD_CESVE...
-        </div>
-        <div id="cesve-results" class="results-grid"></div>
-      </div>
-
-      <!-- ==========================================
-           TAB 3: DIRECTORIO POST VENTA
-           ========================================== -->
-      <div id="tab-directorio" class="tab-pane">
-        <div class="dir-controls">
-          <div class="field" style="flex:1;">
-            <span>Seleccionar Área</span>
-            <select id="dir-area-select" onchange="tab3LoadData(this.value)">
-              <option value="ATENCION A CLIENTES">Atención a Clientes</option>
-              <option value="REPARACIONES TIENDAS">Reparaciones Tiendas</option>
-              <option value="REPARACIONES AGENCIAS">Reparaciones Agencias</option>
-              <option value="ARMADOS Y ACTIVADOS">Armados y Activados</option>
-              <option value="GARANTIAS">Garantías</option>
-              <option value="REGIONALES">Regionales</option>
-            </select>
-          </div>
-          <div class="field" style="flex:2;">
-            <span>Buscar persona, correo o rol</span>
-            <input type="text" id="dir-search" placeholder="Ej. Asesor, Juan..." onkeyup="tab3ApplyFilter()">
-          </div>
-        </div>
-        
-        <div id="dir-loader" class="loader-container" style="display:none;">
-           <i class="fa-solid fa-spinner fa-spin"></i> Consultando Directorio...
-        </div>
-        
-        <div class="dir-table-wrap">
-          <table class="dir-table" id="dir-table" style="display:none;">
-            <thead id="dir-thead"></thead>
-            <tbody id="dir-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- ==========================================
-           TAB 4: CALCULADORA GARANTÍAS
-           ========================================== -->
-      <div id="tab-calculadora" class="tab-pane">
-        <div class="card calc-panel">
-          <div class="field">
-            <span>Fecha de Factura</span>
-            <input id="calc-fecha" type="date" />
-          </div>
-          <div class="field">
-            <span>Kilometraje Actual</span>
-            <input id="calc-km" type="number" min="0" value="0" />
-          </div>
-          <div class="field">
-             <span>Distancia al CESVE (km)</span>
-             <input id="calc-dist" type="number" min="0" value="0" placeholder="Para tolerancia automática" />
-          </div>
-          <div style="display:flex; gap:10px; align-items:flex-end;">
-            <button class="btn" onclick="tab4Calcular()"><i class="fa-solid fa-calculator"></i> Calcular</button>
-            <button class="btn btn-outline" onclick="tab4Limpiar()"><i class="fa-solid fa-trash-can"></i></button>
-          </div>
-        </div>
-        
-        <div class="calc-grid">
-          <div class="card">
-            <div class="kpi-container">
-              <div class="kpi-box">
-                <div style="font-size:11px; font-weight:700; color:var(--vento-gray);">DICTAMEN GENERAL</div>
-                <div id="calc-badge" class="status-pill" style="margin-top:8px; background:var(--vento-gray-light);">Pendiente</div>
-              </div>
-              <div class="kpi-box">
-                <div style="font-size:11px; font-weight:700; color:var(--vento-gray);">TOLERANCIA APLICADA</div>
-                <div id="calc-tol" style="margin-top:8px; font-weight:700;">—</div>
-              </div>
-            </div>
-            <div style="overflow-x:auto;">
-              <table id="calc-table">
-                <thead><tr><th>#</th><th>Km Límite</th><th>Meses</th><th>Fecha Límite</th><th>Estatus</th></tr></thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-          
-          <div class="card" style="height: fit-content;">
-            <h3 style="margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px;">Resumen</h3>
-            <div id="calc-resumen" style="font-size:13px; line-height:1.6; color:var(--vento-gray-dark);">
-              Ingresa los datos para generar el dictamen.
-            </div>
-            <button class="btn btn-black" style="width:100%; margin-top:20px;" onclick="guardarHistorialLocal()"><i class="fa-solid fa-floppy-disk"></i> Guardar en Historial</button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- ==========================================
-           TAB 5: HISTORIAL LOCAL (Guardado)
-           ========================================== -->
-      <div id="tab-historial" class="tab-pane">
-        <div class="card">
-          <div class="card-header">
-             <i class="fa-solid fa-clock-rotate-left" style="color:var(--vento-orange);"></i> Dictámenes Guardados Localmente
-          </div>
-          <p style="font-size:13px; color:var(--vento-gray);">Esta información se guarda en tu navegador de forma privada (LocalStorage).</p>
-          <div style="overflow-x:auto;">
-             <table id="historial-table">
-                <thead>
-                   <tr><th>Fecha de Guardado</th><th>Tipo</th><th>Detalle</th><th>Acción</th></tr>
-                </thead>
-                <tbody></tbody>
-             </table>
-          </div>
-          <button class="btn btn-outline" style="margin-top:20px;" onclick="limpiarHistorial()"><i class="fa-solid fa-trash"></i> Borrar Todo el Historial</button>
-        </div>
-      </div>
-
-    </main>
-  </div>
+<div id="dbTimestamp" style="font-size:0.9rem; color:var(--muted)">Última actualización: —</div>
+<button class="btn ghost" onclick="fetchData()" aria-label="Refrescar datos">Refrescar</button>
+<button class="btn" onclick="abrirModalPorMetrica('totales_global')" aria-label="Resumen general">Resumen</button>
 </div>
-
-<!-- ==========================================
-     MODAL KIOSCO (Tab 1)
-     ========================================== -->
-<div class="overlay-blur" id="kiosco-overlay" onclick="tab1CerrarModal()"></div>
-<div class="panel-modal" id="kiosco-modal">
-  <div class="modal-header">
-    <div>
-      <div id="kiosco-modal-badge"></div>
-      <div id="kiosco-modal-title" style="font-size:20px; font-weight:800; margin-top:10px;">Agencia</div>
-    </div>
-    <button class="modal-close" onclick="tab1CerrarModal()"><i class="fa-solid fa-xmark"></i></button>
-  </div>
-  <div class="modal-body">
-    <div class="field" style="margin-bottom:20px;">
-      <span>Origen de Armado</span>
-      <select id="kiosco-select-armado" class="input-vin" onchange="tab1EvaluarDictamen()">
-        <option value="SIN">Sin Registro (Mantiene Base)</option>
-        <option value="CEDIS">CEDIS</option>
-        <option value="CESVE">CESVE</option>
-      </select>
-    </div>
-    
-    <div style="background:var(--vento-bg); padding:15px; border-radius:8px; border:1px dashed var(--vento-gray); margin-bottom:20px;">
-      <span style="font-size:11px; font-weight:700;">ACCIÓN BASE CALCULADA</span>
-      <div id="kiosco-accion-base" style="margin-top:5px;"></div>
-    </div>
-    
-    <div class="field" style="margin-bottom:20px;">
-      <span>Validación de VIN (Proyecto S)</span>
-      <input type="text" id="kiosco-input-vin" class="input-vin" placeholder="Ingresa 17 caracteres..." onkeyup="tab1EvaluarDictamen()" maxlength="17">
-    </div>
-    
-    <div id="kiosco-resultado" style="padding:15px; border-radius:8px; border:1px solid var(--vento-gray-light); display:none; margin-bottom:20px;"></div>
-    
-    <div style="display:flex; gap:10px;">
-       <button id="kiosco-btn-cap" class="btn" style="flex:1;" onclick="tab1CopiarCaptura()"><i class="fa-solid fa-camera"></i> Copiar Dictamen</button>
-       <button class="btn btn-black" onclick="guardarHistorialLocal('Agencia: ' + document.getElementById('kiosco-modal-title').innerText + ' | VIN: ' + document.getElementById('kiosco-input-vin').value)"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
-    </div>
-  </div>
+</header>
+<div id="topArea" class="top-fixed" role="region" aria-label="Indicadores principales">
+<div class="kpi-grid" id="kpiGrid">
+<div class="kpi" id="kpiTotal" onclick="abrirModalPorMetrica('totales_global')" role="button" tabindex="0">
+<div class="label">Tickets Totales</div>
+<div class="value" id="kpiTotalGlobal">0</div>
+<div class="meta">Bandeja activa</div>
 </div>
-
-<!-- Notificación Flotante -->
-<div id="toast-notify" class="save-notification">
-  <i class="fa-solid fa-circle-check" style="color:#4ade80;"></i> <span id="toast-msg">Guardado correctamente</span>
+<div class="kpi en-tiempo" id="kpiEnTiempoCard" onclick="abrirModalPorMetrica('en_tiempo')" role="button" tabindex="0">
+<div class="label">En Tiempo</div>
+<div class="value" id="kpiEnTiempo">0</div>
+<div class="meta">Pending tocados hoy + Open ≤4h</div>
 </div>
-
+<div class="kpi pendiente" id="kpiPendientesCard" onclick="abrirModalPorMetrica('pendientes_stocar')" role="button" tabindex="0">
+<div class="label">Pendientes s/Tocar</div>
+<div class="value" id="kpiPendientesSTocar">0</div>
+<div class="meta">Pending 12–24h (sin-tocar)</div>
+</div>
+<div class="kpi preventivo" id="kpiPreventivosCard" onclick="abrirModalPorMetrica('preventivos')" role="button" tabindex="0">
+<div class="label">Preventivos</div>
+<div class="value" id="kpiPreventivos">0</div>
+<div class="meta">Open 4–24h</div>
+</div>
+<div class="kpi urgente" id="kpiUrgentesCard" onclick="abrirModalPorMetrica('urgentes')" role="button" tabindex="0">
+<div class="label">Urgentes</div>
+<div class="value" id="kpiUrgentesTotal">0</div>
+<div class="meta">Open >24h, Pending ≥24h, creado >72h</div>
+</div>
+</div>
+</div>
+<main class="main" id="mainContent" role="main">
+<div class="matrix-title">Seguimiento por Asesor</div>
+<div class="grid-asesores-wrap" style="position:relative;">
+<div class="nav-arrow nav-left" id="navLeft" title="Desplazar a la izquierda" onclick="scrollGrid('left')" aria-hidden="true">‹</div>
+<div class="grid-asesores" id="gridMosaicos" tabindex="0" role="region" aria-label="Tarjetas de asesores, desplázalas horizontalmente"></div>
+<div class="nav-arrow nav-right" id="navRight" title="Desplazar a la derecha" onclick="scrollGrid('right')" aria-hidden="true">›</div>
+</div>
+<div style="height:24px"></div>
+</main>
+<div class="modal-overlay" id="modalDetalles" onclick="cerrarModalExterno(event)">
+<div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+<div class="modal-head">
+<div><h3 id="modalTitle" style="margin:0; font-size:1rem;">Desglose</h3></div>
+<div style="display:flex; gap:8px; align-items:center;">
+<button class="btn" onclick="enviarWhatsAppDesdeModal()" aria-label="Enviar resumen por WhatsApp">Enviar por WA</button>
+<button class="btn ghost" onclick="cerrarModal()" aria-label="Cerrar modal">Cerrar</button>
+</div>
+</div>
+<div class="modal-body">
+<div class="table-wrap">
+<table aria-describedby="modalTitle">
+<thead>
+<tr>
+<th>Asesor</th><th>ID</th><th>Estatus</th><th>Creación</th><th>Última Act.</th><th>Edad</th><th>Clasificación</th>
+</tr>
+</thead>
+<tbody id="modalTablaCuerpo"></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
 <script>
-/* ==========================================================================
-   LOGICA GLOBAL Y NAVEGACIÓN
-   ========================================================================== */
-// Reloj Global
-setInterval(() => { 
-  document.getElementById('global-clock').innerText = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); 
-}, 1000);
+/* ============================
+Configuraciones y umbrales
+============================ */
+const PENDING_WARNING_MIN_HOURS = 12;
+const PENDING_URGENT_HOURS = 24; 
 
-// Sistema de Login (Bypass / Google Simple)
-function bypassLogin() {
-  document.getElementById('login-view').style.display = 'none';
-  document.getElementById('app-view').style.display = 'block';
-  document.getElementById('user-name').innerText = "Desarrollador";
-  initApp();
-}
+/* Fuentes de datos Tickets */
+const SHEET_ID = '1JBre4cLAbYiOJuYye_FGcsk5U_BIStDoAiCbV-B8WoA';
+const querySQLTickets = encodeURIComponent("SELECT A, B, C, F, G, I, Z");
+const URL_TICKETS = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Tickets_BD&tq=${querySQLTickets}`;
+const TICKET_BASE_URL = 'https://ayuda.vento.com/a/tickets/';
+const GRUPOS_VALIDOS = ['ATC','AMERICAN PISTON (ATC)','American Piston (ATC)'];
 
-function handleCredentialResponse(response) {
-  // Decode JWT Simple (solo para visualización cliente)
-  const responsePayload = JSON.parse(atob(response.credential.split('.')[1]));
-  document.getElementById('login-view').style.display = 'none';
-  document.getElementById('app-view').style.display = 'block';
-  document.getElementById('user-name').innerText = responsePayload.given_name;
-  document.getElementById('user-avatar').src = responsePayload.picture;
-  initApp();
-}
+/* Fuentes de datos Mapeo Jerarquía */
+const SHEET_MAPPING_ID = '1GBcoYjw-mziCA30F2CgqGM9kKWjJjeSiTGfHN6XM8rE';
+const querySQLMapping = encodeURIComponent("SELECT D, C");
+const URL_MAPPING = `https://docs.google.com/spreadsheets/d/${SHEET_MAPPING_ID}/gviz/tq?tqx=out:json&sheet=Asesores&tq=${querySQLMapping}`;
 
-function logout() {
-  document.getElementById('app-view').style.display = 'none';
-  document.getElementById('login-view').style.display = 'flex';
-}
+/* Variables Globales */
+let rawData = [];
+let dataFiltradaGlobal = []; 
+let relacionAsesores = []; 
+let ultimaActualizacionBase = '—';
+let asesorActivoModal = 'all';
+let _fetchLock = false;
 
-// Navegación por Pestañas y Lazy Loading
-let loadedTabs = { tab1: false, tab2: false, tab3: false, tab4: true, tab5: false };
-
-function switchTab(tabId, el) {
-  document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
-  el.classList.add('active');
-
-  // Lazy Load
-  if (tabId === 'tab-agencias' && !loadedTabs.tab1) { tab1Init(); loadedTabs.tab1 = true; }
-  if (tabId === 'tab-cesve' && !loadedTabs.tab2) { tab2Init(); loadedTabs.tab2 = true; }
-  if (tabId === 'tab-directorio' && !loadedTabs.tab3) { tab3LoadData('ATENCION A CLIENTES'); loadedTabs.tab3 = true; }
-  if (tabId === 'tab-historial') { renderHistorial(); }
-}
-
-function initApp() {
-  // Cargar tab 1 por defecto
-  if(!loadedTabs.tab1) { tab1Init(); loadedTabs.tab1 = true; }
-  renderHistorial();
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast-notify');
-  document.getElementById('toast-msg').innerText = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-/* ==========================================================================
-   TAB 1: KIOSCO AGENCIAS Y PROYECTO S (Source 1)
-   ========================================================================== */
-const tab1_sheetId = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY';
-let tab1_cacheAgencias = [];
-let tab1_cacheSeries = [];
-let tab1_agenciaActiva = null;
-
-async function tab1Init() {
-  try {
-    const pAg = fetch(`https://docs.google.com/spreadsheets/d/${tab1_sheetId}/gviz/tq?tqx=out:csv&sheet=Agencias`).then(r=>r.text());
-    const pSe = fetch(`https://docs.google.com/spreadsheets/d/${tab1_sheetId}/gviz/tq?tqx=out:csv&sheet=Proyecto+S`).then(r=>r.text());
-    const [csvAg, csvSe] = await Promise.all([pAg, pSe]);
-    
-    Papa.parse(csvAg, { complete: (res) => tab1ProcesarAg(res.data) });
-    Papa.parse(csvSe, { complete: (res) => tab1ProcesarSe(res.data) });
-    
-    document.getElementById('kiosco-loader').style.display = 'none';
-  } catch(e) {
-    console.error(e);
-    document.getElementById('kiosco-loader').innerHTML = '<span style="color:red">Error al cargar bases.</span>';
-  }
-}
-
-function tab1ProcesarAg(data) {
-  tab1_cacheAgencias = [];
-  for(let i=1; i<data.length; i++) {
-    const row = data[i];
-    if(!row || row.length < 2 || !row[1]) continue;
-    tab1_cacheAgencias.push({
-      nombre: row[1].trim(),
-      accion: row[13] ? row[13].trim() : 'No especificada',
-      puede: row[14] ? row[14].trim().toUpperCase() : 'NO'
-    });
-  }
-  tab1RenderGrid(tab1_cacheAgencias);
-}
-
-function tab1ProcesarSe(data) {
-  tab1_cacheSeries = [];
-  for(let i=1; i<data.length; i++) {
-    const row = data[i];
-    if(!row || row.length < 6 || !row[5]) continue;
-    tab1_cacheSeries.push({
-      vin: row[5].trim().toLowerCase(),
-      originalVin: row[5].trim(),
-      modelo: row[3] ? row[3].trim() : '',
-      fecha: row[7] ? row[7].trim() : '',
-      accion: row[11] ? row[11].trim() : ''
-    });
-  }
-}
-
-function tab1RenderGrid(list) {
-  const container = document.getElementById('kiosco-grid');
-  container.innerHTML = '';
-  if(list.length === 0) {
-    container.innerHTML = `<div style="grid-column:1/-1; padding:30px; text-align:center; background:var(--vento-white); border-radius:8px;">No se encontró agencia. Las de reciente apertura PASAN COMO GARANTÍA.</div>`;
-    return;
-  }
-  list.forEach(ag => {
-    const div = document.createElement('div');
-    div.className = 'kiosco-card';
-    
-    let classAccion = ag.accion.toUpperCase().includes('GARANTIA') ? 'badge-black' : (ag.accion.toUpperCase().includes('CHECK LIST') ? 'badge-orange' : 'badge-white');
-    let classKit = ag.puede === 'SI' ? 'badge-orange' : 'badge-black';
-    let txtKit = ag.puede === 'SI' ? 'Sin Kit Herramientas' : 'Con Kit Herramientas';
-
-    div.innerHTML = `
-      <div class="card-name">${ag.nombre}</div>
-      <div style="margin-top:auto; display:flex; flex-direction:column; gap:8px;">
-        <div><span class="data-label">Acción DB:</span><span class="badge ${classAccion}">${ag.accion}</span></div>
-        <div><span class="badge ${classKit}">${txtKit}</span></div>
-      </div>
-    `;
-    div.onclick = () => { tab1_agenciaActiva = ag; tab1AbrirModal(); };
-    container.appendChild(div);
-  });
-}
-
-function tab1FiltrarKiosco() {
-  const q = document.getElementById('kiosco-search').value.toLowerCase();
-  const f = tab1_cacheAgencias.filter(a => a.nombre.toLowerCase().includes(q));
-  tab1RenderGrid(f);
-}
-
-function tab1AbrirModal() {
-  if(!tab1_agenciaActiva) return;
-  document.getElementById('kiosco-modal-title').innerText = tab1_agenciaActiva.nombre;
-  
-  let classKit = tab1_agenciaActiva.puede === 'SI' ? 'badge-orange' : 'badge-black';
-  let txtKit = tab1_agenciaActiva.puede === 'SI' ? 'Sin Kit' : 'Con Kit';
-  document.getElementById('kiosco-modal-badge').innerHTML = `<span class="badge ${classKit}">${txtKit}</span>`;
-  
-  document.getElementById('kiosco-select-armado').value = 'SIN';
-  document.getElementById('kiosco-input-vin').value = '';
-  document.getElementById('kiosco-resultado').style.display = 'none';
-  
-  tab1EvaluarDictamen();
-  
-  document.getElementById('kiosco-overlay').style.display = 'block';
-  const modal = document.getElementById('kiosco-modal');
-  modal.style.display = 'flex';
-  setTimeout(() => { document.getElementById('kiosco-overlay').style.opacity = '1'; modal.classList.add('show'); }, 10);
-}
-
-function tab1CerrarModal() {
-  document.getElementById('kiosco-overlay').style.opacity = '0';
-  document.getElementById('kiosco-modal').classList.remove('show');
-  setTimeout(() => { document.getElementById('kiosco-overlay').style.display = 'none'; document.getElementById('kiosco-modal').style.display = 'none'; }, 300);
-}
-
-function tab1EvaluarDictamen() {
-  const armado = document.getElementById('kiosco-select-armado').value;
-  let accionCalc = tab1_agenciaActiva.accion;
-  if (armado === 'CEDIS') accionCalc = 'SE REQUIERE CHECK LIST';
-  if (armado === 'CESVE') accionCalc = 'PASA COMO GARANTIA';
-  
-  let classAcc = accionCalc.toUpperCase().includes('GARANTIA') ? 'badge-black' : 'badge-orange';
-  document.getElementById('kiosco-accion-base').innerHTML = `<span class="badge ${classAcc}">${accionCalc}</span>`;
-  
-  const vin = document.getElementById('kiosco-input-vin').value.replace(/[^a-zA-Z0-9]/g,'').toLowerCase();
-  const resBox = document.getElementById('kiosco-resultado');
-  
-  if(vin.length === 0) { resBox.style.display = 'none'; return; }
-  resBox.style.display = 'block';
-  
-  if(vin.length < 17) {
-    resBox.innerHTML = `<span style="color:var(--vento-orange); font-weight:bold;">VIN Incompleto (Faltan ${17-vin.length})</span>`;
-    return;
-  }
-  
-  const reg = tab1_cacheSeries.find(s => s.vin === vin || s.vin.includes(vin));
-  let finalAcc = accionCalc;
-  let html = '';
-  
-  if(reg) {
-    finalAcc = reg.accion || 'N/A';
-    html = `<div style="font-size:12px; margin-bottom:10px; color:var(--vento-gray-dark);">Localizado en Proyecto S: ${reg.modelo} | ${reg.fecha}</div>`;
-  } else {
-    html = `<div style="font-size:12px; margin-bottom:10px; color:var(--vento-gray-dark);">No localizado en Proyecto S. Se respeta agencia.</div>`;
-  }
-  
-  let st = finalAcc.toUpperCase().includes('GARANTIA') ? 'background:var(--vento-black); color:white;' : 'background:var(--vento-orange); color:white;';
-  resBox.innerHTML = html + `<div style="padding:10px; border-radius:6px; font-weight:800; text-align:center; ${st}">${finalAcc}</div>`;
-}
-
-async function tab1CopiarCaptura() {
-  const modal = document.getElementById('kiosco-modal');
-  const btn = document.getElementById('kiosco-btn-cap');
-  const origText = btn.innerHTML;
-  btn.innerHTML = 'Copiando...';
-  
-  try {
-    const canvas = await html2canvas(modal, { scale: 1.5, ignoreElements: (el) => el.tagName === 'BUTTON' });
-    canvas.toBlob(async (blob) => {
-      try {
-        await navigator.clipboard.write([new ClipboardItem({"image/png": blob})]);
-        btn.innerHTML = '¡Copiado!';
-        showToast("Imagen del dictamen copiada al portapapeles.");
-      } catch(e) {
-        const link = document.createElement('a'); link.download = 'Dictamen.png'; link.href = canvas.toDataURL(); link.click();
-        btn.innerHTML = 'Descargado';
-      }
-      setTimeout(()=> btn.innerHTML = origText, 2000);
-    });
-  } catch(e) { btn.innerHTML = origText; }
-}
-
-/* ==========================================================================
-   TAB 2: BUSCADOR CESVE (Source 2)
-   ========================================================================== */
-const tab2_API = 'https://script.google.com/macros/s/AKfycbxwd8h8xKt9oLwcaIHRmrESBSzVqnF6FKdQNHQYQKsXRPqDEJxSdzGSr50orA6TEOqjbQ/exec';
-let tab2_rows = [];
-let tab2_states = [];
-
-async function tab2Init() {
-  document.getElementById('cesve-loader').style.display = 'flex';
-  try {
-    const response = await fetch(`${tab2_API}?_=${Date.now()}`);
-    const json = await response.json();
-    tab2_rows = json.map(r => {
-      const search = [r['ID CESVE'], r['RAZON SOCIAL'], r['NOMBRE COMERCIAL'], r['CIUDAD / MUNICIPIO'], r['ESTADO'], r['MAIL']].filter(Boolean).join(' ').toLowerCase();
-      return { ...r, searchable: search };
-    });
-    tab2_states = [...new Set(tab2_rows.map(r => r['ESTADO']).filter(Boolean))].sort();
-    
-    const sel = document.getElementById('cesve-state');
-    tab2_states.forEach(s => { const opt = document.createElement('option'); opt.value = s; opt.innerText = s; sel.appendChild(opt); });
-    
-    tab2Filtrar();
-  } catch(e) {
-    document.getElementById('cesve-results').innerHTML = '<div style="color:red">Error cargando API CESVE</div>';
-  }
-  document.getElementById('cesve-loader').style.display = 'none';
-  
-  document.getElementById('cesve-search').addEventListener('input', tab2Filtrar);
-  document.getElementById('cesve-city').addEventListener('change', tab2Filtrar);
-}
-
-function tab2ActualizarMunicipios() {
-  const est = document.getElementById('cesve-state').value.toLowerCase();
-  const sel = document.getElementById('cesve-city');
-  sel.innerHTML = '<option value="">Todas las ciudades</option>';
-  
-  const munis = [...new Set(tab2_rows.filter(r => !est || r['ESTADO'].toLowerCase() === est).map(r => r['CIUDAD / MUNICIPIO']).filter(Boolean))].sort();
-  munis.forEach(m => { const opt = document.createElement('option'); opt.value = m; opt.innerText = m; sel.appendChild(opt); });
-  
-  tab2Filtrar();
-}
-
-function tab2Filtrar() {
-  const q = document.getElementById('cesve-search').value.toLowerCase();
-  const est = document.getElementById('cesve-state').value.toLowerCase();
-  const cit = document.getElementById('cesve-city').value.toLowerCase();
-  
-  const f = tab2_rows.filter(r => {
-    return (!q || r.searchable.includes(q)) && 
-           (!est || r['ESTADO'].toLowerCase() === est) && 
-           (!cit || r['CIUDAD / MUNICIPIO'].toLowerCase() === cit);
-  });
-  
-  tab2Render(f);
-}
-
-function tab2LimpiarFiltros() {
-  document.getElementById('cesve-search').value = '';
-  document.getElementById('cesve-state').value = '';
-  tab2ActualizarMunicipios();
-}
-
-function tab2Render(list) {
-  const cont = document.getElementById('cesve-results');
-  cont.innerHTML = '';
-  if(list.length === 0) { cont.innerHTML = '<div>No hay resultados</div>'; return; }
-  
-  // Renderizar máximo 50 para evitar lag
-  list.slice(0, 50).forEach(r => {
-    const div = document.createElement('div');
-    div.className = 'result-card';
-    div.innerHTML = `
-      <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-        <span style="font-size:11px; font-weight:bold; color:var(--vento-gray);">ID: ${r['ID CESVE'] || 'N/A'}</span>
-        <span class="badge badge-white" style="font-size:10px;">${r['ESTADO'] || ''}</span>
-      </div>
-      <h2 class="result-title">${r['RAZON SOCIAL'] || r['NOMBRE COMERCIAL'] || 'Sin Nombre'}</h2>
-      <p class="result-subtitle">${r['NOMBRE COMERCIAL'] || ''}</p>
-      
-      <div class="result-meta">
-        <p style="margin:4px 0;"><strong>Dir:</strong> ${r['CALLE'] || ''} ${r['COLONIA'] || ''}</p>
-        <p style="margin:4px 0;"><strong>Tel:</strong> ${r['TELEFONO'] || r['CELULAR'] || 'N/A'}</p>
-        <p style="margin:4px 0;"><strong>Reg:</strong> ${r['REGIONAL VENTO'] || 'N/A'}</p>
-      </div>
-      <div style="margin-top:10px; display:flex; justify-content:flex-end;">
-         <button class="btn btn-outline" style="padding:4px 8px; font-size:11px;" onclick="guardarHistorialLocal('Consulta CESVE: ${r['RAZON SOCIAL']} (ID: ${r['ID CESVE']})')"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
-      </div>
-    `;
-    cont.appendChild(div);
-  });
-}
-
-/* ==========================================================================
-   TAB 3: DIRECTORIO POST VENTA (Source 3)
-   ========================================================================== */
-const tab3_sheetId = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
-let tab3_currentData = [];
-let tab3_headers = [];
-
-function tab3LoadData(sheetName) {
-  document.getElementById('dir-loader').style.display = 'flex';
-  document.getElementById('dir-table').style.display = 'none';
-  document.getElementById('dir-search').value = '';
-  
-  const url = `https://docs.google.com/spreadsheets/d/${tab3_sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-  Papa.parse(url, {
-    download: true, header: false, skipEmptyLines: true,
-    complete: function(res) {
-      let raw = res.data || [];
-      // Fill merged cells simplistic approach
-      for(let col=0; col<Math.max(...raw.map(r=>r.length)); col++){
-        let last='';
-        for(let row=0; row<raw.length; row++) {
-          if(raw[row][col] && raw[row][col].trim()!=='') last = raw[row][col];
-          else raw[row][col] = last;
-        }
-      }
-      
-      // Find header
-      let hIdx = 0;
-      for(let i=0; i<Math.min(10, raw.length); i++){
-        const j = raw[i].join('').toUpperCase();
-        if(j.includes('NOMBRE') || j.includes('CORREO') || j.includes('PUESTO')){ hIdx=i; break; }
-      }
-      
-      tab3_headers = raw[hIdx].map(h=>h.trim());
-      // Fix empty headers
-      for(let i=0;i<tab3_headers.length;i++){ if(!tab3_headers[i] && i>0) tab3_headers[i]=tab3_headers[i-1]; }
-      
-      tab3_currentData = [];
-      for(let r=hIdx+1; r<raw.length; r++) {
-        let obj = {};
-        for(let c=0; c<tab3_headers.length; c++) {
-          let k = tab3_headers[c];
-          if(!k) continue;
-          let v = raw[r][c] ? raw[r][c].trim() : '';
-          obj[k] = obj[k] ? obj[k] + (v ? ', '+v : '') : v;
-        }
-        // Basic filter
-        if(Object.values(obj).some(v=>v!=='')) tab3_currentData.push(obj);
-      }
-      tab3Render(tab3_currentData);
-      document.getElementById('dir-loader').style.display = 'none';
-      document.getElementById('dir-table').style.display = 'table';
+/* ============================
+Utilidades de fecha y parseo
+============================ */
+const utils = {
+  parseDateTime(txt){
+    if(!txt) return null;
+    const s = txt.toString().trim();
+    const iso = new Date(s);
+    if(!isNaN(iso.getTime())) return iso;
+    const parts = s.split(' ');
+    const datePart = (parts[0] || '').replace(/\//g,'-');
+    const timePart = parts.slice(1).join(' ') || '00:00';
+    const f = datePart.split('-');
+    if(f.length !== 3) return null;
+    let y,m,d;
+    if(f[0].length === 4){ y = parseInt(f[0],10); m = parseInt(f[1],10)-1; d = parseInt(f[2],10); }
+    else { d = parseInt(f[0],10); m = parseInt(f[1],10)-1; y = parseInt(f[2],10); }
+    let hh = 0, mm = 0;
+    const clean = timePart.replace(/\./g,':').trim();
+    const ampm = /am|pm/i.test(clean);
+    const hp = clean.split(':');
+    if(hp.length >= 1){ hh = parseInt(hp[0].replace(/\D/g,'')) || 0; mm = parseInt((hp[1]||'0').replace(/\D/g,'')) || 0; }
+    if(ampm){
+      const isPM = /pm/i.test(clean);
+      if(isPM && hh < 12) hh += 12;
+      if(!isPM && hh === 12) hh = 0;
     }
-  });
+    return new Date(y,m,d,hh,mm,0);
+  },
+  parseDate(txt){
+    if(!txt) return null;
+    const clean = txt.toString().trim().split(' ')[0].replace(/\//g,'-');
+    const p = clean.split('-');
+    if(p.length !== 3) return null;
+    if(p[0].length === 4) return new Date(parseInt(p[0],10), parseInt(p[1],10)-1, parseInt(p[2],10));
+    return new Date(parseInt(p[2],10), parseInt(p[1],10)-1, parseInt(p[0],10));
+  },
+  daysBetween(a,b){
+    if(!a||!b) return 0;
+    const start = new Date(a); start.setHours(0,0,0,0);
+    const end = new Date(b); end.setHours(0,0,0,0);
+    return Math.floor((end.getTime() - start.getTime()) / 86400000);
+  },
+  hoursBetween(a,b){
+    if(!a||!b) return 0;
+    return Math.floor(((new Date(b)).getTime() - (new Date(a)).getTime()) / (1000*60*60));
+  }
+};
+
+/* ============================
+Clasificación de tickets 
+============================ */
+function clasificarTicketObj(ticket, ahora = new Date()){
+  const creado = utils.parseDateTime(ticket.fechaCreacionStr) || utils.parseDate(ticket.fechaCreacionStr);
+  const ultima = utils.parseDateTime(ticket.fechaActualizacionStr) || utils.parseDate(ticket.fechaActualizacionStr);
+  const horasDesdeCreacion = creado ? utils.hoursBetween(creado, ahora) : Infinity;
+  const horasDesdeUltAct = ultima ? utils.hoursBetween(ultima, ahora) : Infinity;
+  const estatus = (ticket.estado || '').toString().trim().toLowerCase();
+  const grupo = (ticket.grupo || '').toString().trim();
+  if(!GRUPOS_VALIDOS.includes(grupo)) return { categoria: 'fuera-scope', razon: 'grupo no ATC' };
+  if(estatus === 'closed') return { categoria: 'exclude', razon: 'closed' };
+  
+  if (creado && horasDesdeCreacion > 72) return { categoria: 'urgente', razon: 'creado > 72h' };
+  if(estatus === 'open'){
+    if(horasDesdeCreacion >= 24) return { categoria: 'urgente', razon: 'open >= 24h' };
+    if(horasDesdeCreacion >= 4 && horasDesdeCreacion < 24) return { categoria: 'preventivo', razon: 'open 4-24h' };
+    if(horasDesdeCreacion <= 4) return { categoria: 'en-tiempo', razon: 'open <=4h' };
+  }
+  if(estatus === 'pending'){
+    if(horasDesdeUltAct >= PENDING_URGENT_HOURS){
+      return { categoria: 'urgente', razon: `pending sin actualizar >= ${PENDING_URGENT_HOURS}h` };
+    }
+    if(horasDesdeUltAct >= PENDING_WARNING_MIN_HOURS && horasDesdeUltAct < PENDING_URGENT_HOURS){
+      return { categoria: 'sin-tocar', razon: `pending sin actualizar ${PENDING_WARNING_MIN_HOURS}-${PENDING_URGENT_HOURS}h` };
+    }
+    return { categoria: 'en-tiempo', razon: `pending tocado < ${PENDING_WARNING_MIN_HOURS}h` };
+  }
+  return { categoria: 'en-tiempo', razon: 'en-tiempo' };
 }
 
-function tab3Render(list) {
-  const th = document.getElementById('dir-thead');
-  const tb = document.getElementById('dir-tbody');
+/* ============================
+Manejo de Filtros y Mapping
+============================ */
+async function fetchMapping() {
+  try {
+    const res = await fetch(URL_MAPPING);
+    const text = await res.text();
+    const json = JSON.parse(text.substr(47).slice(0,-2));
+    const rows = json.table.rows || [];
+    
+    relacionAsesores = rows.map(row => {
+      if (!row || !row.c) return null;
+      const asesor = row.c[0] ? (row.c[0].f || row.c[0].v || '').toString().trim() : '';
+      const supervisor = row.c[1] ? (row.c[1].f || row.c[1].v || '').toString().trim() : '';
+      if (!asesor || asesor.toLowerCase() === 'supervisor') return null; 
+      return { asesor, supervisor };
+    }).filter(x => x !== null);
+    
+    poblarFiltros();
+  } catch(e) {
+    console.error("Error al cargar mapping de asesores", e);
+  }
+}
+
+function poblarFiltros() {
+  const selectSup = document.getElementById('filterSupervisor');
+  const valSup = selectSup.value;
   
-  const uniqHeaders = [...new Set(tab3_headers.filter(h=>h))];
-  th.innerHTML = '<tr>' + uniqHeaders.map(h => `<th>${h}</th>`).join('') + '</tr>';
+  const supervisores = [...new Set(relacionAsesores.map(r => r.supervisor).filter(Boolean))].sort();
+  selectSup.innerHTML = '<option value="all">Todos los Supervisores</option>';
+  supervisores.forEach(sup => {
+    const opt = document.createElement('option');
+    opt.value = sup;
+    opt.text = sup;
+    selectSup.appendChild(opt);
+  });
   
-  tb.innerHTML = list.map(row => {
-    let tr = '<tr>';
-    uniqHeaders.forEach(h => {
-      let v = row[h] || '';
-      if (h.toUpperCase().includes('ROL') || h.toUpperCase().includes('PUESTO')) {
-        let rc = v.toLowerCase().includes('superv') ? 'role-supervisor' : 'role-asesor';
-        v = `<span class="${rc}">${v}</span>`;
+  if (valSup && supervisores.includes(valSup)) { selectSup.value = valSup; }
+  actualizarFiltroAsesores(false);
+}
+
+function actualizarFiltroAsesores(dispararUpdate = true) {
+  const selectSup = document.getElementById('filterSupervisor');
+  const selectAse = document.getElementById('filterAsesor');
+  const valAse = selectAse.value;
+  const supSeleccionado = selectSup.value;
+  
+  let filtrados = relacionAsesores;
+  if (supSeleccionado !== 'all') {
+    filtrados = relacionAsesores.filter(r => r.supervisor === supSeleccionado);
+  }
+  
+  const asesores = [...new Set(filtrados.map(r => r.asesor).filter(Boolean))].sort();
+  selectAse.innerHTML = '<option value="all">Todos los Asesores</option>';
+  asesores.forEach(ase => {
+    const opt = document.createElement('option');
+    opt.value = ase;
+    opt.text = ase;
+    selectAse.appendChild(opt);
+  });
+  
+  if (valAse && asesores.includes(valAse)) { selectAse.value = valAse; }
+  if (dispararUpdate) { updateDashboard(); }
+}
+
+function onFilterChange(tipo) {
+  if (tipo === 'supervisor') {
+    actualizarFiltroAsesores(true);
+  } else {
+    updateDashboard();
+  }
+}
+
+/* ============================
+Configuración de API Freshdesk
+============================ */
+const API_KEY = '5oM3UkoeFNmWN35pK4M';
+const FRESH_DOMAIN = 'ayuda.vento.com';
+const TICKET_BASE_URL = `https://${FRESH_DOMAIN}/a/tickets/`;
+const GRUPOS_VALIDOS = ['ATC','AMERICAN PISTON (ATC)','American Piston (ATC)'];
+
+// Autenticación HTTP Basic requerida por Freshdesk (API_KEY : X)
+const AUTH_HEADER = 'Basic ' + btoa(`${API_KEY}:X`);
+
+/* ============================
+Fetch de Tickets desde la API
+============================ */
+async function fetchData(){
+  if(_fetchLock) return;
+  _fetchLock = true;
+  try{
+    document.getElementById('dbTimestamp').innerText = 'Actualizando...';
+    
+    // Consultamos tickets abiertos y pendientes (hasta 100 registros)
+    const urlAPI = `https://${FRESH_DOMAIN}/api/v2/tickets?filter=new_and_my_open&per_page=100`;
+    
+    const res = await fetch(urlAPI, {
+      method: 'GET',
+      headers: {
+        'Authorization': AUTH_HEADER,
+        'Content-Type': 'application/json'
       }
-      tr += `<td>${v}</td>`;
     });
-    return tr + '</tr>';
-  }).join('');
+
+    if(!res.ok) throw new Error(`Error en la API Freshdesk: ${res.status}`);
+
+    const tickets = await res.json();
+    const ahora = new Date();
+    ultimaActualizacionBase = ahora.toLocaleTimeString();
+
+    // Mapeo del JSON numérico de Freshdesk al formato del Dashboard
+    const estatusMap = { 2: 'open', 3: 'pending', 4: 'resolved', 5: 'closed' };
+
+    rawData = tickets.map(t => {
+      const ticketID = t.id ? t.id.toString() : '';
+      const estatusTxt = estatusMap[t.status] || 'open';
+      
+      // Excluir cerrados o resueltos
+      if(estatusTxt === 'closed' || estatusTxt === 'resolved') return null;
+
+      const fechaCreacionTxt = t.created_at || '';
+      const fechaActualizacionTxt = t.updated_at || '';
+      
+      // La API devuelve responder_id (ID numérico del agente)
+      const nombreAsesor = t.responder_id ? `Agente ID ${t.responder_id}` : 'Sin Asesor';
+      const grupo = 'ATC'; // O mapear según t.group_id
+
+      const fechaCreacionObjFull = utils.parseDateTime(fechaCreacionTxt) || new Date(fechaCreacionTxt);
+      const fechaActObjFull = utils.parseDateTime(fechaActualizacionTxt) || new Date(fechaActualizacionTxt);
+      
+      const horasEdad = utils.hoursBetween(fechaCreacionObjFull, ahora);
+      const diasEdad = utils.daysBetween(fechaCreacionObjFull, ahora);
+      const horasUltAct = utils.hoursBetween(fechaActObjFull, ahora);
+      const diasUltAct = utils.daysBetween(fechaActObjFull, ahora);
+
+      const cls = clasificarTicketObj({
+        grupo: grupo,
+        estado: estatusTxt,
+        fechaCreacionStr: fechaCreacionTxt,
+        fechaActualizacionStr: fechaActualizacionTxt
+      }, ahora);
+
+      return {
+        ticket: ticketID,
+        asesor: nombreAsesor,
+        grupo: grupo,
+        fechaCreacionStr: fechaCreacionTxt,
+        fechaActualizacionStr: fechaActualizacionTxt,
+        estado: estatusTxt,
+        diasEdad: diasEdad,
+        horasEdad: horasEdad,
+        horasUltAct: horasUltAct,
+        diasUltAct: diasUltAct,
+        categoria: cls.categoria,
+        razon: cls.razon
+      };
+    }).filter(x => x !== null);
+
+    updateDashboard();
+    document.getElementById('dbTimestamp').innerText = `Última actualización: ${ultimaActualizacionBase}`;
+    requestAnimationFrame(() => setTimeout(ajustarAnchoTarjetas, 20));
+
+  } catch(e){
+    console.error("Error al obtener datos:", e);
+    document.getElementById('dbTimestamp').innerText = 'Error al conectar con la API';
+  } finally {
+    _fetchLock = false;
+  }
+}
+/* ============================
+Render del dashboard 
+============================ */
+function animateCount(id, target){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const start = parseInt(el.innerText.replace(/\D/g,'')) || 0;
+  const duration = 600;
+  const stepTime = 30;
+  const steps = Math.ceil(duration / stepTime);
+  let i = 0;
+  const delta = (target - start) / steps;
+  let current = start;
+  const t = setInterval(()=> {
+    i++;
+    current = Math.round(start + delta * i);
+    el.innerText = current;
+    if(i >= steps){ clearInterval(t); el.innerText = target; }
+  }, stepTime);
 }
 
-function tab3ApplyFilter() {
-  const q = document.getElementById('dir-search').value.toLowerCase();
-  const f = tab3_currentData.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(q)));
-  tab3Render(f);
-}
+function updateDashboard(){
+  const supSeleccionado = document.getElementById('filterSupervisor').value;
+  const aseSeleccionado = document.getElementById('filterAsesor').value;
 
-/* ==========================================================================
-   TAB 4: CALCULADORA GARANTÍAS (Source 4)
-   ========================================================================== */
-const tab4_SERVICES = [
-  {num:1, km:300, m:1},{num:2, km:2000, m:3},{num:3, km:4000, m:6},
-  {num:4, km:6000, m:9},{num:5, km:9000, m:12},{num:6, km:12000, m:15},
-  {num:7, km:15000, m:18},{num:8, km:18000, m:21},{num:9, km:21000, m:24},
-  {num:10, km:24000, m:27},{num:11, km:27000, m:30},{num:12, km:30000, m:33}
-];
-
-function tab4Limpiar() {
-  document.getElementById('calc-fecha').value = '';
-  document.getElementById('calc-km').value = '0';
-  document.getElementById('calc-dist').value = '0';
-  document.querySelector('#calc-table tbody').innerHTML = '';
-  document.getElementById('calc-resumen').innerHTML = 'Ingresa los datos para generar el dictamen.';
-  document.getElementById('calc-badge').innerHTML = 'Pendiente';
-  document.getElementById('calc-badge').style.background = 'var(--vento-gray-light)';
-  document.getElementById('calc-badge').style.color = 'var(--vento-black)';
-  document.getElementById('calc-tol').innerText = '—';
-}
-
-function tab4Calcular() {
-  const f = document.getElementById('calc-fecha').value;
-  const km = Number(document.getElementById('calc-km').value || 0);
-  const dist = Number(document.getElementById('calc-dist').value || 0);
-  
-  if(!f) { alert("Ingresa fecha de factura"); return; }
-  
-  let toleranceDays = dist > 10 ? 5 : 0;
-  let toleranceKm = dist > 10 ? 50 : 0;
-  document.getElementById('calc-tol').innerText = dist > 10 ? '5 días / 50 km' : 'Sin tolerancia (0)';
-  
-  const invD = new Date(f + "T00:00:00");
-  const today = new Date();
-  
-  let isVoided = false;
-  let summaryReasons = [];
-  let tb = '';
-  
-  tab4_SERVICES.forEach(s => {
-    let limitDate = new Date(invD);
-    limitDate.setMonth(limitDate.getMonth() + s.m);
-    
-    // Add tolerance
-    let limitDateTol = new Date(limitDate);
-    limitDateTol.setDate(limitDateTol.getDate() + toleranceDays);
-    let limitKmTol = s.km + toleranceKm;
-    
-    let reqDate = today >= limitDate;
-    let reqKm = km >= s.km;
-    
-    if(!reqDate && !reqKm) return; // No toca
-    
-    let stat = 'OK (A Tiempo)';
-    let badgeClass = 'badge-orange'; // asume bien temporalmente
-    
-    // Simplificación de lógica para este hub: si se pasó del km o fecha con tolerancia, pierde
-    if (km > limitKmTol) { stat = `Excedido Km (Lím: ${limitKmTol})`; badgeClass = 'badge-black'; isVoided = true; summaryReasons.push(`Servicio ${s.num}: Excedió km permitido.`); }
-    if (today > limitDateTol) { stat = `Excedido Fecha (Lím: ${limitDateTol.toLocaleDateString()})`; badgeClass = 'badge-black'; isVoided = true; summaryReasons.push(`Servicio ${s.num}: Fuera de tiempo.`); }
-    
-    tb += `<tr>
-      <td><b>${s.num}</b></td>
-      <td>${s.km} km</td>
-      <td>${s.m} mes(es)</td>
-      <td>${limitDate.toLocaleDateString()}</td>
-      <td><span class="badge ${badgeClass}">${stat}</span></td>
-    </tr>`;
+  const asesorASupervisor = {};
+  relacionAsesores.forEach(r => {
+    const norm = r.asesor.toUpperCase().trim();
+    asesorASupervisor[norm] = r.supervisor;
   });
-  
-  document.querySelector('#calc-table tbody').innerHTML = tb;
-  
-  if(tb === '') {
-     document.querySelector('#calc-table tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;">No requiere servicios aún por tiempo ni por kilometraje.</td></tr>';
-  }
 
-  const badge = document.getElementById('calc-badge');
-  const resu = document.getElementById('calc-resumen');
-  if(isVoided) {
-    badge.innerText = "NO PROCEDENTE";
-    badge.style.background = "var(--vento-black)";
-    badge.style.color = "var(--vento-white)";
-    resu.innerHTML = `<span style="color:red; font-weight:bold;">Garantía Invalidada.</span><br><ul style="margin-top:10px; padding-left:20px;">${summaryReasons.map(r=>`<li>${r}</li>`).join('')}</ul>`;
-  } else {
-    badge.innerText = "PROCEDENTE (VIGENTE)";
-    badge.style.background = "var(--vento-orange)";
-    badge.style.color = "var(--vento-white)";
-    resu.innerHTML = `<span style="color:green; font-weight:bold;">Servicios en regla.</span> La garantía sigue vigente bajo los parámetros de tiempo y kilometraje actuales.`;
-  }
+  dataFiltradaGlobal = rawData.filter(d => {
+    const asNorm = (d.asesor || 'Sin Asesor').toUpperCase().trim();
+    const supNorm = asesorASupervisor[asNorm] || 'Sin Supervisor';
+    
+    let pasaSupervisor = true;
+    let pasaAsesor = true;
+    
+    if (supSeleccionado !== 'all') { pasaSupervisor = (supNorm === supSeleccionado); }
+    if (aseSeleccionado !== 'all') { pasaAsesor = (asNorm === aseSeleccionado.toUpperCase().trim()); }
+    
+    return pasaSupervisor && pasaAsesor;
+  });
+
+  let cTotales = 0, cEnTiempo = 0, cPendientesSTocar = 0, cPreventivos = 0, cUrgentes = 0;
+  const mapeoAsesores = {};
+  
+  dataFiltradaGlobal.forEach(d => {
+    cTotales++;
+    const asesorKey = (d.asesor || 'Sin Asesor').toString().trim().replace(/\s+/g,' ').toLowerCase();
+    if(!mapeoAsesores[asesorKey]) {
+      mapeoAsesores[asesorKey] = {
+        nombreDisplay: (d.asesor || 'Sin Asesor').toString().trim(),
+        urgentes: 0, pendientes: 0, preventivos: 0, totales: 0, enTiempo: 0
+      };
+    }
+    const asObj = mapeoAsesores[asesorKey];
+    asObj.totales++;
+    if(d.categoria === 'urgente'){ cUrgentes++; asObj.urgentes++; }
+    else if(d.categoria === 'preventivo'){ cPreventivos++; asObj.preventivos++; }
+    else if(d.categoria === 'sin-tocar'){ cPendientesSTocar++; asObj.pendientes++; }
+    else if(d.categoria === 'en-tiempo'){ cEnTiempo++; asObj.enTiempo++; }
+  });
+
+  animateCount('kpiTotalGlobal', cTotales);
+  animateCount('kpiEnTiempo', cEnTiempo);
+  animateCount('kpiPendientesSTocar', cPendientesSTocar);
+  animateCount('kpiPreventivos', cPreventivos);
+  animateCount('kpiUrgentesTotal', cUrgentes);
+  
+  document.getElementById('kpiEnTiempoCard').classList.add('en-tiempo');
+  document.getElementById('kpiPreventivosCard').classList.add('preventivo');
+  document.getElementById('kpiPendientesCard').classList.add('pendiente');
+  document.getElementById('kpiUrgentesCard').classList.add('urgente');
+  
+  const grid = document.getElementById('gridMosaicos');
+  grid.innerHTML = '';
+  const lista = Object.values(mapeoAsesores).sort((a,b) => b.urgentes - a.urgentes || b.pendientes - a.pendientes || b.preventivos - a.preventivos);
+  
+  lista.forEach(as => {
+    const displayName = as.nombreDisplay;
+    let semClass = 'green';
+    let pillClass = 'green';
+    if(as.urgentes > 0){ semClass = 'red'; pillClass = 'red'; }
+    else if(as.preventivos > 0){ semClass = 'yellow'; pillClass = 'yellow'; }
+    else if(as.pendientes > 0){ semClass = 'orange'; pillClass = 'orange'; }
+    const div = document.createElement('div');
+    div.className = 'card-asesor';
+    div.setAttribute('onclick', `abrirModalAsesor('${displayName.replace(/'/g,"\\'")}')`);
+    div.setAttribute('role','button');
+    div.setAttribute('tabindex','0');
+    div.innerHTML = `
+      <div class="card-row">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="semaforo ${semClass}" aria-hidden="true"></span>
+          <h4 title="${displayName}">${displayName}</h4>
+        </div>
+        <div class="pill ${pillClass}">${as.urgentes>0 ? 'Atención' : (as.pendientes>0 ? 'Seguimiento' : (as.preventivos>0 ? 'Preventivo' : 'OK'))}</div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric"><div class="m-label">Total</div><div class="m-value">${as.totales}</div></div>
+        <div class="metric"><div class="m-label">En tiempo</div><div class="m-value" style="color:${as.enTiempo>0?'var(--green)':'var(--black)'}">${as.enTiempo}</div></div>
+        <div class="metric"><div class="m-label">Pendientes s/Tocar</div><div class="m-value" style="color:${as.pendientes>0?'var(--orange)':'var(--black)'}">${as.pendientes}</div></div>
+        <div class="metric"><div class="m-label">Preventivos</div><div class="m-value" style="color:${as.preventivos>0?'var(--yellow)':'var(--black)'}">${as.preventivos}</div></div>
+        <div class="metric" style="grid-column:span 2;"><div class="m-label">Urgentes</div><div class="m-value" style="color:${as.urgentes>0?'var(--red)':'var(--black)'}">${as.urgentes}</div></div>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+  requestAnimationFrame(() => setTimeout(ajustarAnchoTarjetas, 20));
 }
 
-/* ==========================================================================
-   TAB 5: LOCAL STORAGE HISTORIAL
-   ========================================================================== */
-function guardarHistorialLocal(customText) {
-  let hist = JSON.parse(localStorage.getItem('vento_historial') || '[]');
-  
-  let item = { date: new Date().toLocaleString(), type: 'General', detail: '' };
-  
-  // Inferir si viene de calculo o string
-  if (customText) {
-    item.type = 'Consulta Guardada';
-    item.detail = customText;
-  } else {
-    const badge = document.getElementById('calc-badge').innerText;
-    const km = document.getElementById('calc-km').value;
-    const f = document.getElementById('calc-fecha').value;
-    if(!f) { showToast("Nada que guardar."); return; }
-    item.type = 'Dictamen Garantía';
-    item.detail = `Fact: ${f} | Km: ${km} | Estatus: ${badge}`;
-  }
-  
-  hist.unshift(item); // prepend
-  if (hist.length > 50) hist.pop(); // keep last 50
-  
-  localStorage.setItem('vento_historial', JSON.stringify(hist));
-  showToast("Información guardada en tu historial local.");
-  if (loadedTabs.tab5) renderHistorial(); // Refresca si está abierta
-}
-
-function renderHistorial() {
-  loadedTabs.tab5 = true;
-  let hist = JSON.parse(localStorage.getItem('vento_historial') || '[]');
-  let tb = document.querySelector('#historial-table tbody');
-  if (hist.length === 0) {
-    tb.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay registros locales.</td></tr>';
+/* ============================
+Ajustes visuales
+============================ */
+function ajustarAnchoTarjetas(){
+  const grid = document.getElementById('gridMosaicos');
+  if(!grid) return;
+  const gap = parseFloat(getComputedStyle(grid).gap) || 12;
+  const wrap = grid.parentElement;
+  const leftArrow = document.querySelector('.nav-left');
+  const rightArrow = document.querySelector('.nav-right');
+  const arrowSpace = ((leftArrow && leftArrow.offsetWidth) ? (leftArrow.offsetWidth + 12) : 0) + ((rightArrow && rightArrow.offsetWidth) ? (rightArrow.offsetWidth + 12) : 0);
+  const wrapWidth = Math.max( wrap.clientWidth - arrowSpace, 360 ); 
+  const cardWidth = Math.floor((wrapWidth - (gap * 2)) / 3);
+  const cards = Array.from(grid.querySelectorAll('.card-asesor')).filter(c => c.offsetParent !== null);
+  if(cards.length === 0){
+    grid.style.setProperty('--computed-card-width', cardWidth + 'px');
     return;
   }
-  tb.innerHTML = hist.map((h, i) => `
-    <tr>
-      <td>${h.date}</td>
-      <td><span class="badge badge-white">${h.type}</span></td>
-      <td style="font-weight:600;">${h.detail}</td>
-      <td><button class="btn btn-outline" style="padding:4px 8px; font-size:11px; border:none;" onclick="borrarItem(${i})"><i class="fa-solid fa-trash-can" style="color:var(--red);"></i></button></td>
-    </tr>
-  `).join('');
+  cards.forEach(c => {
+    c.style.flex = `0 0 ${cardWidth}px`;
+    c.style.maxWidth = `${cardWidth}px`;
+  });
+}
+function scrollGrid(direction){
+  const grid = document.getElementById('gridMosaicos');
+  if(!grid) return;
+  const card = grid.querySelector('.card-asesor');
+  if(!card) return;
+  const gap = parseFloat(getComputedStyle(grid).gap) || 12;
+  const cardWidth = card.getBoundingClientRect().width;
+  const scrollAmount = Math.round((cardWidth + gap) * 3);
+  const left = direction === 'right' ? scrollAmount : -scrollAmount;
+  grid.scrollBy({ left, behavior: 'smooth' });
 }
 
-function borrarItem(idx) {
-  let hist = JSON.parse(localStorage.getItem('vento_historial') || '[]');
-  hist.splice(idx, 1);
-  localStorage.setItem('vento_historial', JSON.stringify(hist));
-  renderHistorial();
-  showToast("Elemento eliminado.");
-}
-
-function limpiarHistorial() {
-  if(confirm("¿Seguro que deseas borrar TODO tu historial local?")) {
-    localStorage.removeItem('vento_historial');
-    renderHistorial();
-    showToast("Historial borrado completo.");
+document.addEventListener('keydown', (e) => {
+  const active = document.activeElement;
+  if(active && active.id === 'gridMosaicos'){
+    if(e.key === 'ArrowRight') { e.preventDefault(); scrollGrid('right'); }
+    if(e.key === 'ArrowLeft') { e.preventDefault(); scrollGrid('left'); }
   }
+});
+
+function ajustarLayoutFijo(){
+  const header = document.getElementById('appHeader');
+  const top = document.getElementById('topArea');
+  const headerH = header ? header.getBoundingClientRect().height : 64;
+  const topH = top ? top.getBoundingClientRect().height : 160;
+  document.documentElement.style.setProperty('--header-h', headerH + 'px');
+  document.documentElement.style.setProperty('--top-h', topH + 'px');
+  ajustarAnchoTarjetas();
 }
 
+window.addEventListener('load', () => {
+  ajustarLayoutFijo();
+  const grid = document.getElementById('gridMosaicos');
+  if(grid) grid.setAttribute('tabindex','0');
+  
+  fetchMapping().then(() => {
+    fetchData();
+  });
+});
+window.addEventListener('resize', ajustarLayoutFijo);
+
+/* ============================
+Modal y tabla
+============================ */
+function abrirModalAsesor(nombre){
+  asesorActivoModal = nombre;
+  document.getElementById('modalTitle').innerText = `Auditoría: ${nombre}`;
+  const tickets = dataFiltradaGlobal.filter(x => x.asesor === nombre);
+  construirTablaModal(tickets);
+  document.getElementById('modalDetalles').classList.add('active');
+}
+
+function abrirModalPorMetrica(tipo){
+  asesorActivoModal = 'all';
+  let tk = [];
+  if(tipo === 'totales_global') tk = [...dataFiltradaGlobal];
+  else if(tipo === 'en_tiempo') tk = dataFiltradaGlobal.filter(x => x.categoria === 'en-tiempo');
+  else if(tipo === 'pendientes_stocar') tk = dataFiltradaGlobal.filter(x => x.categoria === 'sin-tocar');
+  else if(tipo === 'preventivos') tk = dataFiltradaGlobal.filter(x => x.categoria === 'preventivo');
+  else if(tipo === 'urgentes') tk = dataFiltradaGlobal.filter(x => x.categoria === 'urgente');
+  document.getElementById('modalTitle').innerText = tipo === 'totales_global' ? 'Todos los tickets' : `Listado - ${tipo}`;
+  construirTablaModal(tk);
+  document.getElementById('modalDetalles').classList.add('active');
+}
+
+function cerrarModal(){ document.getElementById('modalDetalles').classList.remove('active'); }
+function cerrarModalExterno(e){ if(e.target.id === 'modalDetalles') cerrarModal(); }
+
+function construirTablaModal(lista){
+  const tbody = document.getElementById('modalTablaCuerpo');
+  tbody.innerHTML = '';
+  if(!Array.isArray(lista)) lista = [];
+  if(lista.length === 0){
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; font-weight:800; color:var(--green)">✨ Cero folios en este segmento.</td></tr>`;
+    return;
+  }
+  const prioridad = { 'urgente': 1, 'sin-tocar': 2, 'preventivo': 3, 'en-tiempo': 4 };
+  lista.sort((a, b) => {
+    const pa = prioridad[a.categoria] || 99;
+    const pb = prioridad[b.categoria] || 99;
+    if (pa !== pb) return pa - pb;
+    return (b.horasEdad || 0) - (a.horasEdad || 0);
+  });
+  lista.forEach(t => {
+    let pillClass = 'green';
+    if(t.categoria === 'urgente') pillClass = 'red';
+    else if(t.categoria === 'preventivo') pillClass = 'yellow';
+    else if(t.categoria === 'sin-tocar') pillClass = 'orange';
+    else if(t.categoria === 'en-tiempo') pillClass = 'green';
+    const badge = `<span class="pill ${pillClass}">${t.categoria.toUpperCase()}</span>`;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${t.asesor}</strong></td>
+      <td><a href="${TICKET_BASE_URL}${encodeURIComponent(t.ticket)}" target="_blank" rel="noopener">#${t.ticket}</a></td>
+      <td>${t.estado}</td>
+      <td><small>${t.fechaCreacionStr || '-'}</small></td>
+      <td><small>${t.fechaActualizacionStr || '-'}</small></td>
+      <td style="font-weight:900; color:${t.diasEdad>=4?'var(--orange)':'var(--black)'}">${t.diasEdad} d.</td>
+      <td>${badge} <div style="font-size:0.72rem; color:var(--muted); margin-top:6px;">${t.razon || ''}</div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ============================
+Resúmenes y WA
+============================ */
+function generarResumenPorAsesor(nombre){
+  const tickets = dataFiltradaGlobal.filter(x => x.asesor === nombre);
+  const urg = tickets.filter(t => t.categoria === 'urgente').length;
+  const prev = tickets.filter(t => t.categoria === 'preventivo').length;
+  const pend = tickets.filter(t => t.categoria === 'sin-tocar').length;
+  const enTiempo = tickets.filter(t => t.categoria === 'en-tiempo').length;
+  
+  let msj = `*Resumen de Operación: ${nombre}*\n`;
+  msj += `Tickets Totales: ${tickets.length}\n`;
+  msj += `\u{1F534} Urgentes: ${urg}\n`;
+  msj += `\u{1F7E1} Preventivos: ${prev}\n`;
+  msj += `\u{1F7E0} Pendientes s/Tocar: ${pend}\n`;
+  msj += `\u{1F7E2} En tiempo: ${enTiempo}\n`;
+  return msj;
+}
+
+function enviarWhatsAppDesdeModal(){
+  let msj = '';
+  if(asesorActivoModal && asesorActivoModal !== 'all'){
+    msj = generarResumenPorAsesor(asesorActivoModal);
+  } else {
+    const urg = dataFiltradaGlobal.filter(t => t.categoria === 'urgente').length;
+    const prev = dataFiltradaGlobal.filter(t => t.categoria === 'preventivo').length;
+    const pend = dataFiltradaGlobal.filter(t => t.categoria === 'sin-tocar').length;
+    const enTiempo = dataFiltradaGlobal.filter(t => t.categoria === 'en-tiempo').length;
+    msj = `*Resumen General ATC*\n`;
+    msj += `Tickets Totales: ${dataFiltradaGlobal.length}\n`;
+    msj += `\u{1F534} Urgentes: ${urg}\n`;
+    msj += `\u{1F7E1} Preventivos: ${prev}\n`;
+    msj += `\u{1F7E0} Pendientes s/Tocar: ${pend}\n`;
+    msj += `\u{1F7E2} En tiempo: ${enTiempo}\n`;
+  }
+  
+  // Usamos el endpoint API oficial de WhatsApp para garantizar compatibilidad de caracteres
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msj)}`;
+  window.open(url, '_blank');
+}
 </script>
 </body>
 </html>
