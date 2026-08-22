@@ -1,427 +1,739 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Centro de Mandos ATC — Portal</title>
-<!-- Tipografía y FontAwesome institucional -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta Agencias - Vento Postventa</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Librería para capturas de pantalla -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 /* 
   ESTÁNDARES INSTITUCIONALES VENTO
+  Tipografía: Inter
   Colores Estrictos: Negro, Blanco y Naranja
 */
 :root {
   --vento-white: #FFFFFF;
-  --vento-bg: #F8F9FA;
-  --vento-black: #1A1A1A;
-  --vento-gray-dark: #4B5563;
-  --vento-gray-light: #E5E7EB;
+  --vento-black: #000000;
   --vento-orange: #F28F17;
   --vento-orange-hover: #D97D11;
   
-  --radius: 12px;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.35);
-  --widget-width: 360px;
-  --widget-height: 540px;
-  --widget-collapsed-size: 64px;
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --radius: 12px;
 }
-*{box-sizing:border-box}
-html,body{
-  height:100%; margin:0; 
-  background-color: var(--vento-bg);
-  font-family: 'Inter', system-ui, sans-serif; 
+body { 
+  font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+  background-color: var(--vento-white); 
+  margin: 0; 
+  padding: 0; 
+  color: var(--vento-black); 
+  font-size: 15px; 
+}
+/* Layout Principal */
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px;
+}
+/* Encabezado */
+.hub-header { 
+  background-color: var(--vento-white); 
+  padding: 20px 30px; 
+  border-bottom: 4px solid var(--vento-black); 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.brand-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+.brand-title { 
+  font-size: 13px; 
+  font-weight: 800; 
+  color: var(--vento-black); 
+  letter-spacing: 1px;
+  text-transform: uppercase; 
+  margin-bottom: 4px;
+}
+.hub-title { 
+  font-size: 24px; 
+  font-weight: 700; 
   color: var(--vento-black);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.app{height:100vh; display:flex; flex-direction:column}
-
-/* Iframe full area */
-.frame-wrap{flex:1; display:block}
-.frame{width:100%; height:100vh; border:0; display:block; background:var(--vento-white)}
-
-/* Widget fijo inferior derecho */
-.widget {
-  position:fixed;
-  right:24px; bottom:24px;
-  width:var(--widget-width); height:var(--widget-height);
-  border-radius:var(--radius);
-  background: var(--vento-black);
-  border: 2px solid var(--vento-gray-dark);
-  color: var(--vento-white);
-  box-shadow:var(--shadow-lg);
-  display:flex; flex-direction:column;
-  overflow:hidden; z-index:9999;
-  transition: all .22s ease;
+.hub-title i {
+  color: var(--vento-orange);
 }
-.widget-header{
-  display:flex; align-items:center; justify-content:space-between; 
-  padding:16px; border-bottom:2px solid #333;
+.clock-display {
+  font-size: 15px; 
+  font-weight: 600; 
+  color: var(--vento-black);
+  background: var(--vento-white);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid var(--vento-black);
 }
-.widget-title{display:flex; align-items:center; gap:12px; width: 100%;}
-.widget-title .logo{
-  width:44px; height:44px; border-radius:10px; 
-  background: var(--vento-orange); 
-  display:flex; align-items:center; justify-content:center; 
-  font-weight:700; color:var(--vento-white); font-size: 24px;
+/* Buscador Moderno */
+.search-section { 
+  margin: 30px 0; 
+  display: flex;
+  justify-content: center;
 }
-.widget-title h4{margin:0; font-size:1rem; font-weight: 700; letter-spacing: 0.5px;}
-.widget-controls{display:flex; gap:8px; align-items:center}
-.widget-controls .close-icon{
-  width:32px; height:32px; border-radius:8px; background:transparent; 
-  border: 2px solid var(--vento-gray-dark);
-  display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700;
-  transition: all 0.2s;
+.input-box {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
 }
-.widget-controls .close-icon:hover{
-  background: var(--vento-white); color: var(--vento-black); border-color: var(--vento-white);
+.input-box i {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--vento-black);
+  font-size: 18px;
 }
-
-.widget-body{padding:16px; overflow:auto; flex:1}
-.menu-item{
-  display:flex; justify-content:space-between; align-items:center; 
-  padding:12px; border-radius:8px; background:transparent; 
-  color:var(--vento-gray-light); cursor:pointer; margin-bottom:8px; 
-  border:2px solid transparent; font-weight: 500; font-size: 14px;
-  transition: all 0.2s;
+.input-box input { 
+  width: 100%;
+  padding: 16px 20px 16px 50px; 
+  border: 2px solid var(--vento-black); 
+  border-radius: var(--radius); 
+  font-size: 16px; 
+  font-weight: 500;
+  font-family: inherit;
+  box-sizing: border-box;
+  outline: none; 
+  transition: all 0.3s ease; 
+  background: var(--vento-white);
+  box-shadow: var(--shadow-sm);
 }
-.menu-item i { font-size: 16px; color: var(--vento-gray-dark); }
-.menu-item:hover{
-  background: #2a2a2a; border-color: #444; color: var(--vento-white);
+.input-box input:focus { 
+  border-color: var(--vento-orange); 
+  box-shadow: 0 0 0 4px rgba(242, 143, 23, 0.15);
 }
-.menu-item:hover i { color: var(--vento-orange); }
-.menu-item.active{
-  background: var(--vento-orange); color: var(--vento-white); 
-  font-weight:700; border-color: var(--vento-orange-hover);
+/* Grid de Tarjetas */
+#kiosco-container { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+  gap: 20px; 
+  position: relative;
 }
-.menu-item.active i { color: var(--vento-white); }
-
-.widget-footer{
-  padding:12px 16px; border-top:2px solid #333; font-size:0.82rem; 
-  color:var(--vento-gray-dark); display:flex; justify-content:space-between; align-items:center;
-  font-weight: 600; text-transform: uppercase;
-}
-
-/* WIDGET COLAPSADO */
-.widget.collapsed {
-  width: var(--widget-collapsed-size) !important;
-  height: var(--widget-collapsed-size) !important;
-  border-radius: 50% !important;
-  background: transparent !important; 
-  border: none !important;
-  box-shadow: none !important; 
-  padding: 0 !important;
-  overflow: visible !important;
-}
-.widget.collapsed .widget-header { border: none !important; padding: 0 !important; height: 100%; justify-content: center; }
-.widget.collapsed .widget-title { justify-content: center; gap: 0; }
-.widget.collapsed .logo {
-  width: 64px !important; height: 64px !important; border-radius: 50% !important; 
-  background: var(--vento-orange) !important; font-size: 32px !important; cursor: pointer;
-  box-shadow: 0 4px 12px rgba(242, 143, 23, 0.4) !important;
-}
-.widget.collapsed .widget-title > div:not(.logo),
-.widget.collapsed .widget-controls,
-.widget.collapsed .widget-body,
-.widget.collapsed .widget-footer { display: none !important; }
-
-/* MODAL DE BÚSQUEDA UNIVERSAL DE VIN */
-.overlay-blur {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(26, 26, 26, 0.7); backdrop-filter: blur(5px); z-index: 10000;
-  justify-content: center; align-items: center;
-}
-.panel-modal {
-  background-color: var(--vento-white); border: 2px solid var(--vento-black);
-  border-radius: 16px; width: 90%; max-width: 450px; padding: 0;
-  box-shadow: var(--shadow-lg); position: relative; color: var(--vento-black);
+.kiosco-card { 
+  background: var(--vento-white); 
+  border-radius: var(--radius); 
+  padding: 24px; 
+  border: 2px solid var(--vento-black); 
+  cursor: pointer; 
+  transition: all 0.2s ease; 
+  display: flex; 
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  position: relative;
   overflow: hidden;
 }
-.modal-header {
-  padding: 20px 24px; border-bottom: 2px solid var(--vento-black);
-  background: var(--vento-bg); display: flex; justify-content: space-between; align-items: center;
+.kiosco-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
 }
-.modal-header-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
-.modal-header-title i { color: var(--vento-orange); }
-.modal-close {
-  background: var(--vento-white); border: 2px solid var(--vento-black);
-  width: 30px; height: 30px; border-radius: 50%; color: var(--vento-black);
-  font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s;
-  display: flex; align-items: center; justify-content: center;
+.kiosco-card:hover { 
+  transform: translateY(-4px); 
+  box-shadow: var(--shadow-lg); 
 }
-.modal-close:hover { background: var(--vento-orange); color: var(--vento-white); border-color: var(--vento-orange); }
-
-.modal-body { padding: 24px; }
-.modal-body p { margin: 0 0 16px 0; font-size: 14px; color: var(--vento-gray-dark); font-weight: 500; }
-
-.input-vin {
-  width: 100%; padding: 14px 18px; border-radius: 8px; border: 2px solid var(--vento-black);
-  background-color: var(--vento-white); color: var(--vento-black); font-size: 16px;
-  font-weight: 700; text-transform: uppercase; outline: none; margin-bottom: 16px;
-  font-family: 'Inter', sans-serif; transition: all 0.3s ease;
+.kiosco-card:hover::before {
+  background-color: var(--vento-orange);
 }
-.input-vin:focus { border-color: var(--vento-orange); box-shadow: 0 0 0 4px rgba(242, 143, 23, 0.15); }
-.input-vin::placeholder { color: #9CA3AF; font-weight: 500; text-transform: none; }
-
-.btn-search {
-  width: 100%; padding: 14px; background-color: var(--vento-black); color: var(--vento-white);
-  border: 2px solid var(--vento-black); border-radius: 8px; font-size: 15px; font-weight: 800;
-  cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;
-  text-transform: uppercase; letter-spacing: 0.5px;
+.card-header {
+  margin-bottom: 16px;
 }
-.btn-search:hover { background-color: var(--vento-orange); border-color: var(--vento-orange); }
-.btn-search:disabled { background-color: var(--vento-gray-dark); border-color: var(--vento-gray-dark); cursor: not-allowed; }
-
-/* Resultados de Bases de Datos */
-.db-results-container { margin-top: 20px; display: none; flex-direction: column; gap: 12px; }
-.db-item {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 16px; border-radius: 8px; border: 2px solid var(--vento-gray-light);
-  background: var(--vento-bg);
+.card-name { 
+  font-size: 18px; 
+  font-weight: 800; 
+  color: var(--vento-black); 
+  line-height: 1.3;
 }
-.db-name { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+}
+.data-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--vento-black);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 6px;
+}
 /* Badges Corporativos */
 .badge {
-  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
-  border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
-.badge-orange { background-color: var(--vento-orange); color: var(--vento-white); border: 1px solid var(--vento-orange-hover); }
-.badge-black { background-color: var(--vento-black); color: var(--vento-white); border: 1px solid var(--vento-black); }
-.badge-white { background-color: var(--vento-white); color: var(--vento-black); border: 1px solid var(--vento-black); }
-
-@media (max-width:900px){
-  .widget{right:16px; bottom:16px; width:90%; height:460px}
-  .widget.collapsed{right:16px; bottom:16px}
+.badge-orange { 
+  background-color: var(--vento-orange); 
+  color: var(--vento-white); 
+  border: 1px solid var(--vento-orange-hover);
+}
+.badge-black { 
+  background-color: var(--vento-black); 
+  color: var(--vento-white); 
+  border: 1px solid var(--vento-black);
+}
+.badge-white {
+  background-color: var(--vento-white);
+  color: var(--vento-black);
+  border: 1px solid var(--vento-black);
+}
+/* Mensaje de Agencia No Encontrada */
+#no-results-msg {
+  grid-column: 1 / -1;
+  background: var(--vento-white);
+  border: 2px dashed var(--vento-black);
+  padding: 40px 30px;
+  border-radius: var(--radius);
+  text-align: center;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+#no-results-msg i {
+  font-size: 40px;
+  color: var(--vento-orange);
+}
+.no-results-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--vento-black);
+}
+.no-results-text {
+  font-size: 15px;
+  color: var(--vento-black);
+  max-width: 650px;
+  line-height: 1.6;
+}
+/* Modal */
+.overlay-blur { 
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+  background-color: rgba(0, 0, 0, 0.7); 
+  backdrop-filter: blur(6px); 
+  z-index: 999; 
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.panel-modal { 
+  position: fixed; top: 50%; left: 50%; 
+  transform: translate(-50%, -48%) scale(0.96); 
+  width: 650px; 
+  max-width: 90vw; 
+  background: var(--vento-white); 
+  border-radius: 16px; 
+  box-shadow: var(--shadow-lg); 
+  border: 2px solid var(--vento-black);
+  z-index: 1000; 
+  display: none; 
+  flex-direction: column; 
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.panel-modal.show {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+.modal-header { 
+  padding: 24px 30px; 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:flex-start; 
+  border-bottom: 2px solid var(--vento-black); 
+  background-color: var(--vento-white);
+  border-radius: 14px 14px 0 0;
+}
+.modal-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.modal-header-title { 
+  font-size: 22px; 
+  font-weight: 800; 
+  color: var(--vento-black); 
+}
+.modal-close { 
+  background: var(--vento-white); 
+  border: 2px solid var(--vento-black); 
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--vento-black); 
+  font-size: 16px; 
+  font-weight: bold;
+  cursor: pointer; 
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close:hover { 
+  background: var(--vento-orange);
+  color: var(--vento-white); 
+  border-color: var(--vento-orange);
+}
+.modal-body { 
+  padding: 30px; 
+  max-height: 80vh; 
+  overflow-y: auto; 
+}
+/* Inputs Selectores */
+.vin-section-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--vento-black);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.input-vin { 
+  width: 100%; 
+  padding: 16px 20px; 
+  border-radius: var(--radius); 
+  border: 2px solid var(--vento-black); 
+  background: var(--vento-white); 
+  color: var(--vento-black); 
+  box-sizing: border-box; 
+  font-family: 'Inter', sans-serif; 
+  font-size: 16px; 
+  font-weight: 600;
+  outline: none; 
+  transition: all 0.3s ease;
+}
+.input-vin:focus { 
+  border-color: var(--vento-orange); 
+  box-shadow: 0 0 0 4px rgba(242, 143, 23, 0.15);
+}
+select.input-vin {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 20px top 50%;
+  background-size: 12px auto;
+}
+/* Resultados */
+.result-box { 
+  margin-top: 20px; 
+  padding: 20px; 
+  border-radius: var(--radius); 
+  font-size: 14px; 
+  display: none; 
+  animation: slideDown 0.3s ease;
+  border: 2px solid var(--vento-black);
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* Botón de Captura */
+.btn-capture {
+  width: 100%;
+  padding: 16px;
+  margin-top: 25px;
+  background-color: var(--vento-orange);
+  color: var(--vento-white);
+  border: 2px solid var(--vento-orange);
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Inter', sans-serif;
+}
+.btn-capture:hover {
+  background-color: var(--vento-black);
+  border-color: var(--vento-black);
+}
+/* Loader */
+.loader-container {
+  grid-column: 1/-1; 
+  text-align: center; 
+  padding: 60px; 
+  color: var(--vento-black); 
+  font-weight: 700; 
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+.loader-container i {
+  font-size: 32px;
+  color: var(--vento-orange);
 }
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="frame-wrap">
-    <iframe id="mainFrame" class="frame" src="https://supervisor1atcvento-ctrl.github.io/tickets_atc/" title="Contenido principal"></iframe>
+<header class="hub-header">
+  <div class="brand-wrapper">
+    <div class="brand-title">VENTO MOTORCYCLES U.S.A.</div>
+    <div class="hub-title"><i class="fa-solid fa-motorcycle"></i> Validación de Postventa</div>
   </div>
-</div>
-
-<!-- =========================================
-     MODAL BÚSQUEDA UNIVERSAL DE VIN
-     ========================================= -->
-<div class="overlay-blur" id="vinModalOverlay">
-  <div class="panel-modal">
-    <div class="modal-header">
-      <div class="modal-header-title">
-        <i class="fa-solid fa-magnifying-glass"></i> Búsqueda Universal VIN
-      </div>
-      <button class="modal-close" onclick="cerrarModalVIN()" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="modal-body">
-      <p>Ingresa el número de serie para consultar su registro en todas las bases operativas de Vento.</p>
-      <form onsubmit="ejecutarBusquedaUniversal(event)">
-        <input type="text" id="vinInput" class="input-vin" placeholder="Ingrese VIN (17 caracteres)..." autocomplete="off" maxlength="17" required>
-        <button type="submit" id="vinSubmitBtn" class="btn-search">
-          <i class="fa-solid fa-database"></i> Consultar Bases
-        </button>
-      </form>
-      
-      <div id="dbResults" class="db-results-container">
-        <!-- Resultados inyectados por JS -->
-      </div>
+  <div id="reloj" class="clock-display"></div>
+</header>
+<main class="app-container">
+  <div class="search-section">
+    <div class="input-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="input-agencia" placeholder="Buscar agencia por nombre o ubicación..." onkeyup="filtrarKiosco()">
     </div>
   </div>
-</div>
-
-<!-- Widget fijo -->
-<aside class="widget" id="menuWidget">
-  <div class="widget-header" id="widgetHeader">
-    <div class="widget-title">
-      <div class="logo" id="widgetLogo"><i class="fa-solid fa-motorcycle"></i></div>
-      <div>
-        <h4>Asistente ATC</h4>
-        <div style="font-size:0.75rem; color:var(--vento-gray-light); font-weight:500;">Portal de herramientas</div>
+  <div id="kiosco-container">
+    <div class="loader-container">
+      <i class="fa-solid fa-circle-notch fa-spin"></i>
+      Sincronizando directorio de agencias...
+    </div>
+    
+    <div id="no-results-msg">
+      <i class="fa-solid fa-store-slash"></i>
+      <div class="no-results-title">Agencia no localizada en el directorio</div>
+      <div class="no-results-text">
+        Si la agencia que buscas no se encuentra en el listado, evalúala manualmente basándote en el origen de su armado y activado. 
+        <br><strong>(Por defecto, toda agencia no registrada NO cuenta con kit de herramientas).</strong>
       </div>
+      <button onclick="abrirModalNuevaAgencia()" class="btn-capture" style="width: auto; padding: 12px 24px; margin-top: 10px;">
+        <i class="fa-solid fa-clipboard-list"></i> Evaluar Agencia Manualmente
+      </button>
     </div>
-    <div class="widget-controls">
-      <div class="close-icon" id="closeWidget" title="Minimizar menú"><i class="fa-solid fa-minus"></i></div>
+    
+  </div>
+</main>
+<div class="overlay-blur" id="overlay" onclick="cerrarModal()"></div>
+
+<!-- Modal que será capturado -->
+<div class="panel-modal" id="modal">
+  <div class="modal-header">
+    <div class="modal-header-content">
+      <div id="modal-badge-rev"></div>
+      <div id="modal-titulo" class="modal-header-title">Agencia</div>
     </div>
+    <button class="modal-close" onclick="cerrarModal()" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
   </div>
   
-  <div class="widget-body" id="widgetBody">
-    <div class="menu-section">
-      <!-- BOTÓN DE BÚSQUEDA UNIVERSAL -->
-      <div class="menu-item" style="border-color: var(--vento-orange); background: rgba(242, 143, 23, 0.1); color: var(--vento-orange);" onclick="abrirModalVIN()">
-        <span>Búsqueda Universal de VIN</span><i class="fa-solid fa-magnifying-glass" style="color: var(--vento-orange);"></i>
-      </div>
-      <hr style="border: 0; border-top: 2px dashed #444; margin: 16px 0;">
-      
-      <!-- Herramientas -->
-      <div class="menu-item active" id="menuTickets" data-url="https://supervisor1atcvento-ctrl.github.io/tickets_atc/" onclick="loadPage(this)">
-        <span>Tickets ATC</span><i class="fa-solid fa-ticket"></i>
-      </div>
-      <div class="menu-item" data-url="https://supervisor1atcvento-ctrl.github.io/indicadores/" onclick="loadPage(this)">
-        <span>Indicadores</span><i class="fa-solid fa-chart-line"></i>
-      </div>
-      <div class="menu-item" data-url="https://supervisor1atcvento-ctrl.github.io/segmentador-de-agencias/" onclick="loadPage(this)">
-        <span>Segmentador de Agencias</span><i class="fa-solid fa-store"></i>
-      </div>
-      <div class="menu-item" data-url="https://supervisor1atcvento-ctrl.github.io/buscador-de-cesves/" onclick="loadPage(this)">
-        <span>Buscador CESVE</span><i class="fa-solid fa-wrench"></i>
-      </div>
-      <div class="menu-item" data-url="https://script.google.com/macros/s/AKfycbzSF4oEkoujflBAHpuGQFS3HC2mTUaOjKbKpt0wz0BzQ_XM0-t0Qm3juTgzHBiBxAJ6/exec" onclick="loadPage(this)">
-        <span>Tiendas VS CESVES</span><i class="fa-solid fa-code-compare"></i>
-      </div>
-      <div class="menu-item" data-url="https://supervisor1atcvento-ctrl.github.io/buscador-de-extensiones-de-garantia/" onclick="loadPage(this)">
-        <span>Buscador Extensiones</span><i class="fa-solid fa-file-shield"></i>
-      </div>
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSfFrOUDVc3YTUqJJav7e04a7utTbRtU1Jf0SbKY539xmyMniA/viewform?usp=sharing" target="_blank" class="menu-item" style="text-decoration: none;">
-        <span>Solicitar Extensión</span><i class="fa-solid fa-pen-to-square"></i>
-      </a>
-      <div class="menu-item" data-url="https://supervisor1atcvento-ctrl.github.io/calculadora-de-servicios/" onclick="loadPage(this)">
-        <span>Calculadora de servicios</span><i class="fa-solid fa-calculator"></i>
-      </div>
-      <div class="menu-item" data-url="https://supervisor1atcvento-ctrl.github.io/Directorio-POST-VENTA/" onclick="loadPage(this)">
-        <span>Directorio POST-VENTA</span><i class="fa-solid fa-address-book"></i>
-      </div>
+  <div class="modal-body">
+    <div class="vin-section-title">
+      <i class="fa-solid fa-users-gear" style="color: var(--vento-orange);"></i> 
+      Origen del Armado y Activado en VENTONET
     </div>
+    <select id="select-armado" class="input-vin" style="margin-bottom: 10px;" onchange="evaluarDictamen()">
+      <option value="" disabled selected>Selecciona una opción...</option>
+      <option value="CEDIS">CEDIS</option>
+      <option value="CESVE">CESVE</option>
+      <option value="AGENCIA">Agencia / Tercero / Sin Registro</option>
+    </select>
+    
+    <div id="resultado-vin-box" class="result-box"></div>
+    
+    <button id="btn-captura" class="btn-capture no-capture" onclick="copiarCaptura()" style="display: none;">
+      <i class="fa-solid fa-camera"></i> Copiar Dictamen al Portapapeles
+    </button>
   </div>
-  <div class="widget-footer">
-    <span>VENTO © 2026</span><span>ATC</span>
-  </div>
-</aside>
+</div>
 
 <script>
-// =========================================
-// LÓGICA DEL WIDGET (Menú)
-// =========================================
-const widget = document.getElementById('menuWidget');
-const closeWidget = document.getElementById('closeWidget');
-const mainFrame = document.getElementById('mainFrame');
+// ==========================================
+// CONFIGURACIÓN DE COLUMNAS 
+// ==========================================
+const COL_AGENCIA_NOMBRE = 1;   
+const COL_PUEDE_REPORTAR = 14;  
+// ==========================================
+const sheetId = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY'; 
+const urlAgencias = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Agencias`; 
+let agenciaActiva = null;
 
-widget.addEventListener('click', function(e){
-  if(widget.classList.contains('collapsed')){ expandWidget(); return; }
-});
-closeWidget.addEventListener('click', function(e){
-  e.stopPropagation();
-  if(widget.classList.contains('collapsed')){ expandWidget(); } 
-  else { collapseWidget(); }
-});
+window.onload = () => {
+  fetch(urlAgencias).then(r => r.text()).then(csv => procesarAgencias(csv)).catch(e => console.error(e)); 
+  setInterval(() => { 
+    document.getElementById('reloj').innerText = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); 
+  }, 1000);
+};
 
-function collapseWidget(){ widget.classList.add('collapsed'); }
-function expandWidget(){ widget.classList.remove('collapsed'); }
-
-function loadPage(el){
-  document.querySelectorAll('.menu-item').forEach(i=>i.classList.remove('active'));
-  el.classList.add('active');
-  const url = el.getAttribute('data-url');
-  if(url) mainFrame.src = url;
+function parsearLineaCSV(linea) { 
+  let resultado = [];
+  let comillas = false;
+  let celda = '';
+  for (let i = 0; i < linea.length; i++) {
+    let char = linea[i];
+    if (char === '"') { comillas = !comillas; }
+    else if (char === ',' && !comillas) { resultado.push(celda.trim()); celda = ''; }
+    else { celda += char; }
+  }
+  resultado.push(celda.trim());
+  return resultado;
 }
 
-// =========================================
-// LÓGICA DE BÚSQUEDA UNIVERSAL (Baterías + Proyecto S + Motos Entregadas)
-// =========================================
-const modalOverlay = document.getElementById('vinModalOverlay');
-const vinInput = document.getElementById('vinInput');
-const dbResults = document.getElementById('dbResults');
-
-function abrirModalVIN() {
-  modalOverlay.style.display = 'flex';
-  collapseWidget(); 
-  vinInput.focus(); 
-}
-
-function cerrarModalVIN() {
-  modalOverlay.style.display = 'none';
-  vinInput.value = ''; 
-  dbResults.style.display = 'none'; 
-}
-
-modalOverlay.addEventListener('click', function(e) {
-  if (e.target === this) cerrarModalVIN();
-});
-
-// Función de consulta concurrente a múltiples bases
-async function ejecutarBusquedaUniversal(e) {
-  e.preventDefault();
+function procesarAgencias(texto) { 
+  const lineas = texto.split(/\r?\n/);
+  const container = document.getElementById('kiosco-container');
+  const noResultsMsg = document.getElementById('no-results-msg');
   
-  const btnSubmit = document.getElementById('vinSubmitBtn');
-  const vinBuscado = vinInput.value.trim().toUpperCase();
-  if (!vinBuscado) return;
+  Array.from(container.children).forEach(child => {
+    if (child.id !== 'no-results-msg') {
+      child.remove();
+    }
+  });
   
-  btnSubmit.disabled = true;
-  btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Consultando...';
-  dbResults.style.display = 'none';
-  
-  // 1. Parámetros Baterías en Planta
-  const BAT_SHEET_ID = '1qxnp3r976gbgxO_ws0XymcMkH0XRklldWp5HEf-gaU4';
-  const BAT_GID = '1280448484';
-  const urlBaterias = `https://docs.google.com/spreadsheets/d/${BAT_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select C where upper(C) = '${vinBuscado}' limit 1`)}&gid=${BAT_GID}`;
-  
-  // 2. Parámetros Proyecto S
-  const MULTI_SHEET_ID = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY';
-  const urlProyectoS = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) = '${vinBuscado}' limit 1`)}&sheet=Proyecto+S`;
-
-  // 3. Parámetros Motos entregadas en Agencia antes del Check List
-  // NOTA: Estoy asumiendo que el VIN se encuentra en la Columna F de esta pestaña. 
-  // Si está en otra columna, cambia la letra "F" en el select de abajo.
-  const pestañaMotos = encodeURIComponent('Motos entregadas en Agencia antes del Check List');
-  const urlMotosEntregadas = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) = '${vinBuscado}' limit 1`)}&sheet=${pestañaMotos}`;
-
-  try {
-    // Ejecutar las tres consultas de forma simultánea
-    const [resBaterias, resProyectoS, resMotosEntregadas] = await Promise.all([
-      fetch(urlBaterias).then(r => r.text()),
-      fetch(urlProyectoS).then(r => r.text()),
-      fetch(urlMotosEntregadas).then(r => r.text())
-    ]);
-
-    // Función auxiliar para extraer el JSON de la respuesta de GViz
-    const extraerJSON = (texto) => {
-      try { return JSON.parse(texto.substring(texto.indexOf('{'), texto.lastIndexOf('}') + 1)); } 
-      catch (err) { return null; }
-    };
-
-    const dataBaterias = extraerJSON(resBaterias);
-    const dataProyectoS = extraerJSON(resProyectoS);
-    const dataMotos = extraerJSON(resMotosEntregadas);
-
-    // Validar si trajeron resultados (rows > 0)
-    const halladoBaterias = dataBaterias && dataBaterias.table && dataBaterias.table.rows.length > 0;
-    const halladoProyectoS = dataProyectoS && dataProyectoS.table && dataProyectoS.table.rows.length > 0;
-    const halladoMotos = dataMotos && dataMotos.table && dataMotos.table.rows.length > 0;
-
-    // Pintar los resultados unificados
-    dbResults.innerHTML = `
-      <div style="font-size: 13px; font-weight: 800; color: var(--vento-gray-dark); margin-bottom: -4px;">RESULTADOS DEL ESCANEO:</div>
-      
-      <div class="db-item" style="${halladoBaterias ? 'border-color: var(--vento-black);' : ''}">
-        <div class="db-name"><i class="fa-solid fa-car-battery" style="color: ${halladoBaterias ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Baterías Activadas</div>
-        <span class="badge ${halladoBaterias ? 'badge-black' : 'badge-white'}">
-          ${halladoBaterias ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
-        </span>
+  for(let i = 1; i < lineas.length; i++) {
+    if(!lineas[i]) continue;
+    const col = parsearLineaCSV(lineas[i]);
+    
+    if(col.length <= COL_AGENCIA_NOMBRE || !col[COL_AGENCIA_NOMBRE]) continue;
+    
+    const nombre = col[COL_AGENCIA_NOMBRE].replace(/"/g, '').trim();
+    const puede = (col[COL_PUEDE_REPORTAR] || '').replace(/"/g, '').trim().toUpperCase();
+    
+    const card = document.createElement('div');
+    card.className = 'kiosco-card';
+    card.setAttribute('data-search', nombre.toLowerCase());
+    
+    const classPuede = (puede === 'SI') ? 'badge-orange' : 'badge-black';
+    const txtPuede = (puede === 'SI') ? '<i class="fa-solid fa-ban"></i> NO CUENTA CON KIT DE HERRAMIENTAS' : '<i class="fa-solid fa-check"></i> SÍ CUENTA CON KIT DE HERRAMIENTAS';
+    
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-name">${nombre}</div>
       </div>
-      
-      <div class="db-item" style="${halladoProyectoS ? 'border-color: var(--vento-orange);' : ''}">
-        <div class="db-name"><i class="fa-solid fa-clipboard-list" style="color: ${halladoProyectoS ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Proyecto S</div>
-        <span class="badge ${halladoProyectoS ? 'badge-orange' : 'badge-white'}">
-          ${halladoProyectoS ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
-        </span>
-      </div>
-
-      <div class="db-item" style="${halladoMotos ? 'border-color: var(--vento-orange);' : ''}">
-        <div class="db-name"><i class="fa-solid fa-motorcycle" style="color: ${halladoMotos ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Entregadas antes C.L.</div>
-        <span class="badge ${halladoMotos ? 'badge-orange' : 'badge-white'}">
-          ${halladoMotos ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
-        </span>
+      <div class="card-body">
+        <div>
+          <span class="data-label">Kit de herramientas:</span>
+          <span class="badge ${classPuede}">${txtPuede}</span>
+        </div>
       </div>
     `;
-    dbResults.style.display = 'flex';
+    
+    card.onclick = () => {
+      agenciaActiva = { nombre, puede, txtPuede, classPuede };
+      abrirModalConAgencia();
+    };
+    
+    container.insertBefore(card, noResultsMsg);
+  }
+}
 
-  } catch (err) {
-    dbResults.innerHTML = `<div class="db-item" style="border-color: red; color: red;"><i class="fa-solid fa-triangle-exclamation"></i> Error al conectar con las bases de datos.</div>`;
-    dbResults.style.display = 'flex';
-  } finally {
-    btnSubmit.disabled = false;
-    btnSubmit.innerHTML = '<i class="fa-solid fa-database"></i> Consultar Bases';
+function filtrarKiosco() { 
+  const val = document.getElementById('input-agencia').value.trim().toLowerCase();
+  let tarjetasVisibles = 0;
+  
+  document.querySelectorAll('.kiosco-card').forEach(c => {
+    const match = c.getAttribute('data-search').includes(val);
+    if (val === '' || match) {
+      c.style.display = 'flex';
+      tarjetasVisibles++;
+    } else {
+      c.style.display = 'none';
+    }
+  });
+  
+  const msjNoResultados = document.getElementById('no-results-msg');
+  if (msjNoResultados) {
+    msjNoResultados.style.display = (tarjetasVisibles === 0) ? 'flex' : 'none';
+  }
+}
+
+function abrirModalNuevaAgencia() {
+  const nombreInput = document.getElementById('input-agencia').value.trim() || 'AGENCIA NO REGISTRADA';
+  agenciaActiva = { 
+    nombre: nombreInput.toUpperCase(), 
+    puede: 'SI', 
+    txtPuede: '<i class="fa-solid fa-ban"></i> NO CUENTA CON KIT DE HERRAMIENTAS', 
+    classPuede: 'badge-orange' 
+  };
+  abrirModalConAgencia();
+}
+
+function abrirModalConAgencia() {
+  if(!agenciaActiva) return;
+  
+  document.getElementById('modal-titulo').innerText = agenciaActiva.nombre;
+  document.getElementById('modal-badge-rev').innerHTML = `<span class="badge ${agenciaActiva.classPuede}">${agenciaActiva.txtPuede}</span>`;
+  
+  document.getElementById('select-armado').value = "";
+  document.getElementById('resultado-vin-box').style.display = 'none';
+  document.getElementById('btn-captura').style.display = 'none';
+  
+  document.getElementById('overlay').style.display = 'block';
+  const modal = document.getElementById('modal');
+  modal.style.display = 'flex';
+  
+  setTimeout(() => {
+    document.getElementById('overlay').style.opacity = '1';
+    modal.classList.add('show');
+    document.getElementById('select-armado').focus();
+  }, 10);
+}
+
+function cerrarModal() {
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal');
+  
+  overlay.style.opacity = '0';
+  modal.classList.remove('show');
+  
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    modal.style.display = 'none';
+    agenciaActiva = null;
+  }, 300);
+}
+
+function evaluarDictamen() {
+  if(!agenciaActiva) return;
+  const armado = document.getElementById('select-armado').value;
+  const respuestaBox = document.getElementById('resultado-vin-box');
+  const btnCaptura = document.getElementById('btn-captura');
+  
+  if (!armado) {
+    respuestaBox.style.display = 'none';
+    btnCaptura.style.display = 'none';
+    return;
+  }
+  
+  let accionCalculada = '';
+  
+  if (armado === 'CEDIS') {
+    accionCalculada = 'SE REQUIERE CHECK LIST';
+  } else {
+    accionCalculada = 'PASA COMO GARANTIA';
+  }
+  
+  respuestaBox.style.display = 'block';
+  btnCaptura.style.display = 'flex';
+  
+  let alertStyle = accionCalculada.includes('GARANTIA') 
+    ? 'border-left: 8px solid var(--vento-black); background: var(--vento-white); color: var(--vento-black); border-top: 2px solid var(--vento-black); border-right: 2px solid var(--vento-black); border-bottom: 2px solid var(--vento-black);' 
+    : 'border-left: 8px solid var(--vento-orange); background: var(--vento-black); color: var(--vento-white); border-top: 2px solid var(--vento-black); border-right: 2px solid var(--vento-black); border-bottom: 2px solid var(--vento-black);';
+  
+  respuestaBox.className = 'result-box';
+  respuestaBox.innerHTML = `
+    <div style="font-size: 15px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--vento-black);">
+      <i class="fa-solid fa-screwdriver-wrench"></i> Dictamen establecido por Origen de Armado
+    </div>
+    <div style="padding: 20px; border-radius: 8px; ${alertStyle}">
+      <span style="display:block; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; font-weight: 800; opacity: 0.9;">Dictamen Final Oficial</span>
+      <span style="font-size: 24px; font-weight: 800;">${accionCalculada}</span>
+    </div>
+  `;
+}
+
+// Lógica de Captura y Copiado
+async function copiarCaptura() {
+  const modalNode = document.getElementById('modal');
+  const modalBody = document.querySelector('.modal-body');
+  const btn = document.getElementById('btn-captura');
+  const originalText = btn.innerHTML;
+  
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generando imagen...';
+  
+  const prevPosition = modalNode.style.position;
+  const prevTop = modalNode.style.top;
+  const prevTransform = modalNode.style.transform;
+  const prevMaxHeight = modalBody.style.maxHeight;
+  const prevOverflow = modalBody.style.overflowY;
+  
+  modalNode.style.position = 'absolute';
+  modalNode.style.top = '20px'; 
+  modalNode.style.transform = 'translate(-50%, 0)'; 
+  modalBody.style.maxHeight = 'none';
+  modalBody.style.overflowY = 'visible';
+  
+  await new Promise(resolve => setTimeout(resolve, 50));
+  
+  try {
+    const canvas = await html2canvas(modalNode, {
+      scale: 2, 
+      backgroundColor: "#FFFFFF",
+      windowHeight: modalNode.scrollHeight + 100, 
+      ignoreElements: (element) => element.classList.contains('no-capture')
+    });
+    
+    modalNode.style.position = prevPosition;
+    modalNode.style.top = prevTop;
+    modalNode.style.transform = prevTransform;
+    modalBody.style.maxHeight = prevMaxHeight;
+    modalBody.style.overflowY = prevOverflow;
+    
+    canvas.toBlob(async function(blob) {
+      try {
+        const item = new ClipboardItem({ "image/png": blob });
+        await navigator.clipboard.write([item]);
+        
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> ¡Copiado al Portapapeles!';
+        btn.style.backgroundColor = 'var(--vento-black)';
+        btn.style.borderColor = 'var(--vento-black)';
+        
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.style.backgroundColor = ''; 
+          btn.style.borderColor = '';
+        }, 3000);
+        
+      } catch (err) {
+        console.error("El navegador no soporta el copiado directo: ", err);
+        const link = document.createElement('a');
+        link.download = 'Dictamen_Garantia.png';
+        link.href = canvas.toDataURL();
+        link.click();
+        
+        btn.innerHTML = '<i class="fa-solid fa-download"></i> Imagen Descargada';
+        setTimeout(() => { btn.innerHTML = originalText; }, 3000);
+      }
+    }, 'image/png');
+    
+  } catch (error) {
+    console.error("Error en la librería html2canvas: ", error);
+    alert("Hubo un error al generar la captura. Revisa la consola.");
+    
+    modalNode.style.position = prevPosition;
+    modalNode.style.top = prevTop;
+    modalNode.style.transform = prevTransform;
+    modalBody.style.maxHeight = prevMaxHeight;
+    modalBody.style.overflowY = prevOverflow;
+    
+    btn.innerHTML = originalText;
   }
 }
 </script>
