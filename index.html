@@ -317,7 +317,7 @@ function loadPage(el){
 }
 
 // =========================================
-// LÓGICA DE BÚSQUEDA UNIVERSAL (Baterías + Proyecto S)
+// LÓGICA DE BÚSQUEDA UNIVERSAL (Baterías + Proyecto S + Motos Entregadas)
 // =========================================
 const modalOverlay = document.getElementById('vinModalOverlay');
 const vinInput = document.getElementById('vinInput');
@@ -351,21 +351,27 @@ async function ejecutarBusquedaUniversal(e) {
   btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Consultando...';
   dbResults.style.display = 'none';
   
-  // Parámetros Baterías en Planta (Fuente Original 1)
+  // 1. Parámetros Baterías en Planta
   const BAT_SHEET_ID = '1qxnp3r976gbgxO_ws0XymcMkH0XRklldWp5HEf-gaU4';
   const BAT_GID = '1280448484';
   const urlBaterias = `https://docs.google.com/spreadsheets/d/${BAT_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select C where upper(C) = '${vinBuscado}' limit 1`)}&gid=${BAT_GID}`;
   
-  // Parámetros Proyecto S (Fuente Original 2)
-  const PROY_SHEET_ID = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY';
-  // En GViz, la columna F es la 6ta, correspondiente al índice 5 del CSV original
-  const urlProyectoS = `https://docs.google.com/spreadsheets/d/${PROY_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) = '${vinBuscado}' limit 1`)}&sheet=Proyecto+S`;
+  // 2. Parámetros Proyecto S
+  const MULTI_SHEET_ID = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY';
+  const urlProyectoS = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) = '${vinBuscado}' limit 1`)}&sheet=Proyecto+S`;
+
+  // 3. Parámetros Motos entregadas en Agencia antes del Check List
+  // NOTA: Estoy asumiendo que el VIN se encuentra en la Columna F de esta pestaña. 
+  // Si está en otra columna, cambia la letra "F" en el select de abajo.
+  const pestañaMotos = encodeURIComponent('Motos entregadas en Agencia antes del Check List');
+  const urlMotosEntregadas = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) = '${vinBuscado}' limit 1`)}&sheet=${pestañaMotos}`;
 
   try {
-    // Ejecutar ambas consultas simultáneamente
-    const [resBaterias, resProyectoS] = await Promise.all([
+    // Ejecutar las tres consultas de forma simultánea
+    const [resBaterias, resProyectoS, resMotosEntregadas] = await Promise.all([
       fetch(urlBaterias).then(r => r.text()),
-      fetch(urlProyectoS).then(r => r.text())
+      fetch(urlProyectoS).then(r => r.text()),
+      fetch(urlMotosEntregadas).then(r => r.text())
     ]);
 
     // Función auxiliar para extraer el JSON de la respuesta de GViz
@@ -376,10 +382,12 @@ async function ejecutarBusquedaUniversal(e) {
 
     const dataBaterias = extraerJSON(resBaterias);
     const dataProyectoS = extraerJSON(resProyectoS);
+    const dataMotos = extraerJSON(resMotosEntregadas);
 
     // Validar si trajeron resultados (rows > 0)
     const halladoBaterias = dataBaterias && dataBaterias.table && dataBaterias.table.rows.length > 0;
     const halladoProyectoS = dataProyectoS && dataProyectoS.table && dataProyectoS.table.rows.length > 0;
+    const halladoMotos = dataMotos && dataMotos.table && dataMotos.table.rows.length > 0;
 
     // Pintar los resultados unificados
     dbResults.innerHTML = `
@@ -396,6 +404,13 @@ async function ejecutarBusquedaUniversal(e) {
         <div class="db-name"><i class="fa-solid fa-clipboard-list" style="color: ${halladoProyectoS ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Proyecto S</div>
         <span class="badge ${halladoProyectoS ? 'badge-orange' : 'badge-white'}">
           ${halladoProyectoS ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
+        </span>
+      </div>
+
+      <div class="db-item" style="${halladoMotos ? 'border-color: var(--vento-orange);' : ''}">
+        <div class="db-name"><i class="fa-solid fa-motorcycle" style="color: ${halladoMotos ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Entregadas antes C.L.</div>
+        <span class="badge ${halladoMotos ? 'badge-orange' : 'badge-white'}">
+          ${halladoMotos ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
         </span>
       </div>
     `;
