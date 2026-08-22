@@ -634,9 +634,10 @@ function evaluarDictamen() {
   
   let accionCalculada = '';
   
-  if (armado === 'CEDIS') {
+  // Aquí está aplicada la nueva lógica
+  if (armado === 'CEDIS' || armado === 'AGENCIA') {
     accionCalculada = 'SE REQUIERE CHECK LIST';
-  } else {
+  } else if (armado === 'CESVE') {
     accionCalculada = 'PASA COMO GARANTIA';
   }
   
