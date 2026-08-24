@@ -540,6 +540,7 @@ modalOverlay.addEventListener('click', function(e) {
 });
 
 // Función de consulta concurrente a múltiples bases
+// Función de consulta concurrente a múltiples bases
 async function ejecutarBusquedaUniversal(e) {
   e.preventDefault();
   
@@ -559,45 +560,66 @@ async function ejecutarBusquedaUniversal(e) {
   // 2. Parámetros Proyecto S
   const MULTI_SHEET_ID = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY';
   const urlProyectoS = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) = '${vinBuscado}' limit 1`)}&sheet=Proyecto+S`;
+  
   // 3. Parámetros Motos entregadas en Agencia antes del Check List
   const pestañaMotos = encodeURIComponent('Motos entregadas en Agencia antes del Check List');
   const urlMotosEntregadas = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) = '${vinBuscado}' limit 1`)}&sheet=${pestañaMotos}`;
+
+  // 4. Parámetros para Extensión de Garantía (Columna I)
+  const EXT_GARANTIA_SHEET_ID = '1vSGWWNPZ6DTK5Cq4Gke6P4WCp_kZoKCSkQ1n2-SJo74';
+  const urlExtensionGarantia = `https://docs.google.com/spreadsheets/d/${EXT_GARANTIA_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select I where upper(I) = '${vinBuscado}' limit 1`)}`;
+
   try {
-    const [resBaterias, resProyectoS, resMotosEntregadas] = await Promise.all([
+    const [resBaterias, resProyectoS, resMotosEntregadas, resExtensionGarantia] = await Promise.all([
       fetch(urlBaterias).then(r => r.text()),
       fetch(urlProyectoS).then(r => r.text()),
-      fetch(urlMotosEntregadas).then(r => r.text())
+      fetch(urlMotosEntregadas).then(r => r.text()),
+      fetch(urlExtensionGarantia).then(r => r.text())
     ]);
+    
     const extraerJSON = (texto) => {
       try { return JSON.parse(texto.substring(texto.indexOf('{'), texto.lastIndexOf('}') + 1)); } 
       catch (err) { return null; }
     };
+    
     const dataBaterias = extraerJSON(resBaterias);
     const dataProyectoS = extraerJSON(resProyectoS);
     const dataMotos = extraerJSON(resMotosEntregadas);
+    const dataExtensionGarantia = extraerJSON(resExtensionGarantia);
     
     const halladoBaterias = dataBaterias && dataBaterias.table && dataBaterias.table.rows.length > 0;
     const halladoProyectoS = dataProyectoS && dataProyectoS.table && dataProyectoS.table.rows.length > 0;
     const halladoMotos = dataMotos && dataMotos.table && dataMotos.table.rows.length > 0;
+    const halladoExtensionGarantia = dataExtensionGarantia && dataExtensionGarantia.table && dataExtensionGarantia.table.rows.length > 0; 
     
     dbResults.innerHTML = `
       <div style="font-size: 13px; font-weight: 800; color: var(--vento-gray-dark); margin-bottom: -4px;">RESULTADOS DEL ESCANEO:</div>
+      
       <div class="db-item" style="${halladoBaterias ? 'border-color: var(--vento-black);' : ''}">
         <div class="db-name"><i class="fa-solid fa-car-battery" style="color: ${halladoBaterias ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Baterías Activadas</div>
         <span class="badge ${halladoBaterias ? 'badge-black' : 'badge-white'}">
           ${halladoBaterias ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
         </span>
       </div>
+      
       <div class="db-item" style="${halladoProyectoS ? 'border-color: var(--vento-orange);' : ''}">
         <div class="db-name"><i class="fa-solid fa-clipboard-list" style="color: ${halladoProyectoS ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Proyecto S</div>
         <span class="badge ${halladoProyectoS ? 'badge-orange' : 'badge-white'}">
           ${halladoProyectoS ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
         </span>
       </div>
+      
       <div class="db-item" style="${halladoMotos ? 'border-color: var(--vento-orange);' : ''}">
         <div class="db-name"><i class="fa-solid fa-motorcycle" style="color: ${halladoMotos ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Entregadas antes C.L.</div>
         <span class="badge ${halladoMotos ? 'badge-orange' : 'badge-white'}">
           ${halladoMotos ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
+        </span>
+      </div>
+
+      <div class="db-item" style="${halladoExtensionGarantia ? 'border-color: var(--vento-orange);' : ''}">
+        <div class="db-name"><i class="fa-solid fa-file-shield" style="color: ${halladoExtensionGarantia ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Extensión de Garantía</div>
+        <span class="badge ${halladoExtensionGarantia ? 'badge-orange' : 'badge-white'}">
+          ${halladoExtensionGarantia ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
         </span>
       </div>
     `;
