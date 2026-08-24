@@ -540,11 +540,11 @@ modalOverlay.addEventListener('click', function(e) {
 });
 
 // Función de consulta concurrente a múltiples bases
+// Función de consulta concurrente a múltiples bases
 async function ejecutarBusquedaUniversal(e) {
   e.preventDefault();
   
   const btnSubmit = document.getElementById('vinSubmitBtn');
-  // Aquí tú ya limpias los espacios de lo que el usuario digita
   const vinBuscado = vinInput.value.trim().toUpperCase();
   if (!vinBuscado) return;
   
@@ -552,22 +552,24 @@ async function ejecutarBusquedaUniversal(e) {
   btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Consultando...';
   dbResults.style.display = 'none';
   
-  // 1. Parámetros Baterías en Planta (Cambiado = por contains)
+  // AHORA USAMOS "select *" PARA TRAER TODA LA FILA Y NO SOLO EL VIN
+  
+  // 1. Parámetros Baterías en Planta
   const BAT_SHEET_ID = '1qxnp3r976gbgxO_ws0XymcMkH0XRklldWp5HEf-gaU4';
   const BAT_GID = '1280448484';
-  const urlBaterias = `https://docs.google.com/spreadsheets/d/${BAT_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select C where upper(C) contains '${vinBuscado}' limit 1`)}&gid=${BAT_GID}`;
+  const urlBaterias = `https://docs.google.com/spreadsheets/d/${BAT_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select * where upper(C) contains '${vinBuscado}' limit 1`)}&gid=${BAT_GID}`;
   
-  // 2. Parámetros Proyecto S (Cambiado = por contains)
+  // 2. Parámetros Proyecto S
   const MULTI_SHEET_ID = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY';
-  const urlProyectoS = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) contains '${vinBuscado}' limit 1`)}&sheet=Proyecto+S`;
+  const urlProyectoS = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select * where upper(F) contains '${vinBuscado}' limit 1`)}&sheet=Proyecto+S`;
   
-  // 3. Parámetros Motos entregadas en Agencia antes del Check List (Cambiado = por contains)
+  // 3. Parámetros Motos entregadas en Agencia antes del Check List
   const pestañaMotos = encodeURIComponent('Motos entregadas en Agencia antes del Check List');
-  const urlMotosEntregadas = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) contains '${vinBuscado}' limit 1`)}&sheet=${pestañaMotos}`;
+  const urlMotosEntregadas = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select * where upper(F) contains '${vinBuscado}' limit 1`)}&sheet=${pestañaMotos}`;
 
-  // 4. Parámetros para Extensión de Garantía (Cambiado = por contains)
+  // 4. Parámetros para Extensión de Garantía
   const EXT_GARANTIA_SHEET_ID = '1vSGWWNPZ6DTK5Cq4Gke6P4WCp_kZoKCSkQ1n2-SJo74';
-  const urlExtensionGarantia = `https://docs.google.com/spreadsheets/d/${EXT_GARANTIA_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select I where upper(I) contains '${vinBuscado}' limit 1`)}`;
+  const urlExtensionGarantia = `https://docs.google.com/spreadsheets/d/${EXT_GARANTIA_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select * where upper(I) contains '${vinBuscado}' limit 1`)}`;
 
   try {
     const [resBaterias, resProyectoS, resMotosEntregadas, resExtensionGarantia] = await Promise.all([
@@ -587,45 +589,69 @@ async function ejecutarBusquedaUniversal(e) {
     const dataMotos = extraerJSON(resMotosEntregadas);
     const dataExtensionGarantia = extraerJSON(resExtensionGarantia);
     
-    const halladoBaterias = dataBaterias && dataBaterias.table && dataBaterias.table.rows.length > 0;
-    const halladoProyectoS = dataProyectoS && dataProyectoS.table && dataProyectoS.table.rows.length > 0;
-    const halladoMotos = dataMotos && dataMotos.table && dataMotos.table.rows.length > 0;
-    const halladoExtensionGarantia = dataExtensionGarantia && dataExtensionGarantia.table && dataExtensionGarantia.table.rows.length > 0; 
-    
+    // Función auxiliar para construir tarjetas desplegables dinámicas
+    const generarTarjeta = (titulo, icono, data, colorNaranja) => {
+      const hallado = data && data.table && data.table.rows.length > 0;
+      const badgeClass = hallado ? (colorNaranja ? 'badge-orange' : 'badge-black') : 'badge-white';
+      const borderColor = hallado ? (colorNaranja ? 'var(--vento-orange)' : 'var(--vento-black)') : 'var(--vento-gray-light)';
+      const iconActiveColor = hallado ? 'var(--vento-orange)' : 'var(--vento-gray-dark)';
+      
+      let detallesHTML = '';
+      
+      if (hallado) {
+        const cols = data.table.cols;
+        const row = data.table.rows[0].c;
+        detallesHTML = `<div class="vin-details" style="display: none; padding: 12px 16px; background: var(--vento-white); border-top: 1px solid var(--vento-gray-light); font-size: 13px; color: var(--vento-gray-dark);">`;
+        
+        let hayDatos = false;
+        for (let i = 0; i < cols.length; i++) {
+          const header = cols[i].label || `Columna ${cols[i].id}`;
+          const cell = row[i];
+          let val = '';
+          if (cell) {
+             if (cell.f) val = cell.f; // Valor formateado (ej. fechas)
+             else if (cell.v !== null && cell.v !== undefined) val = cell.v;
+          }
+          // Solo mostramos campos que tengan información
+          if (val !== '' && val.toString().trim() !== '') {
+            detallesHTML += `<div style="margin-bottom: 6px; border-bottom: 1px dashed var(--vento-gray-light); padding-bottom: 4px;"><strong style="color: var(--vento-black);">${header}:</strong> ${val}</div>`;
+            hayDatos = true;
+          }
+        }
+        if (!hayDatos) detallesHTML += `<div>No hay datos adicionales legibles.</div>`;
+        detallesHTML += `</div>`;
+      }
+
+      return `
+        <div style="border: 2px solid ${borderColor}; border-radius: 8px; margin-bottom: 0px; background: var(--vento-bg); overflow: hidden; transition: all 0.2s;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: ${hallado ? 'pointer' : 'default'};" 
+               ${hallado ? `onclick="const det = this.nextElementSibling; det.style.display = det.style.display === 'none' ? 'block' : 'none';"` : ''}>
+            <div style="font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+              <i class="${icono}" style="color: ${iconActiveColor}"></i> ${titulo}
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="badge ${badgeClass}">
+                ${hallado ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
+              </span>
+              ${hallado ? `<i class="fa-solid fa-chevron-down" style="color: var(--vento-gray-dark); font-size: 14px;"></i>` : ''}
+            </div>
+          </div>
+          ${detallesHTML}
+        </div>
+      `;
+    };
+
     dbResults.innerHTML = `
       <div style="font-size: 13px; font-weight: 800; color: var(--vento-gray-dark); margin-bottom: -4px;">RESULTADOS DEL ESCANEO:</div>
-      
-      <div class="db-item" style="${halladoBaterias ? 'border-color: var(--vento-black);' : ''}">
-        <div class="db-name"><i class="fa-solid fa-car-battery" style="color: ${halladoBaterias ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Baterías Activadas</div>
-        <span class="badge ${halladoBaterias ? 'badge-black' : 'badge-white'}">
-          ${halladoBaterias ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
-        </span>
-      </div>
-      
-      <div class="db-item" style="${halladoProyectoS ? 'border-color: var(--vento-orange);' : ''}">
-        <div class="db-name"><i class="fa-solid fa-clipboard-list" style="color: ${halladoProyectoS ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Proyecto S</div>
-        <span class="badge ${halladoProyectoS ? 'badge-orange' : 'badge-white'}">
-          ${halladoProyectoS ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
-        </span>
-      </div>
-      
-      <div class="db-item" style="${halladoMotos ? 'border-color: var(--vento-orange);' : ''}">
-        <div class="db-name"><i class="fa-solid fa-motorcycle" style="color: ${halladoMotos ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Entregadas antes C.L.</div>
-        <span class="badge ${halladoMotos ? 'badge-orange' : 'badge-white'}">
-          ${halladoMotos ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
-        </span>
-      </div>
-
-      <div class="db-item" style="${halladoExtensionGarantia ? 'border-color: var(--vento-orange);' : ''}">
-        <div class="db-name"><i class="fa-solid fa-file-shield" style="color: ${halladoExtensionGarantia ? 'var(--vento-orange)' : 'var(--vento-gray-dark)'}"></i> Extensión de Garantía</div>
-        <span class="badge ${halladoExtensionGarantia ? 'badge-orange' : 'badge-white'}">
-          ${halladoExtensionGarantia ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
-        </span>
-      </div>
+      ${generarTarjeta('Baterías Activadas', 'fa-solid fa-car-battery', dataBaterias, false)}
+      ${generarTarjeta('Proyecto S', 'fa-solid fa-clipboard-list', dataProyectoS, true)}
+      ${generarTarjeta('Entregadas antes C.L.', 'fa-solid fa-motorcycle', dataMotos, true)}
+      ${generarTarjeta('Extensión de Garantía', 'fa-solid fa-file-shield', dataExtensionGarantia, true)}
     `;
+    
     dbResults.style.display = 'flex';
   } catch (err) {
-    dbResults.innerHTML = `<div class="db-item" style="border-color: red; color: red;"><i class="fa-solid fa-triangle-exclamation"></i> Error al conectar con las bases de datos.</div>`;
+    dbResults.innerHTML = `<div style="padding: 14px; border: 2px solid red; border-radius: 8px; color: red; background: var(--vento-bg);"><i class="fa-solid fa-triangle-exclamation"></i> Error al conectar con las bases de datos.</div>`;
     dbResults.style.display = 'flex';
   } finally {
     btnSubmit.disabled = false;
