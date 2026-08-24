@@ -540,11 +540,11 @@ modalOverlay.addEventListener('click', function(e) {
 });
 
 // Función de consulta concurrente a múltiples bases
-// Función de consulta concurrente a múltiples bases
 async function ejecutarBusquedaUniversal(e) {
   e.preventDefault();
   
   const btnSubmit = document.getElementById('vinSubmitBtn');
+  // Aquí tú ya limpias los espacios de lo que el usuario digita
   const vinBuscado = vinInput.value.trim().toUpperCase();
   if (!vinBuscado) return;
   
@@ -552,22 +552,22 @@ async function ejecutarBusquedaUniversal(e) {
   btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Consultando...';
   dbResults.style.display = 'none';
   
-  // 1. Parámetros Baterías en Planta
+  // 1. Parámetros Baterías en Planta (Cambiado = por contains)
   const BAT_SHEET_ID = '1qxnp3r976gbgxO_ws0XymcMkH0XRklldWp5HEf-gaU4';
   const BAT_GID = '1280448484';
-  const urlBaterias = `https://docs.google.com/spreadsheets/d/${BAT_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select C where upper(C) = '${vinBuscado}' limit 1`)}&gid=${BAT_GID}`;
+  const urlBaterias = `https://docs.google.com/spreadsheets/d/${BAT_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select C where upper(C) contains '${vinBuscado}' limit 1`)}&gid=${BAT_GID}`;
   
-  // 2. Parámetros Proyecto S
+  // 2. Parámetros Proyecto S (Cambiado = por contains)
   const MULTI_SHEET_ID = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY';
-  const urlProyectoS = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) = '${vinBuscado}' limit 1`)}&sheet=Proyecto+S`;
+  const urlProyectoS = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) contains '${vinBuscado}' limit 1`)}&sheet=Proyecto+S`;
   
-  // 3. Parámetros Motos entregadas en Agencia antes del Check List
+  // 3. Parámetros Motos entregadas en Agencia antes del Check List (Cambiado = por contains)
   const pestañaMotos = encodeURIComponent('Motos entregadas en Agencia antes del Check List');
-  const urlMotosEntregadas = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) = '${vinBuscado}' limit 1`)}&sheet=${pestañaMotos}`;
+  const urlMotosEntregadas = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select F where upper(F) contains '${vinBuscado}' limit 1`)}&sheet=${pestañaMotos}`;
 
-  // 4. Parámetros para Extensión de Garantía (Columna I)
+  // 4. Parámetros para Extensión de Garantía (Cambiado = por contains)
   const EXT_GARANTIA_SHEET_ID = '1vSGWWNPZ6DTK5Cq4Gke6P4WCp_kZoKCSkQ1n2-SJo74';
-  const urlExtensionGarantia = `https://docs.google.com/spreadsheets/d/${EXT_GARANTIA_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select I where upper(I) = '${vinBuscado}' limit 1`)}`;
+  const urlExtensionGarantia = `https://docs.google.com/spreadsheets/d/${EXT_GARANTIA_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select I where upper(I) contains '${vinBuscado}' limit 1`)}`;
 
   try {
     const [resBaterias, resProyectoS, resMotosEntregadas, resExtensionGarantia] = await Promise.all([
