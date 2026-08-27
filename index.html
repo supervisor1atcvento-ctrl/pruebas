@@ -80,10 +80,11 @@ html,body{
   display: inline-block;
   white-space: nowrap;
   padding-left: 100%;
+  /* Animación por defecto, se sobreescribe por JS fila por fila */
   animation: marquee 28s linear infinite;
 }
 .ticker-container:hover .ticker-content {
-  animation-play-state: paused;
+  animation-play-state: paused !important;
 }
 .ticker-item {
   display: inline-flex;
@@ -264,15 +265,16 @@ select.input-vin {
 </head>
 <body>
 <div class="app">
-  <!-- BANNER DE ANUNCIO DINÁMICO -->
+  <!-- BANNER DE ANUNCIO DINÁMICO CON ROTACIÓN POR FILA -->
   <div class="bank-banner">
-    <div class="banner-badge">
-      <i class="fa-solid fa-bullhorn"></i> AVISOS ATC
+    <div class="banner-badge" id="bannerBadge">
+      <i class="fa-solid fa-bullhorn" id="badgeIcon"></i>
+      <span id="badgeText">AVISOS ATC</span>
     </div>
     <div class="ticker-container" title="Pasa el cursor para pausar la animación">
       <div class="ticker-content" id="tickerContent">
         <span style="color: var(--vento-white); padding-left: 20px; font-weight: 600;">
-          <i class="fa-solid fa-rotate fa-spin" style="color: var(--vento-orange); margin-right: 8px;"></i> Sincronizando avisos en tiempo real...
+          <i class="fa-solid fa-rotate fa-spin" style="color: var(--vento-orange); margin-right: 8px;"></i> Sincronizando avisos...
         </span>
       </div>
     </div>
@@ -399,7 +401,6 @@ select.input-vin {
     <span>VENTO © 2026</span><span>ATC</span>
   </div>
 </aside>
-
 <script>
 // =========================================
 // LÓGICA DEL WIDGET (Menú)
@@ -423,7 +424,6 @@ function loadPage(el){
   const url = el.getAttribute('data-url');
   if(url) mainFrame.src = url;
 }
-
 // =========================================
 // LÓGICA DEL SEGMENTADOR RÁPIDO NATIVO
 // =========================================
@@ -459,25 +459,21 @@ async function inicializarBaseAgencias() {
     cargandoAgencias = false;
   }
 }
-
 function abrirModalSegmentador() {
   document.getElementById('segmentadorModalOverlay').style.display = 'flex';
   collapseWidget();
   inicializarBaseAgencias(); 
   setTimeout(() => document.getElementById('inputAgenciaModal').focus(), 100);
 }
-
 function cerrarModalSegmentador() {
   document.getElementById('segmentadorModalOverlay').style.display = 'none';
   document.getElementById('inputAgenciaModal').value = '';
   document.getElementById('resultadosAgenciaRapida').style.display = 'none';
   document.getElementById('areaDictamenRapido').style.display = 'none';
 }
-
 document.getElementById('segmentadorModalOverlay').addEventListener('click', function(e) {
   if (e.target === this) cerrarModalSegmentador();
 });
-
 function buscarAgenciaRapida() {
   const input = document.getElementById('inputAgenciaModal').value.trim().toLowerCase();
   const contenedorResultados = document.getElementById('resultadosAgenciaRapida');
@@ -526,7 +522,6 @@ function buscarAgenciaRapida() {
   }
   contenedorResultados.style.display = 'flex';
 }
-
 function seleccionarAgenciaParaDictamen(nombre, puede) {
   document.getElementById('resultadosAgenciaRapida').style.display = 'none'; 
   const claseBadge = (puede === 'SI') ? 'badge-orange' : 'badge-black';
@@ -538,7 +533,6 @@ function seleccionarAgenciaParaDictamen(nombre, puede) {
   document.getElementById('boxDictamenFinal').style.display = 'none';
   document.getElementById('areaDictamenRapido').style.display = 'block';
 }
-
 function evaluarDictamenRapido() {
   const armado = document.getElementById('select-armado-rapido').value;
   const caja = document.getElementById('boxDictamenFinal');
@@ -563,30 +557,25 @@ function evaluarDictamenRapido() {
     </div>
   `;
 }
-
 // =========================================
 // LÓGICA DE BÚSQUEDA UNIVERSAL (Baterías + Proyecto S + Motos Entregadas)
 // =========================================
 const modalOverlay = document.getElementById('vinModalOverlay');
 const vinInput = document.getElementById('vinInput');
 const dbResults = document.getElementById('dbResults');
-
 function abrirModalVIN() {
   modalOverlay.style.display = 'flex';
   collapseWidget(); 
   vinInput.focus(); 
 }
-
 function cerrarModalVIN() {
   modalOverlay.style.display = 'none';
   vinInput.value = ''; 
   dbResults.style.display = 'none'; 
 }
-
 modalOverlay.addEventListener('click', function(e) {
   if (e.target === this) cerrarModalVIN();
 });
-
 async function ejecutarBusquedaUniversal(e) {
   e.preventDefault();
   
@@ -768,10 +757,13 @@ async function ejecutarBusquedaUniversal(e) {
     btnSubmit.innerHTML = '<i class="fa-solid fa-database"></i> Consultar Bases';
   }
 }
+// =========================================
+// LÓGICA DEL BANNER DE AVISOS DINÁMICO POR FILA (GOOGLE SHEETS)
+// =========================================
+let avisosLista = [];
+let avisoActualIndex = 0;
+let avisoTimeout = null;
 
-// =========================================
-// LÓGICA DEL BANNER DE AVISOS DINÁMICO (GOOGLE SHEETS)
-// =========================================
 async function cargarAvisosDinamicos() {
   const sheetId = '1GBcoYjw-mziCA30F2CgqGM9kKWjJjeSiTGfHN6XM8rE';
   const sheetName = 'Avisos';
@@ -783,48 +775,88 @@ async function cargarAvisosDinamicos() {
     
     const jsonString = texto.substring(texto.indexOf('{'), texto.lastIndexOf('}') + 1);
     const data = JSON.parse(jsonString);
-    
     const rows = data.table.rows;
-    const tickerContainer = document.getElementById('tickerContent');
-    let tickerHTML = '';
+    
+    avisosLista = [];
     
     if (rows && rows.length > 0) {
       rows.forEach(row => {
-        const tipoVal = row.c[0] ? row.c[0].v : '';
+        const tipoVal = row.c[0] ? row.c[0].v : 'AVISO ATC';
         const avisoVal = row.c[1] ? row.c[1].v : '';
         
         if (avisoVal) {
-          let icono = 'fa-circle-info';
-          const tipoLower = tipoVal.toString().toLowerCase();
-          
-          if(tipoLower.includes('teléfono') || tipoLower.includes('cobranza') || tipoLower.includes('contacto')) icono = 'fa-phone';
-          else if(tipoLower.includes('horario') || tipoLower.includes('tiempo')) icono = 'fa-clock';
-          else if(tipoLower.includes('urgente') || tipoLower.includes('alerta') || tipoLower.includes('importante')) icono = 'fa-triangle-exclamation';
-          else if(tipoLower.includes('sistema') || tipoLower.includes('falla')) icono = 'fa-desktop';
-          else if(tipoLower.includes('calendario') || tipoLower.includes('fecha')) icono = 'fa-calendar-days';
-          
-          tickerHTML += `
-            <div class="ticker-item">
-              <i class="fa-solid ${icono}"></i>
-              <span><strong>${tipoVal}:</strong> ${avisoVal}</span>
-            </div>
-            <span class="ticker-separator">•</span>
-          `;
+          avisosLista.push({
+            tipo: tipoVal,
+            aviso: avisoVal
+          });
         }
       });
-      
-      tickerContainer.innerHTML = tickerHTML + tickerHTML;
+    }
+    
+    if (avisosLista.length > 0) {
+      avisoActualIndex = 0;
+      reproducirSiguienteAviso();
     } else {
-      tickerContainer.innerHTML = `<span style="color: var(--vento-white); font-weight: 500; padding-left: 20px;">No hay avisos activos en este momento.</span>`;
+      document.getElementById('tickerContent').innerHTML = `
+        <span style="color: var(--vento-white); font-weight: 500; padding-left: 20px;">
+          No hay avisos activos en este momento.
+        </span>`;
     }
   } catch (error) {
     console.error("Error al cargar los avisos de Sheets:", error);
-    document.getElementById('tickerContent').innerHTML = `<span style="color: var(--vento-orange); font-weight: 500; padding-left: 20px;"><i class="fa-solid fa-triangle-exclamation"></i> Error de conexión con el tablero de avisos.</span>`;
+    document.getElementById('tickerContent').innerHTML = `
+      <span style="color: var(--vento-orange); font-weight: 500; padding-left: 20px;">
+        <i class="fa-solid fa-triangle-exclamation"></i> Error de conexión con el tablero de avisos.
+      </span>`;
   }
 }
 
-window.addEventListener('DOMContentLoaded', cargarAvisosDinamicos);
+function reproducirSiguienteAviso() {
+  if (avisosLista.length === 0) return;
+  
+  const item = avisosLista[avisoActualIndex];
+  const badgeText = document.getElementById('badgeText');
+  const badgeIcon = document.getElementById('badgeIcon');
+  const tickerContainer = document.getElementById('tickerContent');
+  
+  // 1. Cambiar la parte de la Columna A (Badge e Ícono)
+  badgeText.innerText = item.tipo.toUpperCase();
+  
+  let icono = 'fa-bullhorn';
+  const tipoLower = item.tipo.toString().toLowerCase();
+  if (tipoLower.includes('teléfono') || tipoLower.includes('cobranza') || tipoLower.includes('contacto')) icono = 'fa-phone';
+  else if (tipoLower.includes('horario') || tipoLower.includes('tiempo')) icono = 'fa-clock';
+  else if (tipoLower.includes('urgente') || tipoLower.includes('alerta') || tipoLower.includes('importante')) icono = 'fa-triangle-exclamation';
+  else if (tipoLower.includes('sistema') || tipoLower.includes('falla')) icono = 'fa-desktop';
+  else if (tipoLower.includes('calendario') || tipoLower.includes('fecha')) icono = 'fa-calendar-days';
+  
+  badgeIcon.className = `fa-solid ${icono}`;
+  
+  // 2. Colocar el texto de la Columna B
+  tickerContainer.innerHTML = `
+    <div class="ticker-item">
+      <span>${item.aviso}</span>
+    </div>
+  `;
+  
+  // 3. Ajuste de ritmo más despacio (Mínimo 16 segundos por aviso o proporcional al largo)
+  const duracionSegundos = Math.max(16, Math.ceil(item.aviso.length * 0.22));
+  
+  // Reiniciar la animación CSS para la nueva fila
+  tickerContainer.style.animation = 'none';
+  tickerContainer.offsetHeight; // Forzar reflow en el navegador
+  tickerContainer.style.animation = `marquee ${duracionSegundos}s linear 1`;
+  
+  // 4. Programar paso a la siguiente fila al terminar el ciclo actual
+  if (avisoTimeout) clearTimeout(avisoTimeout);
+  avisoTimeout = setTimeout(() => {
+    // Pasar a la siguiente fila o reiniciar al inicio (ciclo infinito)
+    avisoActualIndex = (avisoActualIndex + 1) % avisosLista.length;
+    reproducirSiguienteAviso();
+  }, duracionSegundos * 1000);
+}
 
+window.addEventListener('DOMContentLoaded', cargarAvisosDinamicos);
 </script>
 </body>
 </html>
