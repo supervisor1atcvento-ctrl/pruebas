@@ -80,7 +80,6 @@ html,body{
   display: inline-block;
   white-space: nowrap;
   padding-left: 100%;
-  /* Animación por defecto, se sobreescribe por JS fila por fila */
   animation: marquee 28s linear infinite;
 }
 .ticker-container:hover .ticker-content {
@@ -109,6 +108,29 @@ html,body{
   0% { transform: translate3d(0, 0, 0); }
   100% { transform: translate3d(-100%, 0, 0); }
 }
+
+/* NUEVO: Botón para saltar aviso */
+.btn-next-aviso {
+  background-color: var(--vento-black);
+  color: var(--vento-orange);
+  border: none;
+  border-left: 2px solid var(--vento-gray-dark);
+  height: 100%;
+  padding: 0 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+  z-index: 2;
+}
+.btn-next-aviso:hover {
+  background-color: var(--vento-orange);
+  color: var(--vento-white);
+  border-left-color: var(--vento-orange);
+}
+
 /* Iframe full area ajustado */
 .frame-wrap{flex:1; display:block; height: calc(100vh - 40px);}
 .frame{width:100%; height:100%; border:0; display:block; background:var(--vento-white)}
@@ -278,6 +300,10 @@ select.input-vin {
         </span>
       </div>
     </div>
+    <!-- BOTÓN DE SIGUIENTE AVISO -->
+    <button class="btn-next-aviso" onclick="saltarAviso()" title="Saltar al siguiente aviso">
+      <i class="fa-solid fa-forward-step"></i>
+    </button>
   </div>
   
   <div class="frame-wrap">
@@ -558,7 +584,7 @@ function evaluarDictamenRapido() {
   `;
 }
 // =========================================
-// LÓGICA DE BÚSQUEDA UNIVERSAL (Baterías + Proyecto S + Motos Entregadas)
+// LÓGICA DE BÚSQUEDA UNIVERSAL
 // =========================================
 const modalOverlay = document.getElementById('vinModalOverlay');
 const vinInput = document.getElementById('vinInput');
@@ -819,7 +845,6 @@ function reproducirSiguienteAviso() {
   const badgeIcon = document.getElementById('badgeIcon');
   const tickerContainer = document.getElementById('tickerContent');
   
-  // 1. Cambiar la parte de la Columna A (Badge e Ícono)
   badgeText.innerText = item.tipo.toUpperCase();
   
   let icono = 'fa-bullhorn';
@@ -832,28 +857,47 @@ function reproducirSiguienteAviso() {
   
   badgeIcon.className = `fa-solid ${icono}`;
   
-  // 2. Colocar el texto de la Columna B
   tickerContainer.innerHTML = `
     <div class="ticker-item">
       <span>${item.aviso}</span>
     </div>
   `;
   
-  // 3. Ajuste de ritmo más despacio (Mínimo 16 segundos por aviso o proporcional al largo)
   const duracionSegundos = Math.max(16, Math.ceil(item.aviso.length * 0.22));
   
-  // Reiniciar la animación CSS para la nueva fila
   tickerContainer.style.animation = 'none';
-  tickerContainer.offsetHeight; // Forzar reflow en el navegador
+  tickerContainer.offsetHeight; // Forzar reflow
   tickerContainer.style.animation = `marquee ${duracionSegundos}s linear 1`;
   
-  // 4. Programar paso a la siguiente fila al terminar el ciclo actual
   if (avisoTimeout) clearTimeout(avisoTimeout);
   avisoTimeout = setTimeout(() => {
-    // Pasar a la siguiente fila o reiniciar al inicio (ciclo infinito)
-    avisoActualIndex = (avisoActualIndex + 1) % avisosLista.length;
-    reproducirSiguienteAviso();
+    avanzarIndiceO_Recargar();
   }, duracionSegundos * 1000);
+}
+
+// NUEVO: Función auxiliar para avanzar o reiniciar
+function avanzarIndiceO_Recargar() {
+  avisoActualIndex++;
+  
+  // Si llegamos al final del arreglo, se dispara una nueva carga para detectar adiciones en el Sheet
+  if (avisoActualIndex >= avisosLista.length) {
+    document.getElementById('tickerContent').innerHTML = `
+      <span style="color: var(--vento-white); font-weight: 600; padding-left: 20px;">
+        <i class="fa-solid fa-rotate fa-spin" style="color: var(--vento-orange); margin-right: 8px;"></i> Actualizando ciclo de avisos...
+      </span>`;
+    document.getElementById('tickerContent').style.animation = 'none';
+    
+    cargarAvisosDinamicos();
+  } else {
+    // Si aún hay avisos en la lista, sigue con el siguiente
+    reproducirSiguienteAviso();
+  }
+}
+
+// NUEVO: Lógica del Botón "Saltar Aviso"
+function saltarAviso() {
+  if (avisoTimeout) clearTimeout(avisoTimeout);
+  avanzarIndiceO_Recargar();
 }
 
 window.addEventListener('DOMContentLoaded', cargarAvisosDinamicos);
