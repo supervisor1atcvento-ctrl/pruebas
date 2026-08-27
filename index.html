@@ -11,12 +11,10 @@
   - Título: Segoe UI 38 (negritas)
   - Subtítulo: Segoe UI Semibold 32
   - Contenido: Segoe UI 28 (Ajustado proporcionalmente para tabla de datos web)
-  - Paleta: Blanco (#FFFFFF), Negro (#231F20), Gris (#616160), Naranja (#F28F17)
 */
 :root {
   --vento-black: #231F20;
   --vento-white: #FFFFFF;
-  --vento-grey:  #616160;
   --vento-orange:#F28F17;
   --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -44,7 +42,7 @@ body {
   justify-content: space-between;
   align-items: flex-end;
   padding: 20px 0 30px 0;
-  border-bottom: 2px solid var(--vento-grey);
+  border-bottom: 2px solid var(--vento-black);
   margin-bottom: 30px;
 }
 .header-titles h1 {
@@ -58,7 +56,8 @@ body {
   margin: 5px 0 0 0;
   font-size: 32px;
   font-weight: 600;
-  color: var(--vento-grey);
+  color: var(--vento-black);
+  opacity: 0.7;
 }
 .logo-container {
   text-align: right;
@@ -103,7 +102,7 @@ body {
 }
 select, input[type="text"] {
   padding: 14px;
-  border: 1px solid var(--vento-grey);
+  border: 1px solid var(--vento-black);
   border-radius: 0;
   font-size: 18px;
   font-family: var(--font-family);
@@ -134,7 +133,7 @@ select:focus, input[type="text"]:focus {
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 18px; /* Acercándonos a los 28px de contenido, ajustado a legibilidad web */
+  font-size: 18px; 
 }
 th, td {
   padding: 16px;
@@ -163,23 +162,20 @@ tr:hover { background: rgba(242, 143, 23, 0.05); cursor: pointer; }
 }
 .role-supervisor { background: var(--vento-black); }
 .role-asesor { background: var(--vento-orange); }
-.role-gerente { background: var(--vento-grey); }
-
+.role-gerente { background: var(--vento-white); color: var(--vento-black); border: 1px solid var(--vento-black); }
 .highlight { 
   background: rgba(242, 143, 23, 0.3); 
   padding: 2px 4px; 
 }
-.small { font-size: 14px; color: var(--vento-grey); }
+.small { font-size: 14px; color: var(--vento-black); opacity: 0.7; }
 a { color: var(--vento-orange); text-decoration: none; font-weight: bold; }
 a:hover { text-decoration: underline; color: var(--vento-black); }
-
 #loader { 
   color: var(--vento-orange); 
   font-weight: bold; 
   padding: 20px 0; 
   font-size: 18px;
 }
-
 .details {
   background: #f7f7f7;
   padding: 20px;
@@ -204,18 +200,18 @@ a:hover { text-decoration: underline; color: var(--vento-black); }
   <div class="header-section">
     <div class="header-titles">
       <h1>Directorio Post Venta</h1>
-      <h2>Busqueda por Area</h2>
+      <h2>Búsqueda por Área</h2>
     </div>
     <div class="logo-container">
       <div class="logo-text">VENTO</div>
       <div class="logo-sub">MOTORCYCLES U.S.A</div>
     </div>
   </div>
-
   <div class="controls" aria-hidden="false">
     <div class="control">
       <label for="area-select">Seleccionar Pestaña</label>
       <select id="area-select" aria-label="Seleccionar pestaña">
+        <!-- NOTA: Asegúrate de ajustar los valores aquí para que empaten con tu nueva hoja -->
         <option value="ATENCION A CLIENTES">Atención a Clientes</option>
         <option value="REPARACIONES TIENDAS">Reparaciones Tiendas</option>
         <option value="REPARACIONES AGENCIAS">Reparaciones Agencias</option>
@@ -239,7 +235,6 @@ a:hover { text-decoration: underline; color: var(--vento-black); }
       <input type="text" id="search-input" placeholder="Escribe para buscar (Ej. Asesor, Nombre)..." aria-label="Buscar persona correo o rol">
     </div>
   </div>
-
   <div>
     <div class="table-actions">
       <div class="small" id="info-note">Vista completa consolidada. Selecciona una fila para ver detalles completos.</div>
@@ -258,11 +253,10 @@ a:hover { text-decoration: underline; color: var(--vento-black); }
     <div id="detail-panel" style="display:none" class="details" aria-hidden="true"></div>
   </div>
 </div>
-
 <script>
-const SHEET_ID = '1LfMR89SNg0fj1361_Qj1hBqNa35eteulkstloqSdWVw';
+// ID de la nueva base de datos
+const SHEET_ID = '16H9itDsXLT4Zmsgk3tnug3RiIF14MsrOBEXrHzSIIew';
 let currentData = [], currentHeaders = [], filteredData = [];
-
 const areaSelect = document.getElementById('area-select');
 const searchInput = document.getElementById('search-input');
 const table = document.getElementById('data-table');
@@ -272,56 +266,35 @@ const loader = document.getElementById('loader');
 const recordCount = document.getElementById('record-count');
 const detailPanel = document.getElementById('detail-panel');
 
+// Función que arrastra hacia abajo los datos de las celdas combinadas
 function fillMergedCells(rawData) {
   if (!rawData || rawData.length === 0) return rawData;
   const numRows = rawData.length;
   const numCols = Math.max(...rawData.map(r => r.length));
-  
-  // 1. Normalizar celdas vacías a strings vacíos
   for (let i = 0; i < numRows; i++) {
     rawData[i] = rawData[i] || [];
     for (let j = 0; j < numCols; j++) {
       if (typeof rawData[i][j] === 'undefined') rawData[i][j] = '';
     }
   }
-  
-  // 2. Encontrar la fila de encabezados (buscando palabras clave en las primeras 10 filas)
-  let headerRowIndex = -1;
-  for (let i = 0; i < Math.min(10, numRows); i++) {
-    const rowStr = rawData[i].join("").toUpperCase();
-    if (rowStr.includes("CORREO") || rowStr.includes("ASESOR") || rowStr.includes("GERENTE") || rowStr.includes("NOMBRE") || rowStr.includes("ANALISTA")) {
-      headerRowIndex = i;
-      break;
-    }
-  }
-  
-  // 3. Procesar las columnas y aplicar el relleno condicionado
   for (let col = 0; col < numCols; col++) {
-    
-    // Validar si la columna actual pertenece a Zonificación[cite: 1]
-    let isZonificacion = false;
-    if (headerRowIndex !== -1) {
-      const headerName = (rawData[headerRowIndex][col] || '').toString().toUpperCase();
-      if (headerName.includes('ZON') || headerName.includes('ZONIFIC')) {
-        isZonificacion = true;
+    let last = '';
+    for (let row = 0; row < numRows; row++) {
+      if (rawData[row][col] !== '' && rawData[row][col] !== null) {
+        last = rawData[row][col];
+      } else {
+        rawData[row][col] = last;
       }
     }
-    
-    // Si NO es zonificación, arrastramos el dato hacia abajo para rellenar las celdas combinadas[cite: 1]
-    if (!isZonificacion) {
-      let last = '';
-      for (let row = 0; row < numRows; row++) {
-        if (rawData[row][col] !== '' && rawData[row][col] !== null) {
-          last = rawData[row][col];
-        } else {
-          rawData[row][col] = last;
-        }
-      }
-    }
-    // Si ES zonificación, ignoramos el ciclo "last" y se quedan los espacios en blanco intactos.
   }
-  
   return rawData;
+}
+
+// Filtra las columnas para extraer solo las necesarias para un directorio funcional
+function isImportantColumn(headerName) {
+  const h = (headerName || '').toString().trim().toUpperCase();
+  const keywords = ['NOMBRE', 'CORREO', 'EMAIL', 'TEL', 'CEL', 'PUESTO', 'ROL', 'CARGO', 'AREA', 'DEPARTAMENTO', 'SUCURSAL', 'EXTENSIÓN', 'EXT'];
+  return keywords.some(kw => h.includes(kw));
 }
 
 function isExcludedRow(row) {
@@ -413,11 +386,11 @@ function loadData(sheetName) {
         });
         currentData = nonEmpty;
         
+        // Conservamos solamente las columnas vitales para el directorio
         if (currentData.length > 0) {
-          const keys = Object.keys(currentData[0]);
-          currentHeaders = keys;
+          currentHeaders = Object.keys(currentData[0]).filter(h => isImportantColumn(h));
         } else {
-          currentHeaders = headers.filter(h => h && h !== '');
+          currentHeaders = headers.filter(h => h && isImportantColumn(h));
         }
       } else {
         currentHeaders = [];
@@ -429,25 +402,25 @@ function loadData(sheetName) {
       table.style.display = 'table';
     },
     error: function(err) {
-      loader.innerHTML = '<span style="color:var(--vento-orange);">No se pudo conectar. Verifica permisos de lectura.</span>';
+      loader.innerHTML = '<span style="color:var(--vento-orange);">No se pudo conectar. Verifica que la pestaña exista o los permisos de lectura.</span>';
       console.error(err);
     }
   });
 }
 
 function renderTableAll() {
-  thead.innerHTML = '<tr>' + currentHeaders.filter(h=>h).map(h => `<th data-col="${h}">${h}</th>`).join('') + '</tr>';
+  thead.innerHTML = '<tr>' + currentHeaders.map(h => `<th data-col="${h}">${h}</th>`).join('') + '</tr>';
   tbody.innerHTML = filteredData.map((row, idx) => {
-    const rol = row['ROL'] || row['PUESTO'] || '';
+    const rol = row['ROL'] || row['PUESTO'] || row['CARGO'] || '';
     const roleClass = (rol.toLowerCase().includes('supervisor')) ? 'role-supervisor' : (rol.toLowerCase().includes('asesor') ? 'role-asesor' : 'role-gerente');
     
     return `<tr data-idx="${idx}">
-      ${currentHeaders.filter(h=>h).map(h => {
+      ${currentHeaders.map(h => {
         const val = row[h] || '';
         const q = (searchInput.value||'').trim().toLowerCase();
         const display = q && val.toString().toLowerCase().includes(q) ? val.toString().replace(new RegExp(q,'ig'), m=>`<span class="highlight">${m}</span>`) : val;
         
-        if (h.toUpperCase().includes('ROL') || h.toUpperCase().includes('PUESTO')) {
+        if (h.toUpperCase().includes('ROL') || h.toUpperCase().includes('PUESTO') || h.toUpperCase().includes('CARGO')) {
           return `<td><span class="role-badge ${roleClass}">${display}</span></td>`;
         }
         if (h.toUpperCase().includes('NOMBRE') || h.toUpperCase().includes('ASESOR')) {
@@ -455,9 +428,6 @@ function renderTableAll() {
         }
         if (h.toUpperCase().includes('CORREO') || h.toUpperCase().includes('EMAIL')) {
           return `<td><a href="mailto:${val}">${display}</a></td>`;
-        }
-        if (h.toUpperCase().includes('ZON') || h.toUpperCase().includes('ZONIFIC')) {
-          return `<td class="small">${display}</td>`;
         }
         return `<td>${display}</td>`;
       }).join('')}
@@ -477,18 +447,16 @@ function renderTableAll() {
 function showDetails(row) {
   if (!row) { detailPanel.style.display='none'; detailPanel.setAttribute('aria-hidden','true'); return; }
   const email = row['CORREO'] || row['EMAIL'] || '';
-  const tel = row['TEL'] || row['TELEFONO'] || row['CELULAR'] || '';
-  const zon = row['ZONIFICACION'] || row['ZONIFICACIÓN'] || '';
+  const tel = row['TEL'] || row['TELEFONO'] || row['CELULAR'] || row['CEL'] || row['EXT'] || '';
+  const area = row['AREA'] || row['DEPARTAMENTO'] || row['SUCURSAL'] || '';
   const horario = row['HORARIO'] || row['DISPONIBILIDAD'] || '';
-  const notas = row['NOTAS'] || row['COMENTARIOS'] || '';
   
   detailPanel.innerHTML = `<strong style="font-size:24px;">${row['NOMBRE'] || row['ASESOR'] || row['NOMBRE COMPLETO'] || 'Detalle'}</strong>
-    <div class="small" style="margin-bottom: 15px; font-size:16px;">Rol: ${row['ROL'] || row['PUESTO'] || 'N/A'}</div>
-    ${zon ? `<div style="margin-top:6px"><strong>Zonificación</strong>: ${zon}</div>` : ''}
+    <div class="small" style="margin-bottom: 15px; font-size:16px;">Rol: ${row['ROL'] || row['PUESTO'] || row['CARGO'] || 'N/A'}</div>
+    ${area ? `<div style="margin-top:6px"><strong>Área</strong>: ${area}</div>` : ''}
     <div style="margin-top:8px"><strong>Correo</strong>: <a href="mailto:${email}">${email}</a></div>
-    <div style="margin-top:6px"><strong>Teléfono</strong>: ${tel}</div>
+    <div style="margin-top:6px"><strong>Contacto</strong>: ${tel}</div>
     ${horario ? `<div style="margin-top:6px"><strong>Horario</strong>: ${horario}</div>` : ''}
-    ${notas ? `<div style="margin-top:8px"><strong>Notas</strong>: ${notas}</div>` : ''}
   `;
   detailPanel.style.display = 'block';
   detailPanel.setAttribute('aria-hidden','false');
@@ -502,15 +470,12 @@ function applyFilter() {
   });
   renderTableAll();
 }
-
 searchInput.addEventListener('input', () => {
   clearTimeout(window._deb);
   window._deb = setTimeout(applyFilter, 180);
 });
 areaSelect.addEventListener('change', (e) => loadData(e.target.value));
-
 loadData(areaSelect.value);
-
 document.addEventListener('keydown', (e) => {
   if (e.altKey && e.key === 'f') { e.preventDefault(); searchInput.focus(); }
 });
