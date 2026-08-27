@@ -847,7 +847,7 @@ function reproducirSiguienteAviso() {
   
   let icono = 'fa-bullhorn';
   const tipoLower = item.tipo.toString().toLowerCase();
-  if (tipoLower.includes('teléfono') || tipoLower.includes('cobranza') || tipoLower.includes('contacto')) icono = 'fa-phone';
+  if (tipoLower.includes('teléfono') || tipoLower.includes('contacto')) icono = 'fa-phone';
   else if (tipoLower.includes('horario') || tipoLower.includes('tiempo')) icono = 'fa-clock';
   else if (tipoLower.includes('urgente') || tipoLower.includes('alerta') || tipoLower.includes('importante')) icono = 'fa-triangle-exclamation';
   else if (tipoLower.includes('sistema') || tipoLower.includes('falla')) icono = 'fa-desktop';
