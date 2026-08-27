@@ -276,22 +276,51 @@ function fillMergedCells(rawData) {
   if (!rawData || rawData.length === 0) return rawData;
   const numRows = rawData.length;
   const numCols = Math.max(...rawData.map(r => r.length));
+  
+  // 1. Normalizar celdas vacías a strings vacíos
   for (let i = 0; i < numRows; i++) {
     rawData[i] = rawData[i] || [];
     for (let j = 0; j < numCols; j++) {
       if (typeof rawData[i][j] === 'undefined') rawData[i][j] = '';
     }
   }
-  for (let col = 0; col < numCols; col++) {
-    let last = '';
-    for (let row = 0; row < numRows; row++) {
-      if (rawData[row][col] !== '' && rawData[row][col] !== null) {
-        last = rawData[row][col];
-      } else {
-        rawData[row][col] = last;
-      }
+  
+  // 2. Encontrar la fila de encabezados (buscando palabras clave en las primeras 10 filas)
+  let headerRowIndex = -1;
+  for (let i = 0; i < Math.min(10, numRows); i++) {
+    const rowStr = rawData[i].join("").toUpperCase();
+    if (rowStr.includes("CORREO") || rowStr.includes("ASESOR") || rowStr.includes("GERENTE") || rowStr.includes("NOMBRE") || rowStr.includes("ANALISTA")) {
+      headerRowIndex = i;
+      break;
     }
   }
+  
+  // 3. Procesar las columnas y aplicar el relleno condicionado
+  for (let col = 0; col < numCols; col++) {
+    
+    // Validar si la columna actual pertenece a Zonificación[cite: 1]
+    let isZonificacion = false;
+    if (headerRowIndex !== -1) {
+      const headerName = (rawData[headerRowIndex][col] || '').toString().toUpperCase();
+      if (headerName.includes('ZON') || headerName.includes('ZONIFIC')) {
+        isZonificacion = true;
+      }
+    }
+    
+    // Si NO es zonificación, arrastramos el dato hacia abajo para rellenar las celdas combinadas[cite: 1]
+    if (!isZonificacion) {
+      let last = '';
+      for (let row = 0; row < numRows; row++) {
+        if (rawData[row][col] !== '' && rawData[row][col] !== null) {
+          last = rawData[row][col];
+        } else {
+          rawData[row][col] = last;
+        }
+      }
+    }
+    // Si ES zonificación, ignoramos el ciclo "last" y se quedan los espacios en blanco intactos.
+  }
+  
   return rawData;
 }
 
