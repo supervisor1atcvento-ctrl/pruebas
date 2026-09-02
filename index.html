@@ -103,18 +103,35 @@
         }
 
         // 2. Copia idéntica de tu función de duración
-        function durationToSeconds(s){ 
-            if(!s) return 0; 
-            const str=String(s).trim().toLowerCase(); 
-            if(!str) return 0; 
-            let total=0;
-            const mD=str.match(/(\d+)\s*d/); if(mD) total+=parseInt(mD[1],10)*86400;
-            const mH=str.match(/(\d+)\s*h/); if(mH) total+=parseInt(mH[1],10)*3600;
-            const mM=str.match(/(\d+)\s*m/); if(mM) total+=parseInt(mM[1],10)*60;
-            const mS=str.match(/(\d+)\s*s/); if(mS) total+=parseInt(mS[1],10);
-            if(total===0){ const onlyNum=str.match(/^(\d+)$/); if(onlyNum) total=parseInt(onlyNum[1],10); }
-            return total;
-        }
+function durationToSeconds(s) {
+    if (!s) return 0;
+    const str = String(s).trim().toLowerCase();
+    if (!str) return 0;
+
+    // 1. Soporte para formato clásico HH:MM:SS (Por si Sheets lo formatea así en el CSV)
+    const timeMatch = str.match(/^(?:(\d+):)?(\d{1,2}):(\d{1,2})$/);
+    if (timeMatch) {
+        const h = parseInt(timeMatch[1] || 0, 10);
+        const m = parseInt(timeMatch[2] || 0, 10);
+        const sec = parseInt(timeMatch[3] || 0, 10);
+        return (h * 3600) + (m * 60) + sec;
+    }
+
+    // 2. Soporte para el formato 1d 2h 1m 1s (y variantes robustas)
+    let total = 0;
+    const mD = str.match(/(\d+)\s*(?:d|día|dia|day)/); if(mD) total += parseInt(mD[1],10) * 86400;
+    const mH = str.match(/(\d+)\s*(?:h|hr|hora)/);    if(mH) total += parseInt(mH[1],10) * 3600;
+    const mM = str.match(/(\d+)\s*(?:m|min|minuto)/); if(mM) total += parseInt(mM[1],10) * 60;
+    const mS = str.match(/(\d+)\s*(?:s|seg|sec)/);    if(mS) total += parseInt(mS[1],10);
+
+    // 3. Fallback de seguridad si es un número puro
+    if (total === 0) {
+        const onlyNum = str.match(/^(\d+)(?:\.\d+)?$/);
+        if (onlyNum) total = parseInt(onlyNum[1], 10);
+    }
+    
+    return total;
+}
 
         // 3. Lógica de parseo CSV idéntica
         function parseCSV(text){
