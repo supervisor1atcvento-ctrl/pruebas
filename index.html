@@ -177,6 +177,14 @@ function durationToSeconds(s) {
                     const rawStatus = rows[i][COL_STATUS] || '';
                     const rawDuration = rows[i][COL_DURATION] || '';
 
+// --- INICIO DE CÓDIGO DE DEBUG ---
+// Esto imprimirá en consola solo las primeras 3 filas para no saturar
+if (i <= 3) {
+    console.log("Fila " + (i + 1) + ":", rows[i]);
+    console.log("Dato extraído para Col K (Índice 10):", rows[i][10]);
+}
+// --- FIN DE CÓDIGO DE DEBUG ---
+
                     // Evaluando con tus funciones
                     const parsedDate = parseDateFlexible(rawDate);
                     const parsedStatus = String(rawStatus).toLowerCase();
