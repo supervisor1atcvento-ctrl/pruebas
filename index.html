@@ -157,7 +157,7 @@ function durationToSeconds(s) {
             tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:20px;">Conectando con Google Sheets y analizando...</td></tr>';
 
             try {
-                const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+                const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('Error al conectar con el Google Sheet. Código HTTP: ' + res.status);
                 
