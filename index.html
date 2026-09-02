@@ -14,48 +14,89 @@
         :root {
             --bg: #F5F5F5;            
             --card: #FFFFFF;          
-            --vento-primary: #231F20; 
-            --muted: #616160;         
-            --vento-accent: #F28F17;  
-            --success: #10B981;       
-            --warning: #F59E0B;       
-            --danger: #EF4444;        
+            --vento-primary: #231F20; /* Negro Institucional */
+            --muted: #616160;         /* Gris */
+            --vento-accent: #F28F17;  /* Naranja Institucional */
+            
+            --success: #10B981;       /* Verde Meta */
+            --warning: #F59E0B;       /* Amarillo Cerca */
+            --danger: #EF4444;        /* Rojo Alejado */
             --border: #E5E7EB;
             --radius: 12px;
             --shadow-sm: 0 4px 20px rgba(35, 31, 32, 0.08);
         }
+        /* ----------------- Reset y Tipografía ----------------- */
         * { box-sizing: border-box; }
         html, body { height: 100%; }
         body {
-            margin: 0; font-family: "Segoe UI", Inter, Arial, sans-serif;
-            background: var(--bg); color: var(--vento-primary);
-            -webkit-font-smoothing: antialiased; line-height: 1.4; font-size: 14px;
+            margin: 0;
+            font-family: "Segoe UI", Inter, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--vento-primary);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.4;
+            font-size: 14px;
         }
-        .container { max-width: 1320px; margin: 24px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 20px; }
-        header { display: flex; align-items: center; justify-content: space-between; background: var(--card); padding: 16px 24px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+        .container {
+            max-width: 1320px;
+            margin: 24px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        /* ----------------- Header ----------------- */
+        header {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--card); padding: 16px 24px;
+            border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+        }
         .brand { display: flex; align-items: center; gap: 16px; }
-        .logo { width: 52px; height: 52px; border-radius: 10px; background: var(--vento-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; box-shadow: 0 4px 12px rgba(35, 31, 32, 0.15); }
+        .logo {
+            width: 52px; height: 52px; border-radius: 10px;
+            background: var(--vento-primary); color: #fff; 
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 20px; box-shadow: 0 4px 12px rgba(35, 31, 32, 0.15);
+        }
         h1 { font-size: 24px; margin: 0; font-weight: 700; color: var(--vento-primary); letter-spacing: -0.5px; }
         .subtitle { font-size: 14px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+        /* ----------------- Top Cards ----------------- */
         .top-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .top-card { background: var(--card); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+        .top-card {
+            background: var(--card); border-radius: var(--radius); padding: 20px;
+            border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+        }
         .card-header { font-size: 14px; color: var(--vento-primary); font-weight: 700; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px; }
         .goals-wrapper { display: flex; gap: 24px; flex-wrap: wrap; }
         .goal-col { flex: 1; min-width: 200px; }
         .goal-title { font-weight: 700; font-size: 13px; color: var(--muted); text-transform: uppercase; border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; }
         .goal-item { font-size: 14px; display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
         .goal-item strong { color: var(--vento-accent); font-size: 16px; font-weight: 700; }
+        
         .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .stat { padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); text-align: center; }
         .stat .label { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
         .stat .value { font-weight: 700; font-size: 20px; color: var(--vento-primary); margin-top: 4px; }
-        .controls-wrapper { background: var(--card); padding: 16px 20px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px; }
+        /* ----------------- Controles y Filtros ----------------- */
+        .controls-wrapper {
+            background: var(--card); padding: 16px 20px; border-radius: var(--radius);
+            border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px;
+        }
         .filters { display: flex; gap: 16px; flex-wrap: wrap; }
         .control { display: flex; flex-direction: column; min-width: 160px; flex: 1; }
         .control label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; }
         select, input[type="date"] { padding: 10px; border-radius: 8px; border: 1px solid #CCC; font-size: 14px; font-family: "Segoe UI", sans-serif; outline: none; width: 100%; }
         select:focus, input[type="date"]:focus { border-color: var(--vento-accent); }
-        .rules-bar { background: #FFF4E5; border-left: 4px solid var(--vento-accent); padding: 12px 16px; border-radius: 6px; font-size: 13px; color: var(--vento-primary); }
+        
+        /* Tema de Reglas */
+        .rules-bar {
+            background: #FFF4E5;
+            border-left: 4px solid var(--vento-accent);
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--vento-primary);
+        }
         .rules-bar ul { margin: 6px 0 0 20px; padding: 0; }
         .rules-bar li { margin-bottom: 4px; }
         .actions-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 14px; }
@@ -66,29 +107,45 @@
         button.ghost:hover { background: var(--vento-primary); color: #FFF; }
         button.download-btn { background: transparent; border: 2px solid var(--vento-accent); color: var(--vento-accent); padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; }
         button.download-btn:hover { background: var(--vento-accent); color: #FFF; }
+        
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
         .tab { background: var(--bg); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--muted); font-size: 14px; }
         .tab.active { background: var(--vento-primary); border-color: var(--vento-primary); color: #FFF; }
+        /* ----------------- Tabla Leaderboard ----------------- */
         .card { background: var(--card); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
         .table-wrap { overflow-x: auto; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
         thead th { text-align: left; padding: 14px 12px; background: var(--bg); color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--border); }
         tbody td { padding: 16px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        
         .advisor-name-link { font-weight: 700; font-size: 16px; color: var(--vento-primary); cursor: pointer; text-decoration: none; transition: color 0.2s; }
         .advisor-name-link:hover { color: var(--vento-accent); text-decoration: underline; }
         .meta-small { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        
         .col-metric { min-width: 150px; }
         .metric-val { font-size: 18px; font-weight: 700; color: var(--vento-primary); margin-bottom: 4px; }
         .rubro-bar-wrap { width: 100%; background: #E5E7EB; border-radius: 4px; height: 6px; overflow: hidden; margin-bottom: 4px; }
         .rubro-bar { height: 100%; transition: width 0.5s ease, background-color 0.3s ease; }
         .metric-sub { font-size: 11px; font-weight: 600; color: var(--muted); }
+        
         .score { font-size: 18px; padding: 6px 12px; border-radius: 8px; background: #FFF4E5; color: var(--vento-accent); font-weight: 700; display: inline-block; border: 1px solid rgba(242, 143, 23, 0.2); }
         .top-highlight-1 td { background: rgba(255, 213, 74, 0.1); }
         .top-highlight-2 td { background: rgba(230, 238, 248, 0.4); }
         .top-highlight-3 td { background: rgba(255, 216, 181, 0.2); }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(35, 31, 32, 0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
-        .modal-content { background-color: var(--card); padding: 24px 32px; border-radius: var(--radius); width: 90%; max-width: 800px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative; }
-        .close-modal { position: absolute; top: 16px; right: 24px; font-size: 28px; font-weight: bold; color: var(--muted); cursor: pointer; transition: color 0.2s; }
+        /* ----------------- Modal Gráficas ----------------- */
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(35, 31, 32, 0.7); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background-color: var(--card); padding: 24px 32px; border-radius: var(--radius);
+            width: 90%; max-width: 800px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative;
+        }
+        .close-modal {
+            position: absolute; top: 16px; right: 24px; font-size: 28px; font-weight: bold;
+            color: var(--muted); cursor: pointer; transition: color 0.2s;
+        }
         .close-modal:hover { color: var(--vento-accent); }
         .chart-container { position: relative; height: 350px; width: 100%; margin-top: 20px; }
         footer { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; padding-bottom: 20px; font-weight: 600; }
@@ -110,6 +167,7 @@
             <div id="lastSync" style="font-weight: 700; color: var(--vento-primary); font-size: 15px; margin-top: 4px;">--:--</div>
         </div>
     </header>
+    <!-- TOP BAR -->
     <div class="top-bar">
         <div class="top-card">
             <div class="card-header">Metas del Mes Activas</div>
@@ -128,6 +186,7 @@
                 </div>
             </div>
         </div>
+        
         <div class="top-card">
             <div class="card-header">Métricas Generales del Periodo (Válidas)</div>
             <div class="stats">
@@ -138,6 +197,7 @@
             </div>
         </div>
     </div>
+    <!-- CONTROLES -->
     <div class="controls-wrapper">
         <div class="filters">
             <div class="control">
@@ -145,8 +205,8 @@
                 <select id="periodSelector">
                     <option value="custom">Personalizado</option>
                     <option value="today">Hoy</option>
-                    <option value="lastMonth">Mes Anterior</option>
                     <option value="thisMonth" selected>Este Mes</option>
+                    <option value="prevMonth">Mes Anterior</option>
                 </select>
             </div>
             <div class="control">
@@ -164,6 +224,8 @@
                 </select>
             </div>
         </div>
+        
+        <!-- Módulo de Reglas -->
         <div class="rules-bar">
             <strong>📌 Reglas de Negocio (Filtros de validación para metas):</strong>
             <ul>
@@ -172,11 +234,13 @@
                 <li><strong>Chats:</strong> Se cuentan los atendidos por <em>AGENT</em> y con una duración <em>menor o igual a 5 minutos (300 segundos)</em>.</li>
             </ul>
         </div>
+        
+        <!-- Fila de Descargas -->
         <div class="actions-row">
             <button class="ghost" id="refreshBtn">↻ Refrescar</button>
             <button class="primary" id="applyFilters">Aplicar Filtros</button>
             <button class="download-btn" id="downloadFilteredBtn" title="Descarga la tabla resumen que ves en pantalla">📊 Resumen Leaderboard</button>
-            <button class="download-btn" id="downloadExcelTabsBtn" title="Descarga un Excel con 4 pestañas exclusivas de interacciones válidas">🗂️ Descargar Excel Multi-Pestaña</button>
+            <button class="download-btn" id="downloadExcelTabsBtn" title="Descarga un Excel con 4 pestañas: Resumen y bases de datos detalladas exclusivas de interacciones válidas">🗂️ Descargar Excel Multi-Pestaña</button>
             <select id="downloadRawSelect" style="max-width: 200px; border: 2px solid var(--muted); font-weight: 600; border-radius:8px; padding:8px;">
                 <option value="">📁 Base en Crudo...</option>
                 <option value="tickets">Crudo: Tickets</option>
@@ -193,10 +257,12 @@
         <div class="tab" data-group="Nuevo ingreso">Nuevo Ingreso</div>
         <div class="tab" data-group="OTROS">Otros</div>
     </div>
+    <!-- MAIN LEADERBOARD -->
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h2 style="margin: 0; font-size: 18px; color: var(--vento-primary); font-weight: 700;">Leaderboard de Rendimiento</h2>
         </div>
+        
         <div class="table-wrap">
             <table id="leaderboardTable">
                 <thead>
@@ -212,6 +278,7 @@
                 <tbody id="leaderboardBody"></tbody>
             </table>
         </div>
+        
         <div style="margin-top: 16px; color: var(--muted); font-size: 12px; background: var(--bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border);">
             <strong style="color: var(--vento-accent);">💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para visualizar la gráfica de constancia diaria.<br>
             <div style="margin-top: 4px;"><strong>Indicadores de color en barras:</strong> <span style="color: var(--success); font-weight: bold;">■ Verde</span> (En meta), <span style="color: var(--warning); font-weight: bold;">■ Amarillo</span> (Cerca, &ge;80%), <span style="color: var(--danger); font-weight: bold;">■ Rojo</span> (Rezago, &lt;80%).</div>
@@ -219,6 +286,7 @@
     </div>
     <footer>Dashboard Privado · Actualización automática programada (15 min)</footer>
 </div>
+<!-- Modal de Gráfica -->
 <div id="chartModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" id="closeModal">&times;</span>
@@ -229,6 +297,7 @@
         </div>
     </div>
 </div>
+<!-- Loader -->
 <div id="loadingOverlay" style="position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(255,255,255,0.85); z-index: 9999;">
     <div style="text-align: center;">
         <div style="width: 50px; height: 50px; border-radius: 50%; border: 4px solid var(--border); border-top-color: var(--vento-accent); animation: spin 0.8s linear infinite; margin: 0 auto;"></div>
@@ -237,6 +306,7 @@
 </div>
 <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 <script>
+/* ----------------- Config y constantes ----------------- */
 const SPREADSHEET_ID = '1JBre4cLAbYiOJuYye_FGcsk5U_BIStDoAiCbV-B8WoA';
 const ASSESSORS_SPREADSHEET_ID = '1GBcoYjw-mziCA30F2CgqGM9kKWjJjeSiTGfHN6XM8rE';
 const SHEETS = { tickets: 'Tickets_BD', chats: 'Chats_BD', calls: 'Llamadas_BD', asesoresSheet: 'Asesores' };
@@ -246,11 +316,13 @@ const COL = {
     tickets: { advisor: letterToIndex('E'), date: letterToIndex('H'), statusI: letterToIndex('I'), status: letterToIndex('M') },
     chats: { advisor: letterToIndex('B'), duration: letterToIndex('C'), date: letterToIndex('I'), agentFlag: letterToIndex('M') },
     calls: { advisor: letterToIndex('B'), date: letterToIndex('C'), status: letterToIndex('D'), duration: letterToIndex('K') },
-    asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') } 
+    asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') }
 };
+/* ----------------- Estado Global ----------------- */
 let aliasMap = {}; let metaMap = {}; let cache = { tickets:[], chats:[], calls:[] };
-let activeGroup = 'All'; let currentChartInstance = null; let currentFilteredData = []; 
-
+let activeGroup = 'All'; let currentChartInstance = null;
+let currentFilteredData = []; 
+/* ----------------- Utilidades de Parseo ----------------- */
 function parseCSV(text){
     const rows=[]; let cur='', row=[], inQuotes=false;
     for(let i=0; i<text.length; i++){ 
@@ -285,53 +357,75 @@ function durationToSeconds(s){
     if(total===0){ const onlyNum=str.match(/^(\d+)$/); if(onlyNum) total=parseInt(onlyNum[1],10); }
     return total;
 }
-
-// NUEVO Y BLINDADO MOTOR DE FECHAS
+// FIX CRÍTICO: Función de fecha blindada para evitar comportamientos "Invalid Date"
 function parseDateFlexible(v){ 
-    if(!v) return null; const s=String(v).trim(); if(s===''||s==='0'||s==='-'||s.toLowerCase()==='null') return null;
+    if(!v) return null; 
+    const s = String(v).trim().toLowerCase(); 
+    if(s==='' || s==='0' || s==='-' || s==='null') return null;
     
-    const mYMD = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/); 
-    if(mYMD) return new Date(+mYMD[1], +mYMD[2]-1, +mYMD[3]);
+    // Intento primario estándar
+    const d1 = new Date(v); 
+    if(!isNaN(d1.getTime())) return d1;
     
-    const mDMY = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
-    if(mDMY){ 
-        let p1=+mDMY[1], p2=+mDMY[2], yr=+mDMY[3]; 
-        if(yr<100) yr+=2000;
-        if(p1>12) return new Date(yr, p2-1, p1); 
-        return new Date(yr, p1-1, p2); 
+    // Intento para meses en texto en español (ej. 31-ago-2026)
+    const esMonths = { 'ene':0, 'feb':1, 'mar':2, 'abr':3, 'may':4, 'jun':5, 'jul':6, 'ago':7, 'sep':8, 'oct':9, 'nov':10, 'dic':11 };
+    const mText = s.match(/^(\d{1,2})[\/\-\s]+([a-z]{3,})[\/\-\s]+(\d{2,4})/);
+    if(mText) {
+        const mName = mText[2].substring(0,3);
+        if(esMonths[mName] !== undefined) {
+            let yr = parseInt(mText[3], 10);
+            if(yr < 100) yr += 2000;
+            return new Date(yr, esMonths[mName], parseInt(mText[1], 10));
+        }
+    }
+
+    // Intento para fechas ambiguas DD/MM o MM/DD
+    const m = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/); 
+    if(m){ 
+        let p1 = parseInt(m[1], 10), p2 = parseInt(m[2], 10), yr = parseInt(m[3], 10);
+        if(yr < 100) yr += 2000;
+        let day = p1, mon = p2 - 1;
+        if (p1 > 12) { day = p1; mon = p2 - 1; }
+        else if (p2 > 12) { day = p2; mon = p1 - 1; }
+        
+        const dTest = new Date(yr, mon, day);
+        if(!isNaN(dTest.getTime())) return dTest;
     }
     
-    const d1=new Date(s); if(!isNaN(d1.getTime())) return d1; 
+    // Intento para YYYY/MM/DD
+    const m2 = s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/); 
+    if(m2){ 
+        return new Date(parseInt(m2[1],10), parseInt(m2[2],10)-1, parseInt(m2[3],10)); 
+    }
     return null;
 }
-
+/* ----------------- Lógica de Fechas Automatizadas ----------------- */
 document.getElementById('periodSelector').addEventListener('change', function() {
     const period = this.value;
     const today = new Date();
     
-    const formatDateLocal = (date) => {
-        const offset = date.getTimezoneOffset();
-        const localDate = new Date(date.getTime() - (offset * 60 * 1000));
-        return localDate.toISOString().split('T')[0];
+    // FIX: String builder manual para evitar desfases con el Timezone local
+    const buildDateString = (date) => {
+        return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
     };
     
     if (period === 'today') {
-        const dateStr = formatDateLocal(today);
+        const dateStr = buildDateString(today);
         document.getElementById('dateFrom').value = dateStr;
         document.getElementById('dateTo').value = dateStr;
     } else if (period === 'thisMonth') {
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
         const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        document.getElementById('dateFrom').value = formatDateLocal(firstDay);
-        document.getElementById('dateTo').value = formatDateLocal(lastDay);
-    } else if (period === 'lastMonth') {
+        document.getElementById('dateFrom').value = buildDateString(firstDay);
+        document.getElementById('dateTo').value = buildDateString(lastDay);
+    } else if (period === 'prevMonth') { // FIX: Agregada lógica solicitada del Mes Anterior
         const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
         const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
-        document.getElementById('dateFrom').value = formatDateLocal(firstDay);
-        document.getElementById('dateTo').value = formatDateLocal(lastDay);
+        document.getElementById('dateFrom').value = buildDateString(firstDay);
+        document.getElementById('dateTo').value = buildDateString(lastDay);
     }
 });
-
+/* ----------------- Días Laborales y Progreso Esperado ----------------- */
 function getWorkingDaysForMonth(modality, year, month) {
     const total = new Date(year, month + 1, 0).getDate();
     const result = [];
@@ -356,7 +450,7 @@ function getBarColor(real, expected) {
     if (ratio >= 0.8) return 'var(--warning)';
     return 'var(--danger)';
 }
-
+/* ----------------- Mapeo de Usuarios ----------------- */
 async function buildAliasAndMetaMaps(){
     aliasMap={}; metaMap={};
     try{
@@ -399,7 +493,7 @@ function mapAdvisorToCanonical(raw){
     if(!metaMap[canonical]) metaMap[canonical]={group:'OTROS',supervisor:'OTROS',modality:'Presencial'};
     aliasMap[norm]=canonical; return canonical;
 }
-
+/* ----------------- Renderizado del Leaderboard ----------------- */
 function buildLeaderboardRows(scoresArr, filterFrom, filterTo) {
     const tbody = document.getElementById('leaderboardBody');
     tbody.innerHTML = '';
@@ -507,7 +601,7 @@ function buildLeaderboardRows(scoresArr, filterFrom, filterTo) {
         if(link) link.addEventListener('click', () => openChartModal(s.name));
     });
 }
-
+/* ----------------- Lógica Gráfica Individual ----------------- */
 function getDailyChartData(advisorName, start, end) {
     const labels=[]; const dates=[];
     let curr=new Date(start);
@@ -523,12 +617,15 @@ function getDailyChartData(advisorName, start, end) {
     
     cache.tickets.forEach(row => {
         if(mapAdvisorToCanonical(row[COL.tickets.advisor]) !== advisorName) return;
+        
         const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
         const statusM = String(row[COL.tickets.status] || '').toUpperCase();
         const invalidStatuses = ["OPEN", "PENDING"];
+        
         if (statusM !== 'CANALIZADO' || invalidStatuses.includes(statusI)) return;
         
         const parsed=parseDateFlexible(row[COL.tickets.date]);
+        if(!parsed) return; // FIX: Prevenir comparación con null
         if(parsed && parsed>=start && parsed<=end){
             addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 't');
         }
@@ -538,6 +635,7 @@ function getDailyChartData(advisorName, start, end) {
         if(String(row[COL.chats.agentFlag]||'').toUpperCase()!=='AGENT') return;
         if(durationToSeconds(row[COL.chats.duration])>300) return;
         const parsed=parseDateFlexible(row[COL.chats.date]);
+        if(!parsed) return; // FIX
         if(parsed && parsed>=start && parsed<=end){
             addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 'ch');
         }
@@ -547,6 +645,7 @@ function getDailyChartData(advisorName, start, end) {
         if(String(row[COL.calls.status]||'').toLowerCase()!=='completed') return;
         if(durationToSeconds(row[COL.calls.duration])<60) return; 
         const parsed=parseDateFlexible(row[COL.calls.date]);
+        if(!parsed) return; // FIX
         if(parsed && parsed>=start && parsed<=end){
             addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 'c');
         }
@@ -583,7 +682,7 @@ function openChartModal(advisorName) {
     });
 }
 document.getElementById('closeModal').addEventListener('click', () => { document.getElementById('chartModal').style.display = 'none'; });
-
+/* ----------------- Descargas de Archivos ----------------- */
 function downloadCSV(csvContent, fileName) {
     const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a"); const url = URL.createObjectURL(blob);
@@ -603,16 +702,25 @@ function exportExcelMultiTabs() {
         alert("La librería de Excel no ha terminado de cargar. Por favor, intenta de nuevo en unos segundos.");
         return;
     }
-    let from = null, to = null;
-    if(document.getElementById('dateFrom').value) from = new Date(document.getElementById('dateFrom').value + 'T00:00:00');
-    if(document.getElementById('dateTo').value) to = new Date(document.getElementById('dateTo').value + 'T23:59:59');
-    const selectedSupervisor = document.getElementById('filterSupervisor').value;
     
+    // FIX: Creación robusta de fechas limites
+    let from = null, to = null;
+    const df = document.getElementById('dateFrom').value;
+    if(df) {
+        const p = df.split('-');
+        from = new Date(p[0], p[1]-1, p[2], 0, 0, 0);
+    }
+    const dt = document.getElementById('dateTo').value;
+    if(dt) {
+        const p = dt.split('-');
+        to = new Date(p[0], p[1]-1, p[2], 23, 59, 59);
+    }
+    
+    const selectedSupervisor = document.getElementById('filterSupervisor').value;
     const wsLeaderboardData = [["Posicion", "Asesor", "Grupo", "Supervisor", "Modalidad", "Tickets Válidos", "Llamadas Válidas", "Chats Válidos", "Puntaje"]];
     currentFilteredData.forEach((s, idx) => {
         wsLeaderboardData.push([idx + 1, s.name, s.group, s.supervisor, s.modality, s.tickets, s.calls, s.chats, s.total.toFixed(0)]);
     });
-    
     const wsTicketsData = [];
     if(cache.tickets.length > 0) wsTicketsData.push(cache.tickets[0]);
     cache.tickets.forEach((row, index) => {
@@ -627,6 +735,7 @@ function exportExcelMultiTabs() {
         const invalidStatuses = ["OPEN", "PENDING"];
         if(statusM === 'CANALIZADO' && !invalidStatuses.includes(statusI)) {
             const d = parseDateFlexible(row[COL.tickets.date]);
+            if(!d) return; // FIX
             if(from && d < from) return; if(to && d > to) return;
             wsTicketsData.push(row); 
         }
@@ -643,11 +752,11 @@ function exportExcelMultiTabs() {
         const durSecs = durationToSeconds(row[COL.chats.duration]);
         if(String(row[COL.chats.agentFlag]||'').toUpperCase() === 'AGENT' && durSecs <= 300) {
             const d = parseDateFlexible(row[COL.chats.date]);
+            if(!d) return; // FIX
             if(from && d < from) return; if(to && d > to) return;
-            wsChatsData.push(row); 
+            wsChatsData.push(row);
         }
     });
-    
     const wsCallsData = [];
     if(cache.calls.length > 0) wsCallsData.push(cache.calls[0]);
     cache.calls.forEach((row, index) => {
@@ -660,11 +769,11 @@ function exportExcelMultiTabs() {
         const durSecs = durationToSeconds(row[COL.calls.duration]);
         if(String(row[COL.calls.status]||'').toLowerCase() === 'completed' && durSecs >= 60) {
             const d = parseDateFlexible(row[COL.calls.date]);
+            if(!d) return; // FIX
             if(from && d < from) return; if(to && d > to) return;
             wsCallsData.push(row);
         }
     });
-    
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsLeaderboardData), "Leaderboard");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsTicketsData), "Tickets Válidos");
@@ -687,7 +796,7 @@ document.getElementById('downloadExcelTabsBtn').addEventListener('click', export
 document.getElementById('downloadRawSelect').addEventListener('change', function() {
     if (this.value) { exportRawBase(this.value); this.value = ""; }
 });
-
+/* ----------------- Motor de Análisis ----------------- */
 function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervisor){
     const counts={};
     function ensure(name){ if(!counts[name]) counts[name]={tickets:0,chats:0,calls:0}; }
@@ -703,6 +812,7 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
         const invalidStatuses = ["OPEN", "PENDING"];
         if(statusM === 'CANALIZADO' && !invalidStatuses.includes(statusI)){
             const d=parseDateFlexible(row[COL.tickets.date]);
+            if(!d) return; // FIX
             if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
             ensure(adv); counts[adv].tickets++;
         }
@@ -714,6 +824,7 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
         if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
         if(String(row[COL.chats.agentFlag]||'').toUpperCase()==='AGENT' && durationToSeconds(row[COL.chats.duration])<=300){
             const d=parseDateFlexible(row[COL.chats.date]);
+            if(!d) return; // FIX
             if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
             ensure(adv); counts[adv].chats++;
         }
@@ -725,6 +836,7 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
         if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
         if(String(row[COL.calls.status]||'').toLowerCase()==='completed' && durationToSeconds(row[COL.calls.duration])>=60){
             const d=parseDateFlexible(row[COL.calls.date]);
+            if(!d) return; // FIX
             if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
             ensure(adv); counts[adv].calls++;
         }
@@ -758,11 +870,22 @@ function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervis
 }
 function applyAllFilters() {
     let from = null, to = null;
-    if(document.getElementById('dateFrom').value) from = new Date(document.getElementById('dateFrom').value + 'T00:00:00');
-    if(document.getElementById('dateTo').value) to = new Date(document.getElementById('dateTo').value + 'T23:59:59');
+    
+    // FIX: Creación robusta de fechas limites (evita errores "Invalid Date" de Safari o móviles)
+    const df = document.getElementById('dateFrom').value;
+    if(df) {
+        const p = df.split('-');
+        from = new Date(p[0], p[1]-1, p[2], 0, 0, 0);
+    }
+    const dt = document.getElementById('dateTo').value;
+    if(dt) {
+        const p = dt.split('-');
+        to = new Date(p[0], p[1]-1, p[2], 23, 59, 59);
+    }
+    
     aggregateAndScore(from, to, activeGroup, document.getElementById('filterSupervisor').value);
 }
-
+/* ----------------- Flujo de Ejecución e Inicialización ----------------- */
 async function loadAllAndRender() {
     try {
         document.getElementById('loadingOverlay').style.display = 'flex';
