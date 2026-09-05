@@ -1,969 +1,142 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Dashboard ATC — Rendimiento de Asesores</title>
-    <!-- Librería para Gráficas -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Librería para generar Excel con pestañas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <style>
-        /* ----------------- Paleta e Identidad Corporativa ----------------- */
-        :root {
-            --bg: #F5F5F5;            
-            --card: #FFFFFF;          
-            --vento-primary: #231F20; /* Negro Institucional */
-            --muted: #616160;         /* Gris */
-            --vento-accent: #F28F17;  /* Naranja Institucional */
-            
-            --success: #10B981;       /* Verde Meta */
-            --warning: #F59E0B;       /* Amarillo Cerca */
-            --danger: #EF4444;        /* Rojo Alejado */
-            --border: #E5E7EB;
-            --radius: 12px;
-            --shadow-sm: 0 4px 20px rgba(35, 31, 32, 0.08);
-        }
-        /* ----------------- Reset y Tipografía ----------------- */
-        * { box-sizing: border-box; }
-        html, body { height: 100%; }
-        body {
-            margin: 0;
-            font-family: "Segoe UI", Inter, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--vento-primary);
-            -webkit-font-smoothing: antialiased;
-            line-height: 1.4;
-            font-size: 14px;
-        }
-        .container {
-            max-width: 1320px;
-            margin: 24px auto;
-            padding: 0 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        /* ----------------- Header ----------------- */
-        header {
-            display: flex; align-items: center; justify-content: space-between;
-            background: var(--card); padding: 16px 24px;
-            border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
-        }
-        .brand { display: flex; align-items: center; gap: 16px; }
-        .logo {
-            width: 52px; height: 52px; border-radius: 10px;
-            background: var(--vento-primary); color: #fff; 
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 20px; box-shadow: 0 4px 12px rgba(35, 31, 32, 0.15);
-        }
-        h1 { font-size: 24px; margin: 0; font-weight: 700; color: var(--vento-primary); letter-spacing: -0.5px; }
-        .subtitle { font-size: 14px; color: var(--muted); font-weight: 600; margin-top: 2px; }
-        /* ----------------- Top Cards ----------------- */
-        .top-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .top-card {
-            background: var(--card); border-radius: var(--radius); padding: 20px;
-            border: 1px solid var(--border); box-shadow: var(--shadow-sm);
-        }
-        .card-header { font-size: 14px; color: var(--vento-primary); font-weight: 700; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px; }
-        .goals-wrapper { display: flex; gap: 24px; flex-wrap: wrap; }
-        .goal-col { flex: 1; min-width: 200px; }
-        .goal-title { font-weight: 700; font-size: 13px; color: var(--muted); text-transform: uppercase; border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; }
-        .goal-item { font-size: 14px; display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
-        .goal-item strong { color: var(--vento-accent); font-size: 16px; font-weight: 700; }
-        
-        .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .stat { padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); text-align: center; }
-        .stat .label { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
-        .stat .value { font-weight: 700; font-size: 20px; color: var(--vento-primary); margin-top: 4px; }
-        /* ----------------- Controles y Filtros ----------------- */
-        .controls-wrapper {
-            background: var(--card); padding: 16px 20px; border-radius: var(--radius);
-            border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px;
-        }
-        .filters { display: flex; gap: 16px; flex-wrap: wrap; }
-        .control { display: flex; flex-direction: column; min-width: 160px; flex: 1; }
-        .control label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; }
-        select, input[type="date"] { padding: 10px; border-radius: 8px; border: 1px solid #CCC; font-size: 14px; font-family: "Segoe UI", sans-serif; outline: none; width: 100%; }
-        select:focus, input[type="date"]:focus { border-color: var(--vento-accent); }
-        
-        /* Tema de Reglas */
-        .rules-bar {
-            background: #FFF4E5;
-            border-left: 4px solid var(--vento-accent);
-            padding: 12px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            color: var(--vento-primary);
-        }
-        .rules-bar ul { margin: 6px 0 0 20px; padding: 0; }
-        .rules-bar li { margin-bottom: 4px; }
-        .actions-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 14px; }
-        button { font-family: "Segoe UI", sans-serif; cursor: pointer; transition: all 0.2s; }
-        button.primary { background: var(--vento-accent); border: none; color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 10px rgba(242, 143, 23, 0.3); }
-        button.primary:hover { background: #D97D12; }
-        button.ghost { background: transparent; border: 2px solid var(--vento-primary); color: var(--vento-primary); padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; }
-        button.ghost:hover { background: var(--vento-primary); color: #FFF; }
-        button.download-btn { background: transparent; border: 2px solid var(--vento-accent); color: var(--vento-accent); padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; }
-        button.download-btn:hover { background: var(--vento-accent); color: #FFF; }
-        
-        .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-        .tab { background: var(--bg); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--muted); font-size: 14px; }
-        .tab.active { background: var(--vento-primary); border-color: var(--vento-primary); color: #FFF; }
-        
-        /* ----------------- Pista de Carreras (NUEVO) ----------------- */
-        .race-track-container {
-            background: var(--card); border-radius: var(--radius); padding: 20px;
-            border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 20px;
-        }
-        .race-track {
-            background: #2C3E50;
-            border-radius: 8px;
-            position: relative;
-            overflow: hidden;
-            border: 4px solid #1A252F;
-            padding: 5px 0;
-            margin-top: 10px;
-            box-shadow: inset 0 5px 15px rgba(0,0,0,0.4);
-        }
-        .finish-line {
-            position: absolute; right: 0; top: 0; bottom: 0; width: 40px;
-            background-image: 
-                linear-gradient(45deg, #000 25%, transparent 25%), 
-                linear-gradient(-45deg, #000 25%, transparent 25%), 
-                linear-gradient(45deg, transparent 75%, #000 75%), 
-                linear-gradient(-45deg, transparent 75%, #000 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-            background-color: #fff;
-            z-index: 1;
-            border-left: 3px solid var(--vento-accent);
-        }
-        .lane {
-            position: relative; height: 45px;
-            border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
-            display: flex; align-items: center;
-        }
-        .lane:last-child { border-bottom: none; }
-        .lane-label {
-            position: absolute; left: 10px; z-index: 2;
-            color: #FFF; font-size: 12px; font-weight: 700;
-            width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            text-shadow: 1px 1px 3px #000;
-        }
-        .moto-wrapper {
-            position: absolute; display: flex; align-items: center;
-            left: 0%; /* Start for animation */
-            transition: left 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-            z-index: 2; margin-left: 110px; /* Space for the name label */
-        }
-        .emoji-moto {
-            font-size: 26px;
-            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.8));
-        }
-        .score-bubble {
-            background: var(--vento-accent); color: #FFF;
-            font-size: 11px; font-weight: 700;
-            padding: 3px 8px; border-radius: 12px;
-            margin-left: 8px; border: 1px solid #FFF;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            white-space: nowrap;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Moto</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #f4f4f9;
+        margin-top: 50px;
+    }
 
-        /* ----------------- Tabla Leaderboard ----------------- */
-        .card { background: var(--card); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
-        .table-wrap { overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        thead th { text-align: left; padding: 14px 12px; background: var(--bg); color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--border); }
-        tbody td { padding: 16px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        
-        .advisor-name-link { font-weight: 700; font-size: 16px; color: var(--vento-primary); cursor: pointer; text-decoration: none; transition: color 0.2s; }
-        .advisor-name-link:hover { color: var(--vento-accent); text-decoration: underline; }
-        .meta-small { font-size: 12px; color: var(--muted); margin-top: 4px; }
-        
-        .col-metric { min-width: 150px; }
-        .metric-val { font-size: 18px; font-weight: 700; color: var(--vento-primary); margin-bottom: 4px; }
-        .rubro-bar-wrap { width: 100%; background: #E5E7EB; border-radius: 4px; height: 6px; overflow: hidden; margin-bottom: 4px; }
-        .rubro-bar { height: 100%; transition: width 0.5s ease, background-color 0.3s ease; }
-        .metric-sub { font-size: 11px; font-weight: 600; color: var(--muted); }
-        
-        .score { font-size: 18px; padding: 6px 12px; border-radius: 8px; background: #FFF4E5; color: var(--vento-accent); font-weight: 700; display: inline-block; border: 1px solid rgba(242, 143, 23, 0.2); }
-        .top-highlight-1 td { background: rgba(255, 213, 74, 0.1); }
-        .top-highlight-2 td { background: rgba(230, 238, 248, 0.4); }
-        .top-highlight-3 td { background: rgba(255, 216, 181, 0.2); }
-        /* ----------------- Modal Gráficas ----------------- */
-        .modal {
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(35, 31, 32, 0.7); backdrop-filter: blur(4px);
-            align-items: center; justify-content: center;
-        }
-        .modal-content {
-            background-color: var(--card); padding: 24px 32px; border-radius: var(--radius);
-            width: 90%; max-width: 800px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative;
-        }
-        .close-modal {
-            position: absolute; top: 16px; right: 24px; font-size: 28px; font-weight: bold;
-            color: var(--muted); cursor: pointer; transition: color 0.2s;
-        }
-        .close-modal:hover { color: var(--vento-accent); }
-        .chart-container { position: relative; height: 350px; width: 100%; margin-top: 20px; }
-        footer { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; padding-bottom: 20px; font-weight: 600; }
-        @media(max-width: 1000px) { .top-bar { grid-template-columns: 1fr; } }
-    </style>
+    /* CONTENEDOR PRINCIPAL */
+    #game-container {
+        position: relative;
+        width: 600px; /* Ancho del área */
+        height: 150px;
+        background-color: #e0e0e0;
+        border: 3px solid #333;
+        border-radius: 8px;
+        /* Esta propiedad es la magia que evita que los elementos se salgan visualmente */
+        overflow: hidden; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    /* PUNTAJE (Fijo a la izquierda) */
+    #score-board {
+        position: absolute;
+        left: 15px; /* Lo ancla al lado izquierdo */
+        top: 15px;  /* Lo separa un poco del techo */
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        background: rgba(255, 255, 255, 0.8); /* Fondo con un poco de transparencia */
+        padding: 5px 10px;
+        border-radius: 5px;
+        z-index: 100; /* Asegura que siempre esté por encima de la moto */
+    }
+
+    /* LA MOTO */
+    #moto {
+        position: absolute;
+        left: 0px;
+        bottom: 20px;
+        font-size: 40px; /* Usamos un emoji para que funcione sin cargar imágenes externas */
+        transition: left 0.1s ease-out; /* Movimiento fluido */
+        z-index: 50;
+    }
+
+    /* LA META */
+    #meta {
+        position: absolute;
+        right: 10px;
+        bottom: 20px;
+        font-size: 40px;
+        z-index: 40;
+    }
+
+    /* BOTÓN */
+    button {
+        margin-top: 30px;
+        padding: 12px 24px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #d32f2f;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: background-color 0.2s;
+    }
+
+    button:hover {
+        background-color: #b71c1c;
+    }
+</style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <div class="brand">
-            <div class="logo">ATC</div>
-            <div>
-                <h1>Dashboard de Rendimiento</h1>
-                <div class="subtitle">Panel de supervisión y alcance de metas</div>
-            </div>
-        </div>
-        <div style="text-align: right;">
-            <div style="font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase;">Última sincronización</div>
-            <div id="lastSync" style="font-weight: 700; color: var(--vento-primary); font-size: 15px; margin-top: 4px;">--:--</div>
-        </div>
-    </header>
-    
-    <!-- TOP BAR -->
-    <div class="top-bar">
-        <div class="top-card">
-            <div class="card-header">Metas del Mes Activas</div>
-            <div class="goals-wrapper">
-                <div class="goal-col">
-                    <div class="goal-title">🏢 Presencial</div>
-                    <div class="goal-item"><span>Tickets Resolutivos</span><strong id="goal_pres_tickets">362</strong></div>
-                    <div class="goal-item"><span>Chats Atendidos</span><strong id="goal_pres_chats">363</strong></div>
-                    <div class="goal-item"><span>Llamadas Completadas</span><strong id="goal_pres_calls">227</strong></div>
-                </div>
-                <div class="goal-col">
-                    <div class="goal-title">🏡 Home Office</div>
-                    <div class="goal-item"><span>Tickets Resolutivos</span><strong id="goal_ho_tickets">338</strong></div>
-                    <div class="goal-item"><span>Chats Atendidos</span><strong id="goal_ho_chats">1248</strong></div>
-                    <div class="goal-item"><span style="color:var(--muted)">Llamadas (N/A)</span><strong style="color:var(--muted)">0</strong></div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="top-card">
-            <div class="card-header">Métricas Generales del Periodo (Válidas)</div>
-            <div class="stats">
-                <div class="stat"><div class="label">Asesores Activos</div><div class="value" id="statAdvisors">--</div></div>
-                <div class="stat"><div class="label">Tickets Válidos</div><div class="value" id="statTickets">--</div></div>
-                <div class="stat"><div class="label">Llamadas Válidas</div><div class="value" id="statCalls">--</div></div>
-                <div class="stat"><div class="label">Chats Válidos</div><div class="value" id="statChats">--</div></div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- CONTROLES -->
-    <div class="controls-wrapper">
-        <div class="filters">
-            <div class="control">
-                <label>Periodo</label>
-                <select id="periodSelector">
-                    <option value="custom">Personalizado</option>
-                    <option value="today">Hoy</option>
-                    <option value="thisMonth" selected>Este Mes</option>
-                    <option value="lastMonth">Mes Pasado</option>
-                </select>
-            </div>
-            <div class="control">
-                <label>Fecha inicio</label>
-                <input type="date" id="dateFrom">
-            </div>
-            <div class="control">
-                <label>Fecha fin</label>
-                <input type="date" id="dateTo">
-            </div>
-            <div class="control" style="min-width: 200px;">
-                <label>Filtrar Supervisor</label>
-                <select id="filterSupervisor">
-                    <option value="">Todos los supervisores</option>
-                </select>
-            </div>
-        </div>
-        
-        <!-- Módulo de Reglas -->
-        <div class="rules-bar">
-            <strong>📌 Reglas de Negocio (Filtros de validación para metas):</strong>
-            <ul>
-                <li><strong>Tickets:</strong> Se contabilizan los que cuentan con estatus <em>CANALIZADO</em>, descartando aquellos en estatus <em>Open, Pending </em>.</li>
-                <li><strong>Llamadas:</strong> Se cuentan con estatus <em>COMPLETED</em> y una duración <em>mayor o igual a 1 minuto (60 segundos)</em>.</li>
-                <li><strong>Chats:</strong> Se cuentan los atendidos por <em>AGENT</em> y con una duración <em>menor o igual a 5 minutos (300 segundos)</em>.</li>
-            </ul>
-        </div>
-        
-        <!-- Fila de Descargas -->
-        <div class="actions-row">
-            <button class="ghost" id="refreshBtn">↻ Refrescar</button>
-            <button class="primary" id="applyFilters">Aplicar Filtros</button>
-            <button class="download-btn" id="downloadFilteredBtn" title="Descarga la tabla resumen que ves en pantalla">📊 Resumen Leaderboard</button>
-            <button class="download-btn" id="downloadExcelTabsBtn" title="Descarga un Excel con 4 pestañas: Resumen y bases de datos detalladas exclusivas de interacciones válidas">🗂️ Descargar Excel Multi-Pestaña</button>
-            <select id="downloadRawSelect" style="max-width: 200px; border: 2px solid var(--muted); font-weight: 600; border-radius:8px; padding:8px;">
-                <option value="">📁 Base en Crudo...</option>
-                <option value="tickets">Crudo: Tickets</option>
-                <option value="chats">Crudo: Chats</option>
-                <option value="calls">Crudo: Llamadas</option>
-            </select>
-        </div>
-    </div>
-    <div class="tabs" role="tablist">
-        <div class="tab active" data-group="All">Visualizar Todos</div>
-        <div class="tab" data-group="Vento">Vento</div>
-        <div class="tab" data-group="Piston">Piston</div>
-        <div class="tab" data-group="Home Office">Home Office</div>
-        <div class="tab" data-group="Nuevo ingreso">Nuevo Ingreso</div>
-        <div class="tab" data-group="OTROS">Otros</div>
-    </div>
 
-    <!-- PISTA DE CARRERAS (NUEVO) -->
-    <div class="race-track-container">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin: 0; font-size: 18px; color: var(--vento-primary); font-weight: 700;">🏁 Gran Premio ATC (Top 5 Asesores)</h2>
-            <span style="font-size: 12px; color: var(--muted); font-weight: 600;">Posiciones basadas en el Puntaje General</span>
-        </div>
-        <div id="raceTrack" class="race-track">
-            <!-- Las lanes de la carrera se inyectarán aquí vía JS -->
-        </div>
-    </div>
+<div id="game-container">
+    <!-- El puntaje ahora está seguro del lado izquierdo -->
+    <div id="score-board">Puntaje: <span id="score">0</span></div>
+    
+    <!-- Elementos del juego -->
+    <div id="moto">🏍️</div>
+    <div id="meta">🏁</div>
+</div>
 
-    <!-- MAIN LEADERBOARD -->
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin: 0; font-size: 18px; color: var(--vento-primary); font-weight: 700;">Leaderboard de Rendimiento</h2>
-        </div>
-        
-        <div class="table-wrap">
-            <table id="leaderboardTable">
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">Pos</th>
-                        <th style="min-width: 200px;">Asesor / Grupo</th>
-                        <th>Tickets (Válidos)</th>
-                        <th>Llamadas (Completadas)</th>
-                        <th>Chats (Atendidos)</th>
-                        <th style="text-align: right;">Puntaje General</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboardBody"></tbody>
-            </table>
-        </div>
-        
-        <div style="margin-top: 16px; color: var(--muted); font-size: 12px; background: var(--bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border);">
-            <strong style="color: var(--vento-accent);">💡 Tip:</strong> Haz clic en el nombre de cualquier asesor para visualizar la gráfica de constancia diaria.<br>
-            <div style="margin-top: 4px;"><strong>Indicadores de color en barras:</strong> <span style="color: var(--success); font-weight: bold;">■ Verde</span> (En meta), <span style="color: var(--warning); font-weight: bold;">■ Amarillo</span> (Cerca, &ge;80%), <span style="color: var(--danger); font-weight: bold;">■ Rojo</span> (Rezago, &lt;80%).</div>
-        </div>
-    </div>
-    <footer>Dashboard Privado · Actualización automática programada (15 min)</footer>
-</div>
-<!-- Modal de Gráfica -->
-<div id="chartModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" id="closeModal">&times;</span>
-        <h2 id="chartTitle" style="margin-top: 0; font-size: 20px; color: var(--vento-primary);">Rendimiento Diario</h2>
-        <div style="font-size: 13px; color: var(--muted); margin-bottom: 10px;">Comportamiento de interacciones válidas en los últimos 15 días.</div>
-        <div class="chart-container">
-            <canvas id="advisorChart"></canvas>
-        </div>
-    </div>
-</div>
-<!-- Loader -->
-<div id="loadingOverlay" style="position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(255,255,255,0.85); z-index: 9999;">
-    <div style="text-align: center;">
-        <div style="width: 50px; height: 50px; border-radius: 50%; border: 4px solid var(--border); border-top-color: var(--vento-accent); animation: spin 0.8s linear infinite; margin: 0 auto;"></div>
-        <div style="margin-top: 16px; font-weight: 700; color: var(--vento-primary);">Procesando base de datos...</div>
-    </div>
-</div>
-<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+<button onclick="avanzarMoto()">¡Acelerar!</button>
+
 <script>
-/* ----------------- Config y constantes ----------------- */
-const SPREADSHEET_ID = '1JBre4cLAbYiOJuYye_FGcsk5U_BIStDoAiCbV-B8WoA';
-const ASSESSORS_SPREADSHEET_ID = '1GBcoYjw-mziCA30F2CgqGM9kKWjJjeSiTGfHN6XM8rE';
-const SHEETS = { tickets: 'Tickets_BD', chats: 'Chats_BD', calls: 'Llamadas_BD', asesoresSheet: 'Asesores' };
-const AUTO_REFRESH_MS = 15 * 60 * 1000;
-function letterToIndex(letter){ return letter.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0); }
-const COL = {
-    tickets: { advisor: letterToIndex('E'), date: letterToIndex('H'), statusI: letterToIndex('I'), status: letterToIndex('M') },
-    chats: { advisor: letterToIndex('B'), duration: letterToIndex('C'), date: letterToIndex('I'), agentFlag: letterToIndex('M') },
-    calls: { advisor: letterToIndex('B'), date: letterToIndex('C'), status: letterToIndex('D'), duration: letterToIndex('K') },
-    asesores: { supervisor: letterToIndex('C'), username: letterToIndex('D'), group: letterToIndex('E') }
-};
-/* ----------------- Estado Global ----------------- */
-let aliasMap = {}; let metaMap = {}; let cache = { tickets:[], chats:[], calls:[] };
-let activeGroup = 'All'; let currentChartInstance = null;
-let currentFilteredData = []; 
-/* ----------------- Utilidades de Parseo ----------------- */
-function parseCSV(text){
-    const rows=[]; let cur='', row=[], inQuotes=false;
-    for(let i=0; i<text.length; i++){ 
-        const ch=text[i], next=text[i+1];
-        if(ch==='"'){ if(inQuotes && next==='"'){ cur+='"'; i++; continue; } inQuotes=!inQuotes; continue; }
-        if(ch===',' && !inQuotes){ row.push(cur); cur=''; continue; }
-        if((ch==='\n' || ch==='\r') && !inQuotes){ if(ch==='\r' && next==='\n'){ i++; } row.push(cur); rows.push(row); row=[]; cur=''; continue; }
-        cur+=ch;
-    }
-    if(cur!=='' || row.length){ row.push(cur); rows.push(row); }
-    return rows;
-}
-function fetchSheetCSVRowsById(spreadsheetId, sheetName){
-    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-    return fetch(url).then(res => { if(!res.ok) throw new Error('Error al leer hoja (' + res.status + ')'); return res.text(); }).then(parseCSV);
-}
-function normalizeForKey(s){ 
-    if(!s) return ''; 
-    let t=String(s).replace(/\u00A0/g,' ').replace(/\t/g,' ').trim(); t=t.replace(/[\\\.,]/g,''); t=t.toUpperCase();
-    const tokens=['ATC PISTON','ATC SUP','ATC','SUP','CORD','COORD','ANL','CAP','AGT','AGENTE','SR','SRA'];
-    for(const tk of tokens){ const reStart=new RegExp('^\\s*'+tk+'[\\s\\-\\_\\.]*','i'); t=t.replace(reStart,''); const reEnd=new RegExp('[\\s\\-\\_\\.]+'+tk+'\\s*$','i'); t=t.replace(reEnd,''); }
-    if(t.includes(',')){ const parts=t.split(','); if(parts.length>=2){ t=(parts[1]+' '+parts[0]).trim(); } }
-    t=t.replace(/\s+/g,' ').trim(); return t;
-}
-function titleCase(s){ return !s ? s : s.toLowerCase().split(' ').map(w=>w?(w[0].toUpperCase()+w.slice(1)):'').join(' '); }
-function durationToSeconds(s){ 
-    if(!s) return 0; const str=String(s).trim().toLowerCase(); if(!str) return 0; let total=0;
-    const mD=str.match(/(\d+)\s*d/); if(mD) total+=parseInt(mD[1],10)*86400;
-    const mH=str.match(/(\d+)\s*h/); if(mH) total+=parseInt(mH[1],10)*3600;
-    const mM=str.match(/(\d+)\s*m/); if(mM) total+=parseInt(mM[1],10)*60;
-    const mS=str.match(/(\d+)\s*s/); if(mS) total+=parseInt(mS[1],10);
-    if(total===0){ const onlyNum=str.match(/^(\d+)$/); if(onlyNum) total=parseInt(onlyNum[1],10); }
-    return total;
-}
-function parseDateFlexible(v){ 
-    if(!v) return null; const s=String(v).trim(); if(s===''||s==='0'||s==='-'||s.toLowerCase()==='null') return null;
-    const d1=new Date(s); if(!isNaN(d1.getTime())) return d1;
-    const m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/); if(m){ const day=+m[1], mon=+m[2]-1, yr=+m[3]; return new Date(yr<100?2000+yr:yr,mon,day); }
-    const m2=s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/); if(m2){ return new Date(+m2[1], +m2[2]-1, +m2[3]); } return null;
-}
-/* ----------------- Lógica de Fechas Automatizadas ----------------- */
-document.getElementById('periodSelector').addEventListener('change', function() {
-    const period = this.value;
-    const today = new Date();
+    // Variables iniciales
+    let posicionMoto = 0;
+    let puntaje = 0;
     
-    const formatDateLocal = (date) => {
-        const offset = date.getTimezoneOffset();
-        const localDate = new Date(date.getTime() - (offset * 60 * 1000));
-        return localDate.toISOString().split('T')[0];
-    };
+    // Capturamos los elementos del HTML
+    const motoElement = document.getElementById('moto');
+    const scoreElement = document.getElementById('score');
+    const contenedor = document.getElementById('game-container');
     
-    if (period === 'today') {
-        const dateStr = formatDateLocal(today);
-        document.getElementById('dateFrom').value = dateStr;
-        document.getElementById('dateTo').value = dateStr;
-    } else if (period === 'thisMonth') {
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        document.getElementById('dateFrom').value = formatDateLocal(firstDay);
-        document.getElementById('dateTo').value = formatDateLocal(lastDay);
-    } else if (period === 'lastMonth') {
-        const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
-        document.getElementById('dateFrom').value = formatDateLocal(firstDay);
-        document.getElementById('dateTo').value = formatDateLocal(lastDay);
-    }
-});
-/* ----------------- Días Laborales y Progreso Esperado ----------------- */
-function getWorkingDaysForMonth(modality, year, month) {
-    const total = new Date(year, month + 1, 0).getDate();
-    const result = [];
-    for (let d = 1; d <= total; d++) {
-        const dt = new Date(year, month, d);
-        const dow = dt.getDay();
-        if (modality === 'Home Office') { if (dow !== 4 && dow !== 5) result.push(dt); } 
-        else { if (dow !== 0) result.push(dt); }
-    }
-    return result;
-}
-function expectedUntilToday(monthlyMeta, workingDaysArray, today = new Date()) {
-    const total = workingDaysArray.length;
-    const passed = workingDaysArray.filter(d => d <= today).length;
-    if (total === 0) return 0;
-    return (monthlyMeta / total) * passed;
-}
-function getBarColor(real, expected) {
-    if (expected <= 0) return 'var(--success)';
-    const ratio = real / expected;
-    if (ratio >= 1.0) return 'var(--success)';
-    if (ratio >= 0.8) return 'var(--warning)';
-    return 'var(--danger)';
-}
-/* ----------------- Mapeo de Usuarios ----------------- */
-async function buildAliasAndMetaMaps(){
-    aliasMap={}; metaMap={};
-    try{
-        const rows = await fetchSheetCSVRowsById(ASSESSORS_SPREADSHEET_ID, SHEETS.asesoresSheet);
-        const supervisorSet = new Set();
-        for(let r=0;r<rows.length;r++){
-            const row=rows[r];
-            const rawUser=(row[COL.asesores.username]||'').trim();
-            const rawGroup=(row[COL.asesores.group]||'').trim();
-            const rawSupervisor=(row[COL.asesores.supervisor]||'').trim();
-            if(!rawUser) continue;
-            
-            const keyNorm=normalizeForKey(rawUser);
-            const canonical=titleCase(keyNorm);
-            const group=rawGroup?rawGroup:'OTROS';
-            const supervisor=rawSupervisor?rawSupervisor.toUpperCase():'OTROS';
-            const modality = group && group.toLowerCase().includes('home') ? 'Home Office' : 'Presencial';
-            
-            metaMap[canonical]={group,supervisor,modality};
-            aliasMap[keyNorm]=canonical;
-            if(supervisor !== 'OTROS') supervisorSet.add(supervisor);
-        }
-        
-        const supSelect = document.getElementById('filterSupervisor');
-        const currentVal = supSelect.value;
-        supSelect.innerHTML = '<option value="">Todos los supervisores</option>';
-        Array.from(supervisorSet).sort().forEach(sup => {
-            const opt = document.createElement('option'); opt.value = sup; opt.textContent = sup;
-            supSelect.appendChild(opt);
-        });
-        supSelect.value = currentVal;
-    }catch(err){ console.warn('Error Asesores:', err.message); }
-}
-function mapAdvisorToCanonical(raw){
-    const norm=normalizeForKey(raw); if(!norm) return '';
-    if(aliasMap[norm]) return aliasMap[norm];
-    const found=Object.keys(metaMap).find(c=>c.toUpperCase()===norm.toUpperCase());
-    if(found) return found;
-    const canonical=titleCase(norm);
-    if(!metaMap[canonical]) metaMap[canonical]={group:'OTROS',supervisor:'OTROS',modality:'Presencial'};
-    aliasMap[norm]=canonical; return canonical;
-}
+    // Calculamos el límite estricto para que la moto no se salga de la pantalla.
+    // Tomamos el ancho del contenedor y le restamos 45px (el ancho aproximado del emoji de la moto)
+    const limiteMaximo = contenedor.clientWidth - 45; 
 
-/* ----------------- Renderizado Pista de Carreras (NUEVO) ----------------- */
-function renderRaceTrack(arr) {
-    const track = document.getElementById('raceTrack');
-    track.innerHTML = '<div class="finish-line"></div>';
-    
-    // Tomar el Top 5 para la carrera
-    const topAdvisors = arr.slice(0, 5);
-    
-    if (topAdvisors.length === 0) {
-        track.innerHTML = '<div style="padding: 20px; color: #fff; text-align: center; position: relative; z-index: 2; font-weight: bold;">🏁 Sin participantes en esta carrera (Ajusta tus filtros)</div>';
-        return;
+    function avanzarMoto() {
+        // Aumentamos la posición y los puntos cada vez que se hace clic
+        posicionMoto += 35; 
+        puntaje += 15;
+
+        // RESTRICCIÓN DE LÍMITE: Si la moto intenta pasar el máximo, la obligamos a quedarse en el tope
+        if (posicionMoto >= limiteMaximo) {
+            posicionMoto = limiteMaximo; 
+        }
+
+        // Aplicamos los cambios visuales
+        motoElement.style.left = posicionMoto + 'px';
+        scoreElement.innerText = puntaje;
+
+        // Verificamos si la moto ya tocó la meta
+        if (posicionMoto === limiteMaximo) {
+            // Damos un pequeño retraso (100ms) para que se alcance a ver la moto cruzando la meta antes del aviso
+            setTimeout(() => {
+                alert("¡Llegaste a la meta! Puntaje final: " + puntaje);
+                reiniciar(); // Volvemos todo a cero
+            }, 100);
+        }
     }
 
-    // El mayor puntaje marca la distancia máxima (100% relativo a su propio grupo de carrera)
-    const maxScore = topAdvisors[0].total;
-
-    topAdvisors.forEach((adv, idx) => {
-        const lane = document.createElement('div');
-        lane.className = 'lane';
-        
-        // Calculamos porcentaje. Dejamos un margen máximo del 85% para que la moto y el texto no tapen la meta
-        let pct = maxScore > 0 ? (adv.total / maxScore) * 85 : 0;
-        
-        lane.innerHTML = `
-            <div class="lane-label" title="${adv.name}">${idx + 1}. ${adv.name.split(' ')[0]}</div>
-            <div class="moto-wrapper" style="left: 0%;" data-target="${pct}%">
-                <span class="emoji-moto">🏍️</span>
-                <div class="score-bubble">${adv.total.toFixed(0)} pts</div>
-            </div>
-        `;
-        track.appendChild(lane);
-    });
-
-    // Activar animación con un ligero retraso para que sea visible al cargar
-    setTimeout(() => {
-        track.querySelectorAll('.moto-wrapper').forEach(el => {
-            el.style.left = el.getAttribute('data-target');
-        });
-    }, 100);
-}
-
-/* ----------------- Renderizado del Leaderboard ----------------- */
-function buildLeaderboardRows(scoresArr, filterFrom, filterTo) {
-    const tbody = document.getElementById('leaderboardBody');
-    tbody.innerHTML = '';
-    
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
-    
-    const presTickets = Number(document.getElementById('goal_pres_tickets').textContent);
-    const presChats = Number(document.getElementById('goal_pres_chats').textContent);
-    const presCalls = Number(document.getElementById('goal_pres_calls').textContent);
-    const hoTickets = Number(document.getElementById('goal_ho_tickets').textContent);
-    const hoChats = Number(document.getElementById('goal_ho_chats').textContent);
-    
-    let dStart = filterFrom || new Date(year, month, 1);
-    let dEnd = filterTo || new Date(year, month + 1, 0);
-    
-    scoresArr.forEach((s, idx) => {
-        const monthlyMeta = {
-            tickets: s.modality === 'Home Office' ? hoTickets : presTickets,
-            calls: s.modality === 'Home Office' ? 0 : presCalls,
-            chats: s.modality === 'Home Office' ? hoChats : presChats
-        };
-        
-        const refYear = dStart.getFullYear();
-        const refMonth = dStart.getMonth();
-        const totalWD = getWorkingDaysForMonth(s.modality, refYear, refMonth).length || 1;
-        
-        let filteredWD = 0;
-        let passedWD = 0; 
-        
-        let tempDate = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
-        const endD = new Date(dEnd.getFullYear(), dEnd.getMonth(), dEnd.getDate());
-        const todayD = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        
-        while(tempDate <= endD) {
-            const dow = tempDate.getDay();
-            let isWorking = false;
-            if (s.modality === 'Home Office') {
-                if (dow !== 4 && dow !== 5) isWorking = true;
-            } else {
-                if (dow !== 0) isWorking = true;
-            }
-            
-            if (isWorking) {
-                filteredWD++;
-                if (tempDate <= todayD) passedWD++;
-            }
-            tempDate.setDate(tempDate.getDate() + 1);
-        }
-        
-        const periodMetaT = (monthlyMeta.tickets / totalWD) * filteredWD;
-        const periodMetaC = (monthlyMeta.calls / totalWD) * filteredWD;
-        const periodMetaCh = (monthlyMeta.chats / totalWD) * filteredWD;
-        
-        const expT = (monthlyMeta.tickets / totalWD) * passedWD;
-        const expC = (monthlyMeta.calls / totalWD) * passedWD;
-        const expCh = (monthlyMeta.chats / totalWD) * passedWD;
-        
-        const pctT = periodMetaT > 0 ? Math.min(100, (s.tickets / periodMetaT) * 100) : (s.tickets > 0 ? 100 : 0);
-        const pctC = periodMetaC > 0 ? Math.min(100, (s.calls / periodMetaC) * 100) : (s.calls > 0 ? 100 : 0);
-        const pctCh = periodMetaCh > 0 ? Math.min(100, (s.chats / periodMetaCh) * 100) : (s.chats > 0 ? 100 : 0);
-        
-        const colorT = getBarColor(s.tickets, expT);
-        const colorC = getBarColor(s.calls, expC);
-        const colorCh = getBarColor(s.chats, expCh);
-        const tr = document.createElement('tr');
-        if(idx === 0) tr.classList.add('top-highlight-1');
-        else if(idx === 1) tr.classList.add('top-highlight-2');
-        else if(idx === 2) tr.classList.add('top-highlight-3');
-        
-        tr.innerHTML = `
-            <td style="font-weight: 700; color: var(--muted);">${idx + 1}</td>
-            <td>
-                <a class="advisor-name-link" data-advisor="${s.name}">${s.name}</a>
-                <div class="meta-small">${s.group} • ${s.supervisor} • ${s.modality}</div>
-            </td>
-            <td class="col-metric">
-                <div class="metric-val">${s.tickets}</div>
-                <div class="rubro-bar-wrap" title="Meta Ajustada: ${Math.round(periodMetaT)}">
-                    <div class="rubro-bar" style="width:${pctT}%; background-color:${colorT};"></div>
-                </div>
-                <div class="metric-sub">Avance: ${Math.round(pctT)}% | Meta: ${Math.round(periodMetaT)}</div>
-            </td>
-            <td class="col-metric">
-                <div class="metric-val">${s.calls}</div>
-                <div class="rubro-bar-wrap" title="Meta Ajustada: ${Math.round(periodMetaC)}">
-                    <div class="rubro-bar" style="width:${pctC}%; background-color:${colorC};"></div>
-                </div>
-                <div class="metric-sub">Avance: ${Math.round(pctC)}% | Meta: ${Math.round(periodMetaC)}</div>
-            </td>
-            <td class="col-metric">
-                <div class="metric-val">${s.chats}</div>
-                <div class="rubro-bar-wrap" title="Meta Ajustada: ${Math.round(periodMetaCh)}">
-                    <div class="rubro-bar" style="width:${pctCh}%; background-color:${colorCh};"></div>
-                </div>
-                <div class="metric-sub">Avance: ${Math.round(pctCh)}% | Meta: ${Math.round(periodMetaCh)}</div>
-            </td>
-            <td style="text-align: right;">
-                <div class="score">${s.total.toFixed(0)} Pts</div>
-            </td>
-        `;
-        tbody.appendChild(tr);
-        const link = tr.querySelector('.advisor-name-link');
-        if(link) link.addEventListener('click', () => openChartModal(s.name));
-    });
-}
-/* ----------------- Lógica Gráfica Individual ----------------- */
-function getDailyChartData(advisorName, start, end) {
-    const labels=[]; const dates=[];
-    let curr=new Date(start);
-    while(curr<=end){ 
-        const ds=curr.getFullYear()+'-'+String(curr.getMonth()+1).padStart(2,'0')+'-'+String(curr.getDate()).padStart(2,'0'); 
-        dates.push(ds); 
-        labels.push(String(curr.getDate()).padStart(2,'0')+'/'+String(curr.getMonth()+1).padStart(2,'0')); 
-        curr.setDate(curr.getDate()+1); 
+    function reiniciar() {
+        posicionMoto = 0;
+        puntaje = 0;
+        motoElement.style.left = '0px';
+        scoreElement.innerText = puntaje;
     }
-    
-    const dailyCounts={}; dates.forEach(d=>dailyCounts[d]={t:0,c:0,ch:0});
-    function addCount(dateStr, type){ if(dailyCounts[dateStr]) dailyCounts[dateStr][type]++; }
-    
-    cache.tickets.forEach(row => {
-        if(mapAdvisorToCanonical(row[COL.tickets.advisor]) !== advisorName) return;
-        const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
-        const statusM = String(row[COL.tickets.status] || '').toUpperCase();
-        const invalidStatuses = ["OPEN", "PENDING"];
-        if (statusM !== 'CANALIZADO' || invalidStatuses.includes(statusI)) return;
-        const parsed=parseDateFlexible(row[COL.tickets.date]);
-        if(parsed && parsed>=start && parsed<=end){
-            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 't');
-        }
-    });
-    cache.chats.forEach(row => {
-        if(mapAdvisorToCanonical(row[COL.chats.advisor]) !== advisorName) return;
-        if(String(row[COL.chats.agentFlag]||'').toUpperCase()!=='AGENT') return;
-        if(durationToSeconds(row[COL.chats.duration])>300) return;
-        const parsed=parseDateFlexible(row[COL.chats.date]);
-        if(parsed && parsed>=start && parsed<=end){
-            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 'ch');
-        }
-    });
-    cache.calls.forEach(row => {
-        if(mapAdvisorToCanonical(row[COL.calls.advisor]) !== advisorName) return;
-        if(String(row[COL.calls.status]||'').toLowerCase()!=='completed') return;
-        if(durationToSeconds(row[COL.calls.duration])<60) return; 
-        const parsed=parseDateFlexible(row[COL.calls.date]);
-        if(parsed && parsed>=start && parsed<=end){
-            addCount(parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0'), 'c');
-        }
-    });
-    
-    const seriesData = dates.map(d => { const v = dailyCounts[d] ? dailyCounts[d] : {t:0,c:0,ch:0}; return v.t + v.c + v.ch; });
-    return { labels, series: seriesData };
-}
-function openChartModal(advisorName) {
-    const modal = document.getElementById('chartModal');
-    document.getElementById('chartTitle').textContent = `Rendimiento de ${advisorName}`;
-    modal.style.display = 'flex';
-    
-    const end = new Date(); const start = new Date(); start.setDate(end.getDate() - 14);
-    const data = getDailyChartData(advisorName, start, end);
-    const ctx = document.getElementById('advisorChart').getContext('2d');
-    
-    if (currentChartInstance) currentChartInstance.destroy();
-    
-    currentChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.labels,
-            datasets: [{
-                label: 'Interacciones Válidas Totales',
-                data: data.series, borderColor: '#F28F17', backgroundColor: 'rgba(242, 143, 23, 0.15)',
-                borderWidth: 3, tension: 0.2, fill: true, pointBackgroundColor: '#231F20', pointRadius: 4
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, grid: { color: '#E5E7EB' } }, x: { grid: { display: false } } }
-        }
-    });
-}
-document.getElementById('closeModal').addEventListener('click', () => { document.getElementById('chartModal').style.display = 'none'; });
-/* ----------------- Descargas de Archivos ----------------- */
-function downloadCSV(csvContent, fileName) {
-    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a"); const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url); link.setAttribute("download", fileName);
-    link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-}
-function exportFilteredTable() {
-    if(!currentFilteredData.length) { alert("No hay registros en la vista actual para descargar."); return; }
-    let csv = "Posicion,Asesor,Grupo,Supervisor,Modalidad,Tickets,Llamadas,Chats,Puntaje\n";
-    currentFilteredData.forEach((s, idx) => {
-        csv += `${idx + 1},"${s.name}","${s.group}","${s.supervisor}","${s.modality}",${s.tickets},${s.calls},${s.chats},${s.total.toFixed(0)}\n`;
-    });
-    downloadCSV(csv, `Reporte_Leaderboard_${new Date().toISOString().split('T')[0]}.csv`);
-}
-function exportExcelMultiTabs() {
-    if (typeof XLSX === 'undefined') {
-        alert("La librería de Excel no ha terminado de cargar. Por favor, intenta de nuevo en unos segundos.");
-        return;
-    }
-    let from = null, to = null;
-    if(document.getElementById('dateFrom').value) from = new Date(document.getElementById('dateFrom').value + 'T00:00:00');
-    if(document.getElementById('dateTo').value) to = new Date(document.getElementById('dateTo').value + 'T23:59:59');
-    const selectedSupervisor = document.getElementById('filterSupervisor').value;
-    const wsLeaderboardData = [["Posicion", "Asesor", "Grupo", "Supervisor", "Modalidad", "Tickets Válidos", "Llamadas Válidas", "Chats Válidos", "Puntaje"]];
-    currentFilteredData.forEach((s, idx) => {
-        wsLeaderboardData.push([idx + 1, s.name, s.group, s.supervisor, s.modality, s.tickets, s.calls, s.chats, s.total.toFixed(0)]);
-    });
-    const wsTicketsData = [];
-    if(cache.tickets.length > 0) wsTicketsData.push(cache.tickets[0]);
-    cache.tickets.forEach((row, index) => {
-        if(index === 0) return;
-        const adv = mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!adv) return;
-        const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
-        if(activeGroup !== 'All' && meta.group !== activeGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase() !== selectedSupervisor.toUpperCase()) return;
-        
-        const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
-        const statusM = String(row[COL.tickets.status] || '').toUpperCase();
-        const invalidStatuses = ["OPEN", "PENDING"];
-        if(statusM === 'CANALIZADO' && !invalidStatuses.includes(statusI)) {
-            const d = parseDateFlexible(row[COL.tickets.date]);
-            if(from && d < from) return; if(to && d > to) return;
-            wsTicketsData.push(row);
-        }
-    });
-    const wsChatsData = [];
-    if(cache.chats.length > 0) wsChatsData.push(cache.chats[0]);
-    cache.chats.forEach((row, index) => {
-        if(index === 0) return;
-        const adv = mapAdvisorToCanonical(row[COL.chats.advisor]); if(!adv) return;
-        const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
-        if(activeGroup !== 'All' && meta.group !== activeGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase() !== selectedSupervisor.toUpperCase()) return;
-        
-        const durSecs = durationToSeconds(row[COL.chats.duration]);
-        if(String(row[COL.chats.agentFlag]||'').toUpperCase() === 'AGENT' && durSecs <= 300) {
-            const d = parseDateFlexible(row[COL.chats.date]);
-            if(from && d < from) return; if(to && d > to) return;
-            wsChatsData.push(row);
-        }
-    });
-    const wsCallsData = [];
-    if(cache.calls.length > 0) wsCallsData.push(cache.calls[0]);
-    cache.calls.forEach((row, index) => {
-        if(index === 0) return;
-        const adv = mapAdvisorToCanonical(row[COL.calls.advisor]); if(!adv) return;
-        const meta = metaMap[adv] || {group:'OTROS',supervisor:'OTROS', modality:'Presencial'};
-        if(activeGroup !== 'All' && meta.group !== activeGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase() !== selectedSupervisor.toUpperCase()) return;
-        
-        const durSecs = durationToSeconds(row[COL.calls.duration]);
-        if(String(row[COL.calls.status]||'').toLowerCase() === 'completed' && durSecs >= 60) {
-            const d = parseDateFlexible(row[COL.calls.date]);
-            if(from && d < from) return; if(to && d > to) return;
-            wsCallsData.push(row);
-        }
-    });
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsLeaderboardData), "Leaderboard");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsTicketsData), "Tickets Válidos");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsChatsData), "Chats Válidos");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsCallsData), "Llamadas Válidas");
-    XLSX.writeFile(wb, `Reporte_Detallado_Valido_${new Date().toISOString().split('T')[0]}.xlsx`);
-}
-function exportRawBase(type) {
-    const data = cache[type];
-    if (!data || data.length === 0) { alert("Base de datos vacía o no sincronizada."); return; }
-    let csv = "";
-    data.forEach(row => {
-        const escaped = row.map(v => `"${String(v).replace(/"/g, '""')}"`);
-        csv += escaped.join(",") + "\n";
-    });
-    downloadCSV(csv, `Base_Completa_${type.toUpperCase()}_${new Date().toISOString().split('T')[0]}.csv`);
-}
-document.getElementById('downloadFilteredBtn').addEventListener('click', exportFilteredTable);
-document.getElementById('downloadExcelTabsBtn').addEventListener('click', exportExcelMultiTabs);
-document.getElementById('downloadRawSelect').addEventListener('change', function() {
-    if (this.value) { exportRawBase(this.value); this.value = ""; }
-});
-/* ----------------- Motor de Análisis ----------------- */
-function aggregateAndScore(filterFrom, filterTo, selectedGroup, selectedSupervisor){
-    const counts={};
-    function ensure(name){ if(!counts[name]) counts[name]={tickets:0,chats:0,calls:0}; }
-    
-    cache.tickets.forEach(row => {
-        const adv=mapAdvisorToCanonical(row[COL.tickets.advisor]); if(!adv) return;
-        const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
-        if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
-        
-        const statusI = String(row[COL.tickets.statusI] || '').toUpperCase();
-        const statusM = String(row[COL.tickets.status] || '').toUpperCase();
-        const invalidStatuses = ["OPEN", "PENDING"];
-        if(statusM === 'CANALIZADO' && !invalidStatuses.includes(statusI)){
-            const d=parseDateFlexible(row[COL.tickets.date]);
-            if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
-            ensure(adv); counts[adv].tickets++;
-        }
-    });
-    cache.chats.forEach(row => {
-        const adv=mapAdvisorToCanonical(row[COL.chats.advisor]); if(!adv) return;
-        const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
-        if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
-        if(String(row[COL.chats.agentFlag]||'').toUpperCase()==='AGENT' && durationToSeconds(row[COL.chats.duration])<=300){
-            const d=parseDateFlexible(row[COL.chats.date]);
-            if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
-            ensure(adv); counts[adv].chats++;
-        }
-    });
-    cache.calls.forEach(row => {
-        const adv=mapAdvisorToCanonical(row[COL.calls.advisor]); if(!adv) return;
-        const meta=metaMap[adv]||{group:'OTROS',supervisor:'OTROS'};
-        if(selectedGroup!=='All' && meta.group!==selectedGroup) return;
-        if(selectedSupervisor && meta.supervisor.toUpperCase()!==selectedSupervisor.toUpperCase()) return;
-        if(String(row[COL.calls.status]||'').toLowerCase()==='completed' && durationToSeconds(row[COL.calls.duration])>=60){
-            const d=parseDateFlexible(row[COL.calls.date]);
-            if(filterFrom && d<filterFrom) return; if(filterTo && d>filterTo) return;
-            ensure(adv); counts[adv].calls++;
-        }
-    });
-    let maxT=0, maxC=0, maxCh=0;
-    Object.values(counts).forEach(c => {
-        if(c.tickets>maxT) maxT=c.tickets; if(c.calls>maxC) maxC=c.calls; if(c.chats>maxCh) maxCh=c.chats;
-    });
-    const arr = Object.keys(counts).map(name => {
-        const c=counts[name];
-        const tPts = maxT ? (c.tickets/maxT)*100 : 0;
-        const cPts = maxC ? (c.calls/maxC)*100 : 0;
-        const chPts = maxCh ? (c.chats/maxCh)*100 : 0;
-        return {
-            name, tickets: c.tickets, calls: c.calls, chats: c.chats,
-            total: tPts + cPts + chPts,
-            group: metaMap[name]?.group||'OTROS', supervisor: metaMap[name]?.supervisor||'OTROS',
-            modality: metaMap[name]?.modality||'Presencial'
-        };
-    });
-    
-    arr.sort((a,b)=>b.total-a.total);
-    currentFilteredData = arr; 
-    
-    document.getElementById('statAdvisors').textContent = arr.length;
-    document.getElementById('statTickets').textContent = Object.values(counts).reduce((s,c)=>s+c.tickets,0);
-    document.getElementById('statCalls').textContent = Object.values(counts).reduce((s,c)=>s+c.calls,0);
-    document.getElementById('statChats').textContent = Object.values(counts).reduce((s,c)=>s+c.chats,0);
-    
-    // Disparamos la actualización de las tablas
-    renderRaceTrack(arr); 
-    buildLeaderboardRows(arr, filterFrom, filterTo); 
-}
-function applyAllFilters() {
-    let from = null, to = null;
-    if(document.getElementById('dateFrom').value) from = new Date(document.getElementById('dateFrom').value + 'T00:00:00');
-    if(document.getElementById('dateTo').value) to = new Date(document.getElementById('dateTo').value + 'T23:59:59');
-    aggregateAndScore(from, to, activeGroup, document.getElementById('filterSupervisor').value);
-}
-/* ----------------- Flujo de Ejecución e Inicialización ----------------- */
-async function loadAllAndRender() {
-    try {
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        await buildAliasAndMetaMaps();
-        
-        const [t, ch, c] = await Promise.all([
-            fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.tickets).catch(()=>[]),
-            fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.chats).catch(()=>[]),
-            fetchSheetCSVRowsById(SPREADSHEET_ID, SHEETS.calls).catch(()=>[])
-        ]);
-        cache.tickets = t; cache.chats = ch; cache.calls = c;
-        
-        applyAllFilters();
-        document.getElementById('lastSync').textContent = new Date().toLocaleString('es-MX', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-    } catch(e) { console.error(e); } finally { document.getElementById('loadingOverlay').style.display = 'none'; }
-}
-document.getElementById('applyFilters').addEventListener('click', applyAllFilters);
-document.getElementById('refreshBtn').addEventListener('click', loadAllAndRender);
-document.querySelectorAll('.tab').forEach(t => {
-    t.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        t.classList.add('active');
-        activeGroup = t.dataset.group;
-        applyAllFilters();
-    });
-});
-document.getElementById('periodSelector').dispatchEvent(new Event('change'));
-loadAllAndRender();
-setInterval(loadAllAndRender, AUTO_REFRESH_MS);
 </script>
+
 </body>
 </html>
