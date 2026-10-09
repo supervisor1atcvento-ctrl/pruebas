@@ -1,1567 +1,1138 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <base target="\_top">
-  <meta charset="utf-8">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800\&family=IBM+Plex+Sans:wght@400;500;600;700\&display=swap">
-  <style>
-    :root {
-      /* Paleta */
-      --azul: #172B67;        /* Azul Vento: color principal */
-      --azul-medio: #3B58A8;  /* variante para barras */
-      --azul-suave: #E9EDF6;
-      --negro: #0A0A0A;
-      --blanco: #FFFFFF;
-      --gris: #808285;        /* detalles, bordes, iconos */
-      --gris-txt: #5C5E62;    /* textos secundarios (versión más oscura del gris para que se lea bien) */
-      --gris-claro: #C3C4C7;
-      --fondo: #F2F3F5;
-      --borde: #DADBDE;
-      --linea: #ECEDEF;
-      /* Semáforo */
-      --bien: #172B67; --medio: #BDBEC1; --mal: #D9622B; --mal-txt: #A8451A;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: var(--fondo); color: var(--negro);
-      font-family: "IBM Plex Sans", system-ui, sans-serif; font-variant-numeric: tabular-nums; }
-    button, input, select { font-family: inherit; }
-    button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--azul-medio); outline-offset: 2px; }
-    h1, h2, h3 { font-family: "Archivo", "IBM Plex Sans", sans-serif; }
-    .contenido { max-width: 1440px; margin: 0 auto; padding: 0 64px; }
-    .caja { background: var(--blanco); border: 1px solid var(--borde); border-radius: 14px; }
-    .sub { font-size: 14px; color: var(--gris-txt); }
-
-    /* ---- Encabezado azul ---- */
-    .banda { background: var(--azul); color: var(--blanco); }
-    .banda .contenido { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; padding-top: 28px; padding-bottom: 24px; }
-    h1 { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -.01em; }
-    .banda .sub { color: #C9D1E8; margin-top: 4px; }
-    .banda-linea { height: 4px; background: var(--negro); }
-
-    .pagina { display: flex; flex-direction: column; gap: 24px; padding-bottom: 64px; }
-
-    /* ---- Zona fija ---- */
-    .fijo { position: sticky; top: 0; z-index: 20; display: flex; flex-direction: column; gap: 14px;
-      margin: 0 -64px; padding: 16px 64px; background: var(--fondo); transition: box-shadow .2s; }
-    .fijo.sombra { box-shadow: 0 6px 16px -10px rgba(10, 10, 10, .45); }
-    .filtros { display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
-    .filtro { display: flex; flex-direction: column; gap: 6px; }
-    .filtro[hidden] { display: none; }
-    .etq { font-size: 13px; font-weight: 600; color: var(--gris-txt); }
-    .segmentos { display: flex; gap: 4px; padding: 4px; background: #E3E4E7; border-radius: 12px; flex-wrap: wrap; }
-    .segmentos button { min-height: 44px; padding: 0 18px; border: none; border-radius: 9px; background: transparent;
-      color: #2E2F31; font-size: 15px; font-weight: 600; cursor: pointer; }
-    .segmentos button[aria-pressed="true"] { background: var(--azul); color: var(--blanco); }
-    select, input[type="date"] { min-height: 52px; padding: 0 14px; border: 1px solid var(--gris-claro); border-radius: 12px;
-      background: var(--blanco); font-size: 15px; color: var(--negro); }
-    select { min-width: 200px; }
-    .rango { display: flex; align-items: center; gap: 8px; }
-    .rango span { font-size: 14px; color: var(--gris-txt); }
-
-    /* ---- Mis indicadores ---- */
-    .ind-zona { position: relative; display: flex; flex-direction: column; gap: 8px; }
-    .ind-cab { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-    .ind-titulo { display: flex; align-items: baseline; gap: 10px; }
-    .ind-titulo b { font-size: 15px; }
-    .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid var(--gris-claro);
-      border-radius: 10px; background: var(--blanco); color: var(--negro); font-size: 14px; font-weight: 600; cursor: pointer; }
-    .btn.oscuro { background: var(--negro); color: var(--blanco); border-color: var(--negro); }
-    .tarjetas { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
-    .kpi { position: relative; display: flex; flex-direction: column; gap: 2px; min-height: 104px; padding: 12px 14px;
-      background: var(--blanco); border: 1px solid var(--borde); border-top: 3px solid var(--azul); border-radius: 12px; }
-    .kpi:hover { border-color: var(--gris); border-top-color: var(--azul); }
-    .kpi-abrir { position: absolute; inset: 0; border: none; background: transparent; border-radius: 12px; cursor: pointer; }
-    .kpi-etq { display: flex; align-items: center; gap: 6px; padding-right: 30px; font-size: 13px; font-weight: 600; color: var(--gris-txt); }
-    .cuadrito { width: 8px; height: 8px; border-radius: 2px; flex: none; }
-    .kpi-valor { font-family: "Archivo", sans-serif; font-size: 27px; font-weight: 700; line-height: 1.2; white-space: nowrap; color: var(--negro); }
-    .kpi-dice { font-size: 12px; color: var(--gris-txt); line-height: 1.35; }
-    .kpi-quitar { position: absolute; top: 2px; right: 2px; z-index: 1; width: 44px; height: 44px; display: flex; align-items: center;
-      justify-content: center; border: none; border-radius: 10px; background: transparent; color: var(--gris); cursor: pointer; }
-    .kpi-quitar:hover { background: var(--fondo); color: var(--negro); }
-    .agregar { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 104px;
-      border: 2px dashed var(--gris-claro); border-radius: 12px; background: transparent; color: var(--gris-txt); font-size: 14px; font-weight: 600; cursor: pointer; }
-    .agregar:hover { border-color: var(--azul); color: var(--azul); }
-
-    .selector { position: absolute; top: 52px; right: 0; z-index: 30; width: min(820px, 100%); display: flex; flex-direction: column; gap: 16px;
-      padding: 22px 24px; background: var(--blanco); border: 1px solid var(--borde); border-radius: 16px; box-shadow: 0 24px 50px -20px rgba(10, 10, 10, .4); }
-    .selector[hidden] { display: none; }
-    .sel-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-    .sel-cab h3 { margin: 0 0 4px; font-size: 19px; font-weight: 700; }
-    .sel-aviso.lleno { color: var(--mal-txt); }
-    .sel-grupo { display: flex; flex-direction: column; gap: 8px; }
-    .sel-grupo-etq { font-size: 13px; font-weight: 700; color: var(--azul); }
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip-sel { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid var(--gris-claro);
-      border-radius: 999px; background: var(--blanco); color: var(--negro); font-size: 14px; font-weight: 600; cursor: pointer; }
-    .chip-sel[aria-pressed="true"] { background: var(--azul); border-color: var(--azul); color: var(--blanco); }
-    .chip-sel:disabled { opacity: .45; cursor: not-allowed; }
-    .chip-sel svg { display: none; }
-    .chip-sel[aria-pressed="true"] svg { display: block; }
-
-    /* ---- Alertas ---- */
-    .avisos { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
-    .aviso-caja { display: flex; flex-direction: column; gap: 12px; padding: 22px 24px; }
-    h2 { margin: 0; font-size: 20px; font-weight: 700; }
-    .aviso { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border-radius: 10px; }
-    .aviso.mal { background: #FCEFE7; } .aviso.bien { background: var(--azul-suave); } .aviso.neutro { background: var(--fondo); }
-    .aviso-punto { width: 10px; height: 10px; margin-top: 7px; border-radius: 50%; flex: none; }
-    .aviso b { display: block; font-size: 16px; margin-bottom: 2px; }
-    .aviso span { font-size: 15px; color: #2E2F31; line-height: 1.45; }
-
-    /* ---- Tabla ---- */
-    .panel { overflow: hidden; }
-    .panel-cab { display: flex; justify-content: space-between; align-items: center; gap: 16px 24px; flex-wrap: wrap; padding: 16px 24px; border-bottom: 1px solid var(--borde); }
-    .panel-der { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-    .tabla-filtro { display: flex; align-items: center; gap: 10px; }
-    .tabla-filtro label { font-size: 13px; font-weight: 600; color: var(--gris-txt); }
-    .tabla-filtro select { min-height: 44px; }
-    .leyenda { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--gris-txt); }
-    .leyenda span { display: inline-flex; align-items: center; gap: 6px; }
-    .punto { width: 9px; height: 9px; border-radius: 50%; flex: none; display: inline-block; }
-    .scroll { overflow-x: auto; }
-    table { width: 100%; min-width: 1150px; border-collapse: collapse; }
-    thead th { font-size: 13px; text-align: right; white-space: nowrap; }
-    .grupo th { padding: 10px 12px; background: var(--negro); color: var(--blanco); font-weight: 700; text-align: left; letter-spacing: .02em; }
-    .cols th { padding: 10px 12px; background: #F6F6F7; color: var(--gris-txt); font-weight: 600; border-bottom: 1px solid var(--borde); }
-    .cols th:first-child { padding-left: 24px; text-align: left; }
-    .grupo .sep { border-left: 1px solid #3A3B3D; }
-    .sep { border-left: 1px solid var(--borde); }
-    tbody td { padding: 12px; border-top: 1px solid var(--linea); text-align: right; vertical-align: middle; }
-    tbody td.sep { border-left-color: var(--linea); }
-    tbody td:first-child { padding-left: 24px; text-align: left; }
-    tbody tr:nth-child(even) { background: #FAFAFB; }
-    tbody tr.pendiente { background: #F4F4F5; }
-    .asesor { font-size: 15px; font-weight: 700; white-space: nowrap; color: var(--azul); }
-    .pendiente .asesor { color: var(--gris-txt); font-style: italic; }
-    .valor { display: inline-flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; white-space: nowrap; }
-    .cuenta { font-size: 12px; color: var(--gris-txt); margin-top: 2px; white-space: nowrap; }
-    .mensaje { padding: 48px 24px; text-align: center; color: var(--gris-txt); }
-    .error { color: var(--mal-txt); }
-
-    /* ---- Top 5 ---- */
-    dialog { padding: 0; border: none; border-radius: 16px; width: min(520px, calc(100vw - 32px)); color: var(--negro);
-      box-shadow: 0 24px 60px -20px rgba(10, 10, 10, .5); }
-    dialog::backdrop { background: rgba(10, 10, 10, .45); }
-    .top-caja { padding: 24px; display: flex; flex-direction: column; gap: 18px; border-top: 5px solid var(--azul); border-radius: 16px; }
-    .top-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-    .top-cab h3 { margin: 0 0 4px; font-size: 21px; font-weight: 700; }
-    .cerrar { width: 44px; height: 44px; flex: none; border: none; border-radius: 10px; background: var(--fondo); font-size: 22px; cursor: pointer; }
-    .top-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
-    .top-item { display: grid; grid-template-columns: 32px 1fr auto; align-items: center; gap: 12px; }
-    .top-pos { width: 32px; height: 32px; border-radius: 50%; background: var(--fondo); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
-    .top-item:first-child .top-pos { background: var(--azul); color: var(--blanco); }
-    .top-nombre { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-    .top-barra { height: 8px; border-radius: 4px; background: var(--fondo); overflow: hidden; }
-    .top-barra div { height: 8px; border-radius: 4px; }
-    .top-valor { font-size: 18px; font-weight: 700; white-space: nowrap; text-align: right; }
-    .top-valor small { display: block; font-size: 12px; font-weight: 400; color: var(--gris-txt); }
-    .nota { font-size: 13px; color: var(--gris-txt); }
-
-    /* ---- Acceso ---- */
-    .acceso { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
-      background: var(--azul); }
-    .acceso[hidden], #app[hidden] { display: none; }
-    .acceso-caja { width: min(420px, 100%); display: flex; flex-direction: column; gap: 16px; padding: 32px;
-      background: var(--blanco); border-radius: 16px; border-top: 6px solid var(--negro); box-shadow: 0 30px 60px -25px rgba(0, 0, 0, .6); }
-    .acceso-caja[hidden] { display: none; }
-    .acceso-caja h1 { color: var(--azul); font-size: 28px; }
-    .campo { display: flex; flex-direction: column; gap: 6px; }
-    .campo input, .campo select { min-height: 48px; padding: 0 14px; border: 1px solid var(--gris-claro); border-radius: 10px;
-      font-size: 16px; background: var(--blanco); color: var(--negro); }
-    .btn-principal { min-height: 48px; border: none; border-radius: 10px; background: var(--azul); color: var(--blanco);
-      font-size: 16px; font-weight: 700; cursor: pointer; }
-    .btn-principal:disabled { opacity: .6; cursor: wait; }
-    .btn-texto { min-height: 44px; border: none; background: transparent; color: var(--azul); font-size: 14px; font-weight: 600; cursor: pointer; }
-    .msj-error { padding: 10px 12px; border-radius: 8px; background: #FCEFE7; color: var(--mal-txt); font-size: 14px; }
-    .msj-error:empty { display: none; }
-    .msj-ok { padding: 12px 14px; border-radius: 8px; background: var(--azul-suave); color: var(--azul); font-size: 14px; }
-    .msj-ok:empty { display: none; }
-
-    /* ---- Usuario en el encabezado ---- */
-    .menu { display: flex; gap: 4px; padding: 4px; background: rgba(255, 255, 255, .1); border-radius: 12px; margin-right: 8px; }
-    .menu a { min-height: 40px; padding: 0 16px; display: inline-flex; align-items: center; border-radius: 9px; color: #C9D1E8;
-      font-size: 14px; font-weight: 700; text-decoration: none; }
-    .menu a:hover { color: var(--blanco); background: rgba(255, 255, 255, .12); }
-    .menu a[aria-current="page"] { background: var(--blanco); color: var(--azul); }
-    .usuario-zona { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-    .usuario-nombre { font-size: 14px; color: #C9D1E8; margin-right: 6px; }
-    .usuario-nombre b { color: var(--blanco); }
-    .btn-banda { min-height: 44px; padding: 0 14px; border: 1px solid rgba(255, 255, 255, .45); border-radius: 10px;
-      background: transparent; color: var(--blanco); font-size: 14px; font-weight: 600; cursor: pointer; }
-    .btn-banda:hover { background: rgba(255, 255, 255, .12); }
-    .btn-banda[hidden] { display: none; }
-
-    .aviso-vacio { padding: 24px; background: var(--blanco); border: 1px solid var(--borde); border-radius: 14px; color: var(--gris-txt); }
-
-    @media (max-width: 1200px) { .tarjetas { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-    @media (max-width: 1000px) { .avisos { grid-template-columns: 1fr; } }
-    @media (max-width: 900px), (max-height: 700px) { .fijo { position: static; } }
-    @media (max-width: 900px) {
-      .contenido { padding: 0 16px; } .fijo { margin: 0; padding: 16px 0; }
-      h1 { font-size: 26px; } .tarjetas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Centro de Mandos ATC — Portal</title>
+<!-- Tipografía y FontAwesome institucional -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* 
+  ESTÁNDARES INSTITUCIONALES VENTO
+  Colores Estrictos: Negro, Blanco y Naranja
+*/
+:root {
+  --vento-white: #FFFFFF;
+  --vento-bg: #F8F9FA;
+  --vento-black: #1A1A1A;
+  --vento-gray-dark: #4B5563;
+  --vento-gray-light: #E5E7EB;
+  --vento-orange: #F28F17;
+  --vento-orange-hover: #D97D11;
+  --radius: 12px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.35);
+  --widget-width: 360px;
+  --widget-height: 540px;
+  --widget-collapsed-size: 64px;
+}
+*{box-sizing:border-box}
+html,body{
+  height:100%; margin:0; 
+  background-color: var(--vento-bg);
+  font-family: 'Inter', system-ui, sans-serif; 
+  color: var(--vento-black);
+  overflow: hidden;
+}
+.app{height:100vh; display:flex; flex-direction:column}
+/* =========================================
+   BANNER BANCARIO / MARQUESINA DE ANUNCIOS
+   ========================================= */
+.bank-banner {
+  background-color: var(--vento-black);
+  color: var(--vento-white);
+  border-bottom: 3px solid var(--vento-orange);
+  display: flex;
+  align-items: center;
+  height: 40px;
+  min-height: 40px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1000;
+  font-size: 13px;
+}
+.banner-badge {
+  background: var(--vento-orange);
+  color: var(--vento-white);
+  padding: 0 16px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.3);
+  z-index: 2;
+  text-transform: uppercase;
+}
+.ticker-container {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.ticker-content {
+  display: inline-block;
+  white-space: nowrap;
+  padding-left: 100%;
+  animation: marquee 28s linear infinite;
+}
+.ticker-container:hover .ticker-content {
+  animation-play-state: paused !important;
+}
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 40px;
+  font-weight: 500;
+}
+.ticker-item strong {
+  color: var(--vento-white);
+}
+.ticker-item i {
+  color: var(--vento-orange);
+  font-size: 14px;
+}
+.ticker-separator {
+  color: var(--vento-orange);
+  margin: 0 15px;
+  font-weight: bold;
+}
+@keyframes marquee {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-100%, 0, 0); }
+}
+/* BOTÓN PARA SALTAR AVISO */
+.btn-next-aviso {
+  background-color: var(--vento-black);
+  color: var(--vento-orange);
+  border: none;
+  border-left: 2px solid var(--vento-gray-dark);
+  height: 100%;
+  padding: 0 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+  z-index: 2;
+}
+.btn-next-aviso:hover {
+  background-color: var(--vento-orange);
+  color: var(--vento-white);
+  border-left-color: var(--vento-orange);
+}
+/* Iframe full area ajustado */
+.frame-wrap{flex:1; display:block; height: calc(100vh - 40px);}
+.frame{width:100%; height:100%; border:0; display:block; background:var(--vento-white)}
+/* Widget fijo inferior derecho */
+.widget {
+  position:fixed;
+  right:24px; bottom:24px;
+  width:var(--widget-width); height:var(--widget-height);
+  border-radius:var(--radius);
+  background: var(--vento-black);
+  border: 2px solid var(--vento-gray-dark);
+  color: var(--vento-white);
+  box-shadow:var(--shadow-lg);
+  display:flex; flex-direction:column;
+  overflow:hidden; z-index:9999;
+  transition: all .22s ease;
+}
+.widget-header{
+  display:flex; align-items:center; justify-content:space-between; 
+  padding:16px; border-bottom:2px solid #333;
+}
+.widget-title{display:flex; align-items:center; gap:12px; width: 100%;}
+.widget-title .logo{
+  width:44px; height:44px; border-radius:10px; 
+  background: var(--vento-orange); 
+  display:flex; align-items:center; justify-content:center; 
+  font-weight:700; color:var(--vento-white); font-size: 24px;
+}
+.widget-title h4{margin:0; font-size:1rem; font-weight: 700; letter-spacing: 0.5px;}
+.widget-controls{display:flex; gap:8px; align-items:center}
+.widget-controls .close-icon{
+  width:32px; height:32px; border-radius:8px; background:transparent; 
+  border: 2px solid var(--vento-gray-dark);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700;
+  transition: all 0.2s;
+}
+.widget-controls .close-icon:hover{
+  background: var(--vento-white); color: var(--vento-black); border-color: var(--vento-white);
+}
+.widget-body{padding:16px; overflow:auto; flex:1}
+.menu-item{
+  display:flex; justify-content:space-between; align-items:center; 
+  padding:12px; border-radius:8px; background:transparent; 
+  color:var(--vento-gray-light); cursor:pointer; margin-bottom:8px; 
+  border:2px solid transparent; font-weight: 500; font-size: 14px;
+  transition: all 0.2s;
+}
+.menu-item i { font-size: 16px; color: var(--vento-gray-dark); }
+.menu-item:hover{
+  background: #2a2a2a; border-color: #444; color: var(--vento-white);
+}
+.menu-item:hover i { color: var(--vento-orange); }
+.menu-item.active{
+  background: var(--vento-orange); color: var(--vento-white); 
+  font-weight:700; border-color: var(--vento-orange-hover);
+}
+.menu-item.active i { color: var(--vento-white); }
+.widget-footer{
+  padding:12px 16px; border-top:2px solid #333; font-size:0.82rem; 
+  color:var(--vento-gray-dark); display:flex; justify-content:space-between; align-items:center;
+  font-weight: 600; text-transform: uppercase;
+}
+/* WIDGET COLAPSADO */
+.widget.collapsed {
+  width: var(--widget-collapsed-size) !important;
+  height: var(--widget-collapsed-size) !important;
+  border-radius: 50% !important;
+  background: transparent !important; 
+  border: none !important;
+  box-shadow: none !important; 
+  padding: 0 !important;
+  overflow: visible !important;
+}
+.widget.collapsed .widget-header { border: none !important; padding: 0 !important; height: 100%; justify-content: center; }
+.widget.collapsed .widget-title { justify-content: center; gap: 0; }
+.widget.collapsed .logo {
+  width: 64px !important; height: 64px !important; border-radius: 50% !important; 
+  background: var(--vento-orange) !important; font-size: 32px !important; cursor: pointer;
+  box-shadow: 0 4px 12px rgba(242, 143, 23, 0.4) !important;
+}
+.widget.collapsed .widget-title > div:not(.logo),
+.widget.collapsed .widget-controls,
+.widget.collapsed .widget-body,
+.widget.collapsed .widget-footer { display: none !important; }
+/* =========================================
+   ESTILOS WIDGET DE CHATBOT (RESUÉLVELO CHAT)
+   ========================================= */
+.chat-launcher-btn {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--vento-orange);
+  color: var(--vento-white);
+  border: 2px solid var(--vento-white);
+  box-shadow: 0 8px 24px rgba(242, 143, 23, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  cursor: pointer;
+  z-index: 9998;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.chat-launcher-btn:hover {
+  transform: scale(1.1);
+  background: var(--vento-black);
+  border-color: var(--vento-orange);
+  color: var(--vento-orange);
+}
+.chat-widget-container {
+  position: fixed;
+  left: 24px;
+  bottom: 92px;
+  width: 380px;
+  height: 580px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 120px);
+  background: var(--vento-black);
+  border: 2px solid var(--vento-orange);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10001;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease;
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  pointer-events: none;
+}
+.chat-widget-container.active {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: all;
+}
+.chat-widget-header {
+  background: var(--vento-black);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #333;
+}
+.chat-widget-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--vento-white);
+  font-size: 14px;
+}
+.chat-widget-close {
+  background: transparent;
+  border: 2px solid var(--vento-gray-dark);
+  color: var(--vento-white);
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.chat-widget-close:hover {
+  background: var(--vento-orange);
+  border-color: var(--vento-orange);
+  color: var(--vento-white);
+}
+.chat-widget-iframe-container {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  background: var(--vento-white);
+}
+.chat-widget-iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+/* MODALES GENERALES */
+.overlay-blur {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(26, 26, 26, 0.7); backdrop-filter: blur(5px); z-index: 10000;
+  justify-content: center; align-items: center;
+}
+.panel-modal {
+  background-color: var(--vento-white); border: 2px solid var(--vento-black);
+  border-radius: 16px; width: 90%; max-width: 450px; padding: 0;
+  box-shadow: var(--shadow-lg); position: relative; color: var(--vento-black);
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.modal-header {
+  padding: 20px 24px; border-bottom: 2px solid var(--vento-black);
+  background: var(--vento-bg); display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+.modal-header-title i { color: var(--vento-orange); }
+.modal-close {
+  background: var(--vento-white); border: 2px solid var(--vento-black);
+  width: 30px; height: 30px; border-radius: 50%; color: var(--vento-black);
+  font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { background: var(--vento-orange); color: var(--vento-white); border-color: var(--vento-orange); }
+.modal-body { padding: 24px; max-height: 80vh; overflow-y: auto; }
+.modal-body p { margin: 0 0 16px 0; font-size: 14px; color: var(--vento-gray-dark); font-weight: 500; }
+.input-vin {
+  width: 100%; padding: 14px 18px; border-radius: 8px; border: 2px solid var(--vento-black);
+  background-color: var(--vento-white); color: var(--vento-black); font-size: 16px;
+  font-weight: 700; text-transform: uppercase; outline: none; margin-bottom: 16px;
+  font-family: 'Inter', sans-serif; transition: all 0.3s ease;
+}
+.input-vin:focus { border-color: var(--vento-orange); box-shadow: 0 0 0 4px rgba(242, 143, 23, 0.15); }
+.input-vin::placeholder { color: #9CA3AF; font-weight: 500; text-transform: none; }
+.btn-search {
+  width: 100%; padding: 14px; background-color: var(--vento-black); color: var(--vento-white);
+  border: 2px solid var(--vento-black); border-radius: 8px; font-size: 15px; font-weight: 800;
+  cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.btn-search:hover { background-color: var(--vento-orange); border-color: var(--vento-orange); }
+.btn-search:disabled { background-color: var(--vento-gray-dark); border-color: var(--vento-gray-dark); cursor: not-allowed; }
+/* Resultados de Bases de Datos y Segmentador */
+.db-results-container { margin-top: 20px; display: none; flex-direction: column; gap: 12px; }
+.db-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 16px; border-radius: 8px; border: 2px solid var(--vento-gray-light);
+  background: var(--vento-bg);
+}
+.db-name { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+/* Badges Corporativos */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+  border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.badge-orange { background-color: var(--vento-orange); color: var(--vento-white); border: 1px solid var(--vento-orange-hover); }
+.badge-black { background-color: var(--vento-black); color: var(--vento-white); border: 1px solid var(--vento-black); }
+.badge-white { background-color: var(--vento-white); color: var(--vento-black); border: 1px solid var(--vento-black); }
+select.input-vin {
+  cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto;
+}
+@media (max-width:900px){
+  .widget{right:16px; bottom:16px; width:90%; height:460px}
+  .widget.collapsed{right:16px; bottom:16px}
+  .chat-widget-container{left: 16px; bottom: 80px; width: calc(100vw - 32px); height: 80vh;}
+  .chat-launcher-btn{left: 16px; bottom: 16px;}
+}
+</style>
 </head>
 <body>
-  <!-- ===== Pantallas de acceso ===== -->
-  <div class="acceso" id="vista-acceso">
-    <div class="acceso-caja" id="caja-cargando"><h1>Desempeño por asesor</h1><div class="sub">Cargando…</div></div>
-
-    <form class="acceso-caja" id="form-login" hidden novalidate>
-      <div><h1>Desempeño por asesor</h1><div class="sub">Inicia sesión para continuar.</div></div>
-      <div class="msj-ok" id="login-ok" role="status"></div>
-      <div class="campo"><label class="etq" for="login-usuario">Usuario</label><input id="login-usuario" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
-      <div class="campo"><label class="etq" for="login-contrasena">Contraseña</label><input id="login-contrasena" type="password" autocomplete="current-password" required></div>
-      <div class="msj-error" id="login-error" role="alert"></div>
-      <button type="submit" class="btn-principal" id="login-boton">Iniciar sesión</button>
-      <div class="sub">¿Olvidaste tu contraseña? Pídesela al administrador.</div>
-    </form>
-
+<div class="app">
+  <!-- BANNER DE ANUNCIO DINÁMICO CON ROTACIÓN POR FILA -->
+  <div class="bank-banner">
+    <div class="banner-badge" id="bannerBadge">
+      <i class="fa-solid fa-bullhorn" id="badgeIcon"></i>
+      <span id="badgeText">AVISOS ATC</span>
+    </div>
+    <div class="ticker-container" title="Pasa el cursor para pausar la animación">
+      <div class="ticker-content" id="tickerContent">
+        <span style="color: var(--vento-white); padding-left: 20px; font-weight: 600;">
+          <i class="fa-solid fa-rotate fa-spin" style="color: var(--vento-orange); margin-right: 8px;"></i> Sincronizando avisos...
+        </span>
+      </div>
+    </div>
+    <!-- BOTÓN DE SIGUIENTE AVISO -->
+    <button class="btn-next-aviso" onclick="saltarAviso()" title="Saltar al siguiente aviso">
+      <i class="fa-solid fa-forward-step"></i>
+    </button>
   </div>
+  
+  <div class="frame-wrap">
+    <iframe id="mainFrame" class="frame" src="https://supervisor1atcvento-ctrl.github.io/tickets_atc/" title="Contenido principal"></iframe>
+  </div>
+</div>
+<!-- =========================================
+     BOTÓN FLOTANTE Y WIDGET DE CHATBOT (RESUÉLVELO CHAT)
+     ========================================= -->
+<button class="chat-launcher-btn" onclick="toggleChatWidget()" title="Abrir Resuélvelo Chat">
+  <i class="fa-solid fa-robot"></i>
+</button>
+<div class="chat-widget-container" id="chatWidgetContainer">
+  <div class="chat-widget-header">
+    <div class="chat-widget-title">
+      <i class="fa-solid fa-robot" style="color: var(--vento-orange); font-size: 18px;"></i>
+      <span>Chat Bot Vento</span>
+    </div>
+    <button class="chat-widget-close" onclick="toggleChatWidget()" title="Minimizar Chat">
+      <i class="fa-solid fa-minus"></i>
+    </button>
+  </div>
+  <div class="chat-widget-iframe-container">
+    <iframe id="chatIframe" src="https://resuelvelo-chat.darlimco.chatgpt.site/" title="Resuélvelo Chatbot"></iframe>
+  </div>
+</div>
+<!-- =========================================
+     MODAL BÚSQUEDA UNIVERSAL DE VIN
+     ========================================= -->
+<div class="overlay-blur" id="vinModalOverlay">
+  <div class="panel-modal">
+    <div class="modal-header">
+      <div class="modal-header-title">
+        <i class="fa-solid fa-magnifying-glass"></i> Búsqueda Universal VIN
+      </div>
+      <button class="modal-close" onclick="cerrarModalVIN()" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p>Ingresa el número de serie para consultar su registro en todas las bases operativas de Vento.</p>
+      <form onsubmit="ejecutarBusquedaUniversal(event)">
+        <input type="text" id="vinInput" class="input-vin" placeholder="Ingrese VIN (17 caracteres)..." autocomplete="off" maxlength="17" required>
+        <button type="submit" id="vinSubmitBtn" class="btn-search">
+          <i class="fa-solid fa-database"></i> Consultar Bases
+        </button>
+      </form>
+      <div id="dbResults" class="db-results-container">
+        <!-- Resultados inyectados por JS -->
+      </div>
+    </div>
+  </div>
+</div>
+<!-- =========================================
+     MODAL: SEGMENTADOR RÁPIDO NATIVO
+     ========================================= -->
+<div class="overlay-blur" id="segmentadorModalOverlay">
+  <div class="panel-modal">
+    <div class="modal-header">
+      <div class="modal-header-title">
+        <i class="fa-solid fa-store" style="color: var(--vento-orange);"></i> Segmentador Rápido
+      </div>
+      <button class="modal-close" onclick="cerrarModalSegmentador()" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p>Busca el nombre o número de la agencia para verificar su kit de herramientas y sacar el dictamen.</p>
+      <!-- Buscador -->
+      <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+        <input type="text" id="inputAgenciaModal" class="input-vin" style="margin-bottom: 0;" placeholder="Ej. Liverpool, 3054..." autocomplete="off" onkeyup="if(event.key === 'Enter') buscarAgenciaRapida()">
+        <button onclick="buscarAgenciaRapida()" class="btn-search" style="width: auto; padding: 0 20px;">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+      <!-- Resultados de la búsqueda -->
+      <div id="resultadosAgenciaRapida" class="db-results-container" style="margin-top: 10px;"></div>
+      
+      <!-- Área del Dictamen Modificada -->
+      <div id="areaDictamenRapido" style="display: none; margin-top: 20px; border-top: 2px dashed var(--vento-gray-light); padding-top: 20px;">
+        <h4 id="nombreAgenciaSeleccionada" style="margin: 0 0 10px 0; font-weight: 800; font-size: 16px;"></h4>
+        <div id="badgeAgenciaSeleccionada" style="margin-bottom: 20px;"></div>
+        
+        <div style="font-size: 14px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-users-gear" style="color: var(--vento-orange);"></i> Origen del Armado en VENTONET
+        </div>
+        <select id="select-armado-rapido" class="input-vin" onchange="renderizarFlujoAgencia()">
+          <option value="" disabled selected>Selecciona una opción...</option>
+          <option value="CEDIS">CEDIS</option>
+          <option value="CESVE">CESVE</option>
+          <option value="SIN_REGISTRO">SIN REGISTRO (No se nota quién armó)</option>
+        </select>
 
-  <!-- ===== Dashboard ===== -->
-  <div id="app" hidden>
-  <header class="banda">
-    <div class="contenido">
+        <!-- Contenedor dinámico para las preguntas del flujo -->
+        <div id="flujoPreguntas" style="margin-top: 15px;"></div>
+        
+        <!-- Dictamen final -->
+        <div id="boxDictamenFinal" class="db-results-container" style="padding: 0; border: none; background: transparent; display: none;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Widget fijo -->
+<aside class="widget" id="menuWidget">
+  <div class="widget-header" id="widgetHeader">
+    <div class="widget-title">
+      <div class="logo" id="widgetLogo"><i class="fa-solid fa-motorcycle"></i></div>
       <div>
-        <h1>Desempeño por asesor</h1>
-        <div class="sub" id="consultado">Cargando datos…</div>
-      </div>
-      <div class="usuario-zona">
-        <nav class="menu" aria-label="Menú principal">
-          <a href="#" id="menu-llamadas" aria-current="page">Llamadas</a>
-          <a href="#" id="menu-muro">Muro ATC</a>
-        </nav>
-        <span class="usuario-nombre" id="usuario-nombre"></span>
-        <button type="button" class="btn-banda" id="btn-salir">Cerrar sesión</button>
+        <h4>Asistente ATC</h4>
+        <div style="font-size:0.75rem; color:var(--vento-gray-light); font-weight:500;">Portal de herramientas</div>
       </div>
     </div>
-  </header>
-  <div class="banda-linea"></div>
-
-  <div class="contenido pagina">
-    <div class="fijo" id="fijo">
-      <div class="filtros">
-        <div class="filtro">
-          <label class="etq" for="periodo">Periodo</label>
-          <select id="periodo">
-            <option value="todo">Todo el histórico</option>
-            <option value="dia">Un día</option>
-            <option value="semana">Una semana</option>
-            <option value="ult7">Últimos 7 días</option>
-            <option value="ult30">Últimos 30 días</option>
-            <option value="mes" selected>Un mes</option>
-            <option value="ult90">Últimos 90 días</option>
-            <option value="rango">Calendario (elegir fechas)</option>
-          </select>
-        </div>
-        <div class="filtro" id="c-dia" hidden><label class="etq" for="p-dia">Día</label><input type="date" id="p-dia"></div>
-        <div class="filtro" id="c-semana" hidden><label class="etq" for="p-semana">Semana</label><select id="p-semana"></select></div>
-        <div class="filtro" id="c-mes" hidden><label class="etq" for="p-mes">Mes</label><select id="p-mes"></select></div>
-        <div class="filtro" id="c-rango" hidden>
-          <span class="etq" id="etq-rango">Fechas</span>
-          <div class="rango" role="group" aria-labelledby="etq-rango">
-            <input type="date" id="p-desde" aria-label="Desde"><span>a</span><input type="date" id="p-hasta" aria-label="Hasta">
-          </div>
-        </div>
-        <div class="filtro"><span class="etq" id="etq-hor">Horario</span><div class="segmentos" id="horarios" role="group" aria-labelledby="etq-hor"></div></div>
-        <div class="filtro" id="c-asesor"><label class="etq" for="asesor">Asesor</label><select id="asesor"><option value="">Todos los asesores</option></select></div>
+    <div class="widget-controls">
+      <div class="close-icon" id="closeWidget" title="Minimizar menú"><i class="fa-solid fa-minus"></i></div>
+    </div>
+  </div>
+  <div class="widget-body" id="widgetBody">
+    <div class="menu-section">
+      <!-- BOTÓN DE BÚSQUEDA UNIVERSAL -->
+      <div class="menu-item" style="border-color: var(--vento-orange); background: rgba(242, 143, 23, 0.1); color: var(--vento-orange);" onclick="abrirModalVIN()">
+        <span>Búsqueda Universal de VIN</span><i class="fa-solid fa-magnifying-glass" style="color: var(--vento-orange);"></i>
       </div>
-
-      <div class="ind-zona" id="ind-zona">
-        <div class="ind-cab">
-          <div class="ind-titulo">Mis indicadores<span class="sub" id="ind-cuenta"></span></div>
-          <button type="button" class="btn" id="btn-personalizar" aria-expanded="false" aria-controls="selector">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="7" cy="18" r="2"/></svg>
-            <span>Personalizar</span>
-          </button>
-        </div>
-        <div class="tarjetas" id="tarjetas"></div>
-        <div class="selector" id="selector" hidden>
-          <div class="sel-cab">
-            <div><h3>Elige hasta 6 indicadores</h3><div class="sub sel-aviso" id="sel-aviso"></div></div>
-            <button type="button" class="btn oscuro" id="sel-listo">Listo</button>
-          </div>
-          <div id="sel-grupos" style="display: flex; flex-direction: column; gap: 16px"></div>
-        </div>
+      
+      <!-- BOTÓN ACCESO DIRECTO RESUÉLVELO CHATBOT -->
+      <div class="menu-item" style="border-color: var(--vento-orange); background: rgba(242, 143, 23, 0.15); color: var(--vento-white); font-weight: 700;" onclick="toggleChatWidget()">
+        <span>Chat Bot Vento</span><i class="fa-solid fa-robot" style="color: var(--vento-orange);"></i>
+      </div>
+      <hr style="border: 0; border-top: 2px dashed #444; margin: 16px 0;">
+      <!-- Herramientas -->
+      <div class="menu-item active" id="menuTickets" data-url="https://supervisor1atcvento-ctrl.github.io/tickets_atc/" onclick="loadPage(this)">
+        <span>Tickets ATC</span><i class="fa-solid fa-ticket"></i>
+      </div>
+      <div class="menu-item" data-url="https://supervisor1atcvento-ctrl.github.io/indicadores/" onclick="loadPage(this)">
+        <span>Indicadores</span><i class="fa-solid fa-chart-line"></i>
+      </div>
+      <div class="menu-item" onclick="abrirModalSegmentador()">
+        <span>Segmentador de Agencias</span><i class="fa-solid fa-store"></i>
+      </div>
+      <div class="menu-item" data-url="https://supervisor1atcvento-ctrl.github.io/buscador-de-cesves/" onclick="loadPage(this)">
+        <span>Buscador CESVE</span><i class="fa-solid fa-wrench"></i>
+      </div>
+      <div class="menu-item" data-url="https://script.google.com/macros/s/AKfycbzSF4oEkoujflBAHpuGQFS3HC2mTUaOjKbKpt0wz0BzQ_XM0-t0Qm3juTgzHBiBxAJ6/exec" onclick="loadPage(this)">
+        <span>Tiendas VS CESVES</span><i class="fa-solid fa-code-compare"></i>
+      </div>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSfFrOUDVc3YTUqJJav7e04a7utTbRtU1Jf0SbKY539xmyMniA/viewform?usp=sharing" target="_blank" class="menu-item" style="text-decoration: none;">
+        <span>Solicitar Extensión</span><i class="fa-solid fa-pen-to-square"></i>
+      </a>
+      <div class="menu-item" data-url="https://supervisor1atcvento-ctrl.github.io/calculadora-de-servicios/" onclick="loadPage(this)">
+        <span>Calculadora de servicios</span><i class="fa-solid fa-calculator"></i>
+      </div>
+      <div class="menu-item" data-url="https://supervisor1atcvento-ctrl.github.io/Directorio-POST-VENTA/" onclick="loadPage(this)">
+        <span>Directorio POST-VENTA</span><i class="fa-solid fa-address-book"></i>
       </div>
     </div>
-
-    <section class="avisos">
-      <div class="caja aviso-caja"><h2>Qué hay que atender</h2><div id="atender" class="aviso-caja" style="padding:0"></div></div>
-      <div class="caja aviso-caja"><h2>Qué va bien</h2><div id="bien" class="aviso-caja" style="padding:0"></div></div>
-    </section>
-
-    <section class="caja panel">
-      <div class="panel-cab">
-        <div>
-          <h2>Detalle por asesor</h2>
-          <div class="sub" id="titulo-tabla"></div>
-        </div>
-        <div class="panel-der">
-          <div class="tabla-filtro" id="c-tabla-asesor">
-            <label for="tabla-asesor">Ver en la tabla</label>
-            <select id="tabla-asesor"><option value="">Todos los asesores</option></select>
-          </div>
-          <div class="leyenda">
-            <span><i class="punto" style="background:var(--bien)">Mejor que el equipo</span>
-            <span><i class="punto" style="background:var(--medio)">En el promedio</span>
-            <span><i class="punto" style="background:var(--mal)">Por atender</span>
-          </div>
-        </div>
-      </div>
-      <div class="scroll" id="tabla"><div class="mensaje">Cargando datos…</div></div>
-    </section>
   </div>
-
-  <div class="contenido" id="sin-asesor" hidden>
-    <div class="aviso-vacio">Tu usuario todavía no está ligado a un asesor de Freshcaller. Pídele al administrador que lo configure.</div>
+  <div class="widget-footer">
+    <span>VENTO © 2026</span><span>ATC</span>
   </div>
-  </div>
-
-  <dialog id="top" aria-labelledby="top-titulo">
-    <div class="top-caja">
-      <div class="top-cab">
-        <div><h3 id="top-titulo">Top 5</h3><div class="sub" id="top-sub"></div></div>
-        <button type="button" class="cerrar" id="top-cerrar" aria-label="Cerrar">×</button>
-      </div>
-      <ol class="top-lista" id="top-lista"></ol>
-      <div class="nota">"Por definir" no entra en el top porque no corresponde a un asesor.</div>
-    </div>
-  </dialog>
-
+</aside>
 <script>
-
-&#x20; // ================= Configuración =================
-
-&#x20; const POR\_DEFINIR = 'Por definir';
-
-&#x20; const MAX\_INDICADORES = 6;
-
-&#x20; const INDICADORES\_INICIALES = \['total', 'c', 'env', 'csat'];
-
-&#x20; const LLAVE\_GUARDADO = 'dashboard\_indicadores\_v1';
-
-&#x20; const MIN\_LLAMADAS\_ALERTA = 10; // asesores con menos llamadas no generan alertas (muestra muy chica)
-
-
-
-&#x20; const NOMBRES\_MES = \['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-
-&#x20; const CORTOS\_MES  = \['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-
-&#x20; const HORARIOS = \[{ valor: '', texto: 'Todos' }, { valor: 'laborable', texto: 'Laborable' }, { valor: 'no laborable', texto: 'No laborable' }];
-
-&#x20; const GRUPOS = \['Llamadas', 'Encuestas de satisfacción', 'Tiempos promedio'];
-
-
-
-&#x20; // Catálogo de indicadores: valor/dice = tarjeta; rank/rankFmt/rankExtra = top 5
-
-&#x20; // CAMBIO 1: Missed ya no es indicador aparte; se cuenta dentro de Abandonadas.
-
-&#x20; const CATALOGO = \[
-
-&#x20;   { id: 'total', g: 0, etq: 'Llamadas', color: 'var(--negro)', top: 'más llamadas en total',
-
-&#x20;     valor: t => miles(t.total), dice: t => 'Completadas + abandonadas',
-
-&#x20;     rank: r => r.total, rankFmt: miles, rankExtra: r => '' },
-
-&#x20;   { id: 'c', g: 0, etq: 'Completadas', color: 'var(--azul)', top: 'más llamadas completadas',
-
-&#x20;     valor: t => pct(t.c, t.total), dice: t => miles(t.c) + ' llamadas',
-
-&#x20;     rank: r => r.c, rankFmt: miles, rankExtra: r => pct(r.c, r.total) + ' de sus llamadas' },
-
-&#x20;   { id: 'a', g: 0, etq: 'Abandonadas', color: 'var(--mal)', top: 'más llamadas abandonadas',
-
-&#x20;     valor: t => pct(t.a, t.total), dice: t => miles(t.a) + ' llamadas',
-
-&#x20;     rank: r => r.a, rankFmt: miles, rankExtra: r => pct(r.a, r.total) + ' de sus llamadas' },
-
-&#x20;   { id: 's', g: 0, etq: 'Short abandon', color: 'var(--gris-claro)', top: 'más short abandon',
-
-&#x20;     valor: t => miles(t.s), dice: t => pct(t.s, t.a) + ' de abandonadas',
-
-&#x20;     rank: r => r.s, rankFmt: miles, rankExtra: r => pct(r.s, r.a) + ' de abandonadas' },
-
-&#x20;   { id: 'env', g: 1, etq: 'Encuestas enviadas', color: 'var(--azul)', top: 'más encuestas enviadas',
-
-&#x20;     valor: t => pct(t.env, t.c), dice: t => miles(t.env) + ' de ' + miles(t.c) + ' compl.',
-
-&#x20;     rank: r => r.env, rankFmt: miles, rankExtra: r => pct(r.env, r.c) + ' de completadas' },
-
-&#x20;   // CAMBIO 3: No enviadas en porcentaje, igual que Encuestas enviadas
-
-&#x20;   { id: 'noEnv', g: 1, etq: 'No enviadas', color: 'var(--mal)', top: 'más encuestas sin enviar',
-
-&#x20;     valor: t => pct(t.noEnv, t.c), dice: t => miles(t.noEnv) + ' de ' + miles(t.c) + ' compl.',
-
-&#x20;     rank: r => r.noEnv, rankFmt: miles, rankExtra: r => pct(r.noEnv, r.c) + ' de completadas' },
-
-&#x20;   { id: 'sinR', g: 1, etq: 'Sin respuesta', color: 'var(--gris)', top: 'más encuestas sin respuesta',
-
-&#x20;     valor: t => pct(t.sinR, t.env), dice: t => miles(t.sinR) + ' encuestas',
-
-&#x20;     rank: r => r.sinR, rankFmt: miles, rankExtra: r => pct(r.sinR, r.env) + ' de enviadas' },
-
-&#x20;   { id: 'csat', g: 1, etq: 'CSAT promedio', color: 'var(--azul)', top: 'mejor CSAT promedio',
-
-&#x20;     valor: t => csatTxt(prom(t.csat)), dice: t => t.csat\[1] + ' calificadas',
-
-&#x20;     rank: r => prom(r.csat), rankFmt: v => v.toFixed(1), rankExtra: r => r.csat\[1] + ' calificadas' },
-
-&#x20;   { id: 'ct', g: 2, etq: 'CSAT Time', color: 'var(--gris)', top: 'mayor CSAT Time promedio',
-
-&#x20;     valor: t => tiempo(prom(t.csatT)), dice: t => 'Promedio por llamada',
-
-&#x20;     rank: r => prom(r.csatT), rankFmt: tiempo, rankExtra: r => '' },
-
-&#x20;   { id: 'ht', g: 2, etq: 'Handle time', color: 'var(--negro)', top: 'mayor handle time promedio',
-
-&#x20;     valor: t => tiempo(prom(t.ht)), dice: t => 'Promedio por llamada',
-
-&#x20;     rank: r => prom(r.ht), rankFmt: tiempo, rankExtra: r => '' },
-
-&#x20;   { id: 'du', g: 2, etq: 'Duration', color: 'var(--negro)', top: 'mayor duration promedio',
-
-&#x20;     valor: t => tiempo(prom(t.du)), dice: t => 'Promedio por llamada',
-
-&#x20;     rank: r => prom(r.du), rankFmt: tiempo, rankExtra: r => '' }
-
-&#x20; ];
-
-&#x20; const POR\_ID = {}; CATALOGO.forEach(x => { POR\_ID\[x.id] = x; });
-
-
-
-&#x20; // ================= Estado =================
-
-&#x20; // Fila del servidor: \[agente, 'AAAA-MM-DD', estado, short, csat, csatTime, handle, duration, horario, enviada, sinRespuesta, respondida]
-
-&#x20; let FILAS = \[];
-
-&#x20; let HOY = '';
-
-&#x20; let EQUIPO\_DIARIO = null; // solo para el rol Asesor: totales del equipo por día, sin nombres
-
-&#x20; let PERFIL = null;
-
-&#x20; const LLAVE\_SESION = 'dashboard\_sesion\_v1';
-
-&#x20; let TOKEN = leerToken();
-
-&#x20; let temporizadorDatos = null; // actualización automática de datos
-
-&#x20; let filtro = { periodo: 'mes', horario: '', asesor: '', tablaAsesor: '' };
-
-&#x20; let seleccion = cargarSeleccion();
-
-&#x20; let VISTA = { total: null, base: null, equipo: null };
-
-&#x20; const $ = id => document.getElementById(id);
-
-
-
-&#x20; // ================= Sesión =================
-
-&#x20; function leerToken() { try { return localStorage.getItem(LLAVE\_SESION) || ''; } catch (e) { return ''; } }
-
-&#x20; function guardarToken(t) { TOKEN = t; try { t ? localStorage.setItem(LLAVE\_SESION, t) : localStorage.removeItem(LLAVE\_SESION); } catch (e) {} }
-
-&#x20; const esAsesor = () => PERFIL \&\& PERFIL.rol === 'Asesor';
-
-&#x20; const esAdmin = () => PERFIL \&\& PERFIL.rol === 'Administrador';
-
-
-
-&#x20; // Llama una función del servidor y regresa una promesa
-
-&#x20; function servidor(fn) {
-
-&#x20;   const args = Array.prototype.slice.call(arguments, 1);
-
-&#x20;   return new Promise((ok, mal) => {
-
-&#x20;     google.script.run.withSuccessHandler(ok).withFailureHandler(mal)\[fn].apply(null, args);
-
-&#x20;   });
-
-&#x20; }
-
-&#x20; // Igual, pero manda la sesión y si ya no es válida regresa a la pantalla de inicio
-
-&#x20; function conSesion(fn) {
-
-&#x20;   const args = Array.prototype.slice.call(arguments, 1);
-
-&#x20;   return servidor.apply(null, \[fn, TOKEN].concat(args)).catch(e => {
-
-&#x20;     if (String(e \&\& e.message).indexOf('SESION\_INVALIDA') !== -1) {
-
-&#x20;       guardarToken('');
-
-&#x20;       mostrarLogin('Tu sesión se cerró. Vuelve a iniciar sesión.');
-
-&#x20;       throw new Error('SESION\_INVALIDA');
-
-&#x20;     }
-
-&#x20;     throw e;
-
-&#x20;   });
-
-&#x20; }
-
-
-
-&#x20; function mostrarPantalla(cual) {
-
-&#x20;   $('vista-acceso').hidden = cual === 'app';
-
-&#x20;   $('app').hidden = cual !== 'app';
-
-&#x20;   $('caja-cargando').hidden = cual !== 'cargando';
-
-&#x20;   $('form-login').hidden = cual !== 'login';
-
-&#x20; }
-
-
-
-&#x20; function mostrarLogin(mensaje) {
-
-&#x20;   PERFIL = null;
-
-&#x20;   if (temporizadorDatos) { clearInterval(temporizadorDatos); temporizadorDatos = null; }
-
-&#x20;   if ($('top').open) $('top').close();
-
-&#x20;   $('login-ok').textContent = mensaje || '';
-
-&#x20;   $('login-error').textContent = '';
-
-&#x20;   $('login-contrasena').value = '';
-
-&#x20;   mostrarPantalla('login');
-
-&#x20;   $('login-usuario').focus();
-
-&#x20; }
-
-
-
-&#x20; $('form-login').addEventListener('submit', e => {
-
-&#x20;   e.preventDefault();
-
-&#x20;   const u = $('login-usuario').value.trim(), c = $('login-contrasena').value;
-
-&#x20;   if (!u || !c) { $('login-error').textContent = 'Escribe tu usuario y tu contraseña.'; return; }
-
-&#x20;   $('login-boton').disabled = true; $('login-boton').textContent = 'Entrando…';
-
-&#x20;   $('login-error').textContent = ''; $('login-ok').textContent = '';
-
-&#x20;   servidor('iniciarSesion', u, c)
-
-&#x20;     .then(r => { guardarToken(r.token); alTenerPerfil(r.perfil); })
-
-&#x20;     .catch(err => { $('login-error').textContent = err.message || String(err); })
-
-&#x20;     .finally(() => { $('login-boton').disabled = false; $('login-boton').textContent = 'Iniciar sesión'; });
-
-&#x20; });
-
-
-
-&#x20; function salir() {
-
-&#x20;   const t = TOKEN;
-
-&#x20;   guardarToken('');
-
-&#x20;   servidor('cerrarSesion', t).catch(() => {});
-
-&#x20;   mostrarLogin('Cerraste sesión.');
-
-&#x20; }
-
-&#x20; $('btn-salir').onclick = salir;
-
-
-
-&#x20; function alTenerPerfil(perfil) {
-
-&#x20;   PERFIL = perfil;
-
-&#x20;   $('usuario-nombre').innerHTML = esc(perfil.nombre) + ' · <b>' + esc(perfil.rol) + '</b>';
-
-&#x20;   $('consultado').textContent = 'Cargando datos…';
-
-&#x20;   $('tabla').innerHTML = '<div class="mensaje">Cargando datos…</div>';
-
-&#x20;   mostrarPantalla('app');
-
-&#x20;   conSesion('getDashboardData')
-
-&#x20;     .then(iniciar)
-
-&#x20;     .catch(e => {
-
-&#x20;       if (e.message === 'SESION\_INVALIDA') return;
-
-&#x20;       $('consultado').textContent = 'No se pudieron cargar los datos.';
-
-&#x20;       $('tabla').innerHTML = '<div class="mensaje error">' + esc(e.message || String(e)) + '</div>';
-
-&#x20;     });
-
-&#x20; }
-
-
-
-&#x20; // Arranque: si ya había una sesión guardada en este navegador, entra directo
-
-&#x20; if (TOKEN) {
-
-&#x20;   mostrarPantalla('cargando');
-
-&#x20;   conSesion('obtenerPerfil').then(alTenerPerfil).catch(e => {
-
-&#x20;     if (e.message !== 'SESION\_INVALIDA') mostrarLogin(e.message || String(e));
-
-&#x20;   });
-
-&#x20; } else {
-
-&#x20;   mostrarLogin();
-
-&#x20; }
-
-
-
-&#x20; // ================= Actualización automática (sin recargar la página) =================
-
-&#x20; function programarActualizacion(minutos) {
-
-&#x20;   if (temporizadorDatos) clearInterval(temporizadorDatos);
-
-&#x20;   temporizadorDatos = setInterval(actualizarDatos, Math.max(1, minutos || 2) \* 60000);
-
-&#x20; }
-
-&#x20; // Vuelve a pedir los datos y repinta conservando los filtros elegidos
-
-&#x20; function actualizarDatos() {
-
-&#x20;   if ($('app').hidden || !TOKEN) return;
-
-&#x20;   conSesion('getDashboardData').then(res => {
-
-&#x20;     FILAS = res.filas;
-
-&#x20;     EQUIPO\_DIARIO = res.equipo || null;
-
-&#x20;     HOY = res.hoy || HOY;
-
-&#x20;     $('consultado').textContent = 'Datos consultados: ' + res.consultado + ' · se actualiza sola cada ' + (res.minutosRefresco || 2) + ' min';
-
-&#x20;     const dias = \[...new Set(FILAS.map(f => f\[1]))].sort();
-
-&#x20;     const ultimo = dias\[dias.length - 1] || HOY;
-
-&#x20;     \['p-dia', 'p-desde', 'p-hasta'].forEach(id => { $(id).max = HOY > ultimo ? HOY : ultimo; });
-
-&#x20;     rellenar($('p-semana'), \[...new Set(dias.map(lunes))].sort().reverse(), l => 'Del ' + corta(l) + ' al ' + corta(sumarDias(l, 6)), 0);
-
-&#x20;     rellenar($('p-mes'), \[...new Set(dias.map(d => d.slice(0, 7)))].sort().reverse(), m => capital(NOMBRES\_MES\[Number(m.slice(5)) - 1]) + ' ' + m.slice(0, 4), 0);
-
-&#x20;     const asesores = ordenar(\[...new Set(FILAS.map(f => f\[0]))], null);
-
-&#x20;     rellenar($('asesor'), asesores, a => a, 1);
-
-&#x20;     rellenar($('tabla-asesor'), asesores, a => a, 1);
-
-&#x20;     pintar();
-
-&#x20;   }).catch(() => { /\* si falla, se reintenta en la siguiente vuelta \*/ });
-
-&#x20; }
-
-&#x20; // Vuelve a llenar una lista conservando lo que estaba elegido (fijas = opciones iniciales que no se tocan)
-
-&#x20; function rellenar(sel, valores, texto, fijas) {
-
-&#x20;   const actual = sel.value;
-
-&#x20;   sel.length = fijas;
-
-&#x20;   valores.forEach(v => sel.add(new Option(texto(v), v)));
-
-&#x20;   if (\[...sel.options].some(o => o.value === actual)) sel.value = actual;
-
-&#x20; }
-
-
-
-&#x20; function iniciar(res) {
-
-&#x20;   if (res.urlApp) {
-
-&#x20;     $('menu-llamadas').href = res.urlApp;
-
-&#x20;     $('menu-muro').href = res.urlApp + '?vista=muro';
-
-&#x20;   }
-
-&#x20;   FILAS = res.filas;
-
-&#x20;   EQUIPO\_DIARIO = res.equipo || null;
-
-&#x20;   PERFIL = res.perfil || PERFIL;
-
-&#x20;   // CAMBIO 2: la página inicia en "Un mes" (el mes corriente) en lugar de "Todo el histórico"
-
-&#x20;   // Reinicia filtros y listas (por si otra persona inició sesión en esta misma pestaña)
-
-&#x20;   filtro = { periodo: 'mes', horario: '', asesor: '', tablaAsesor: '' };
-
-&#x20;   $('periodo').value = 'mes'; mostrarControlesPeriodo();
-
-&#x20;   $('asesor').length = 1; $('tabla-asesor').length = 1; $('p-semana').length = 0; $('p-mes').length = 0;
-
-
-
-&#x20;   // Rol Asesor: solo ve sus propios datos
-
-&#x20;   const asesorFijo = esAsesor();
-
-&#x20;   if (asesorFijo) filtro.asesor = PERFIL.asesor || '\_\_sin\_asesor\_\_';
-
-&#x20;   $('c-asesor').hidden = asesorFijo;
-
-&#x20;   $('c-tabla-asesor').hidden = asesorFijo;
-
-&#x20;   $('sin-asesor').hidden = !(asesorFijo \&\& !PERFIL.asesor);
-
-&#x20;   HOY = res.hoy || new Date().toISOString().slice(0, 10);
-
-&#x20;   $('consultado').textContent = 'Datos consultados: ' + res.consultado + ' · se actualiza sola cada ' + (res.minutosRefresco || 2) + ' min';
-
-&#x20;   programarActualizacion(res.minutosRefresco);
-
-
-
-&#x20;   const dias = \[...new Set(FILAS.map(f => f\[1]))].sort();
-
-&#x20;   const primero = dias\[0] || HOY, ultimo = dias\[dias.length - 1] || HOY;
-
-
-
-&#x20;   // Día y calendario
-
-&#x20;   \['p-dia', 'p-desde', 'p-hasta'].forEach(id => { $(id).min = primero; $(id).max = HOY > ultimo ? HOY : ultimo; });
-
-&#x20;   $('p-dia').value = ultimo;
-
-&#x20;   $('p-desde').value = sumarDias(ultimo, -6);
-
-&#x20;   $('p-hasta').value = ultimo;
-
-
-
-&#x20;   // Semanas (lunes a domingo) y meses que existen en los datos, del más reciente al más antiguo
-
-&#x20;   \[...new Set(dias.map(lunes))].sort().reverse().forEach(l => {
-
-&#x20;     $('p-semana').add(new Option('Del ' + corta(l) + ' al ' + corta(sumarDias(l, 6)), l));
-
-&#x20;   });
-
-&#x20;   \[...new Set(dias.map(d => d.slice(0, 7)))].sort().reverse().forEach(m => {
-
-&#x20;     $('p-mes').add(new Option(capital(NOMBRES\_MES\[Number(m.slice(5)) - 1]) + ' ' + m.slice(0, 4), m));
-
-&#x20;   });
-
-&#x20;   // Selecciona el mes corriente (si todavía no tiene llamadas, se agrega arriba de la lista)
-
-&#x20;   const mesActual = HOY.slice(0, 7);
-
-&#x20;   if (!\[...$('p-mes').options].some(o => o.value === mesActual)) {
-
-&#x20;     $('p-mes').add(new Option(capital(NOMBRES\_MES\[Number(mesActual.slice(5)) - 1]) + ' ' + mesActual.slice(0, 4), mesActual), 0);
-
-&#x20;   }
-
-&#x20;   $('p-mes').value = mesActual;
-
-
-
-&#x20;   crearSegmentos('horarios', HORARIOS, v => { filtro.horario = v; });
-
-
-
-&#x20;   const asesores = ordenar(\[...new Set(FILAS.map(f => f\[0]))], null);
-
-&#x20;   asesores.forEach(a => { $('asesor').add(new Option(a, a)); $('tabla-asesor').add(new Option(a, a)); });
-
-
-
-&#x20;   $('periodo').onchange = () => { filtro.periodo = $('periodo').value; mostrarControlesPeriodo(); pintar(); };
-
-&#x20;   \['p-dia', 'p-semana', 'p-mes', 'p-desde', 'p-hasta'].forEach(id => $(id).addEventListener('change', pintar));
-
-&#x20;   $('asesor').onchange = () => { filtro.asesor = $('asesor').value; pintar(); };
-
-&#x20;   $('tabla-asesor').onchange = () => { filtro.tablaAsesor = $('tabla-asesor').value; pintarTabla(); };
-
-
-
-&#x20;   pintarSelector();
-
-&#x20;   pintar();
-
-&#x20; }
-
-
-
-&#x20; function crearSegmentos(id, opciones, alElegir) {
-
-&#x20;   const caja = $(id);
-
-&#x20;   caja.innerHTML = '';
-
-&#x20;   opciones.forEach(op => {
-
-&#x20;     const b = document.createElement('button');
-
-&#x20;     b.type = 'button'; b.textContent = op.texto; b.dataset.valor = op.valor;
-
-&#x20;     b.onclick = () => { alElegir(op.valor); pintar(); };
-
-&#x20;     caja.appendChild(b);
-
-&#x20;   });
-
-&#x20; }
-
-
-
-&#x20; function mostrarControlesPeriodo() {
-
-&#x20;   const p = filtro.periodo;
-
-&#x20;   $('c-dia').hidden = p !== 'dia';
-
-&#x20;   $('c-semana').hidden = p !== 'semana';
-
-&#x20;   $('c-mes').hidden = p !== 'mes';
-
-&#x20;   $('c-rango').hidden = p !== 'rango';
-
-&#x20; }
-
-
-
-&#x20; // Devuelve el rango de fechas del periodo elegido: { desde, hasta, texto }
-
-&#x20; function rangoActual() {
-
-&#x20;   const ultimos = n => {
-
-&#x20;     const d = sumarDias(HOY, -(n - 1));
-
-&#x20;     return { desde: d, hasta: HOY, texto: 'Últimos ' + n + ' días (' + corta(d) + ' al ' + corta(HOY) + ')' };
-
-&#x20;   };
-
-&#x20;   switch (filtro.periodo) {
-
-&#x20;     case 'dia': {
-
-&#x20;       const d = $('p-dia').value || HOY;
-
-&#x20;       return { desde: d, hasta: d, texto: larga(d) };
-
-&#x20;     }
-
-&#x20;     case 'semana': {
-
-&#x20;       const l = $('p-semana').value;
-
-&#x20;       if (!l) return { desde: HOY, hasta: HOY, texto: 'Sin semanas con datos' };
-
-&#x20;       return { desde: l, hasta: sumarDias(l, 6), texto: 'Semana del ' + corta(l) + ' al ' + corta(sumarDias(l, 6)) };
-
-&#x20;     }
-
-&#x20;     case 'ult7': return ultimos(7);
-
-&#x20;     case 'ult30': return ultimos(30);
-
-&#x20;     case 'ult90': return ultimos(90);
-
-&#x20;     case 'mes': {
-
-&#x20;       const m = $('p-mes').value;
-
-&#x20;       if (!m) return { desde: HOY, hasta: HOY, texto: 'Sin meses con datos' };
-
-&#x20;       return { desde: m + '-01', hasta: m + '-31', texto: capital(NOMBRES\_MES\[Number(m.slice(5)) - 1]) + ' ' + m.slice(0, 4) };
-
-&#x20;     }
-
-&#x20;     case 'rango': {
-
-&#x20;       let d = $('p-desde').value || HOY, h = $('p-hasta').value || HOY;
-
-&#x20;       if (d > h) { const t = d; d = h; h = t; }
-
-&#x20;       return { desde: d, hasta: h, texto: 'Del ' + corta(d) + ' al ' + larga(h) };
-
-&#x20;     }
-
-&#x20;     default: return { desde: '0000-00-00', hasta: '9999-12-31', texto: 'Todo el histórico' };
-
-&#x20;   }
-
-&#x20; }
-
-
-
-&#x20; // ================= Cálculos =================
-
-&#x20; function nuevoAcum() {
-
-&#x20;   return { total: 0, c: 0, a: 0, m: 0, s: 0, env: 0, noEnv: 0, sinR: 0, resp: 0,
-
-&#x20;            csat: \[0, 0], csatT: \[0, 0], ht: \[0, 0], du: \[0, 0] };
-
-&#x20; }
-
-&#x20; // Promedios: ignoran ceros y vacíos (abandonadas/missed traen 0 y bajarían el promedio)
-
-&#x20; function sumar(par, v) { if (v !== null \&\& v > 0) { par\[0] += v; par\[1]++; } }
-
-&#x20; function prom(par) { return par\[1] ? par\[0] / par\[1] : null; }
-
-&#x20; function acumular(acc, f) {
-
-&#x20;   const estado = f\[2].toLowerCase();
-
-&#x20;   if (estado === 'completed') { acc.c++; if (!f\[9]) acc.noEnv++; }
-
-&#x20;   else if (estado === 'abandoned' || estado === 'missed') acc.a++; // CAMBIO 1: missed cuenta como abandonada
-
-&#x20;   acc.total = acc.c + acc.a;
-
-&#x20;   acc.s += f\[3]; acc.env += f\[9]; acc.sinR += f\[10]; acc.resp += f\[11];
-
-&#x20;   sumar(acc.csat, f\[4]); sumar(acc.csatT, f\[5]); sumar(acc.ht, f\[6]); sumar(acc.du, f\[7]);
-
-&#x20; }
-
-&#x20; function sumarAcum(dest, o) {
-
-&#x20;   \['total', 'c', 'a', 's', 'env', 'noEnv', 'sinR', 'resp'].forEach(k => dest\[k] += o\[k]);
-
-&#x20;   dest.a += Number(o.m) || 0; // CAMBIO 1: si el servidor manda missed aparte (equipo), se suma a abandonadas
-
-&#x20;   \['csat', 'csatT', 'ht', 'du'].forEach(k => { dest\[k]\[0] += o\[k]\[0]; dest\[k]\[1] += o\[k]\[1]; });
-
-&#x20; }
-
-&#x20; function agrupar(filas) {
-
-&#x20;   const total = nuevoAcum(), porAsesor = {};
-
-&#x20;   filas.forEach(f => {
-
-&#x20;     acumular(total, f);
-
-&#x20;     if (!porAsesor\[f\[0]]) porAsesor\[f\[0]] = nuevoAcum();
-
-&#x20;     acumular(porAsesor\[f\[0]], f);
-
-&#x20;   });
-
-&#x20;   return { total, porAsesor };
-
-&#x20; }
-
-&#x20; function ordenar(nombres, datos) {
-
-&#x20;   return nombres.sort((x, y) => {
-
-&#x20;     if (x === POR\_DEFINIR) return 1;
-
-&#x20;     if (y === POR\_DEFINIR) return -1;
-
-&#x20;     return datos ? datos\[y].total - datos\[x].total : x.localeCompare(y);
-
-&#x20;   });
-
-&#x20; }
-
-
-
-&#x20; // Comparación contra el equipo (hb = más alto es mejor)
-
-&#x20; const MEDIDAS = {
-
-&#x20;   pC:     { hb: true,  de: r => rate(r.c, r.total) },
-
-&#x20;   pA:     { hb: false, de: r => rate(r.a, r.total) },
-
-&#x20;   pEnv:   { hb: true,  de: r => rate(r.env, r.c) },
-
-&#x20;   pNoEnv: { hb: false, de: r => rate(r.noEnv, r.c) },
-
-&#x20;   pSinR:  { hb: false, de: r => rate(r.sinR, r.env) },
-
-&#x20;   csat:   { hb: true,  de: r => prom(r.csat) },
-
-&#x20;   ht:     { hb: false, de: r => prom(r.ht) }
-
-&#x20; };
-
-&#x20; function rate(x, t) { return t ? x / t : null; }
-
-&#x20; function tono(r, clave) {
-
-&#x20;   if (!VISTA.equipo || r.esPendiente) return 'var(--medio)';
-
-&#x20;   const m = MEDIDAS\[clave], v = m.de(r), e = m.de(VISTA.equipo);
-
-&#x20;   if (v === null || e === null || !e) return 'var(--medio)';
-
-&#x20;   let d = (v - e) / e; if (!m.hb) d = -d;
-
-&#x20;   return d > 0.08 ? 'var(--bien)' : d < -0.08 ? 'var(--mal)' : 'var(--medio)';
-
-&#x20; }
-
-
-
-&#x20; function textoPeriodo() {
-
-&#x20;   const h = filtro.horario ? ' · Horario ' + HORARIOS.find(x => x.valor === filtro.horario).texto.toLowerCase() : '';
-
-&#x20;   return rangoActual().texto + h;
-
-&#x20; }
-
-
-
-&#x20; // ================= Pintado general =================
-
-&#x20; function pintar() {
-
-&#x20;   document.querySelectorAll('#horarios button').forEach(b => b.setAttribute('aria-pressed', b.dataset.valor === filtro.horario));
-
-
-
-&#x20;   // base = periodo + horario, todos los asesores: sirve para comparar contra el equipo y para el top 5
-
-&#x20;   const r = rangoActual();
-
-&#x20;   const base = agrupar(FILAS.filter(f =>
-
-&#x20;     f\[1] >= r.desde \&\& f\[1] <= r.hasta \&\& (!filtro.horario || f\[8].toLowerCase() === filtro.horario)));
-
-&#x20;   const equipo = nuevoAcum();
-
-&#x20;   if (EQUIPO\_DIARIO) {
-
-&#x20;     EQUIPO\_DIARIO.forEach(g => {
-
-&#x20;       if (g.dia >= r.desde \&\& g.dia <= r.hasta \&\& (!filtro.horario || g.horario.toLowerCase() === filtro.horario)) sumarAcum(equipo, g);
-
-&#x20;     });
-
-&#x20;   } else {
-
-&#x20;     Object.keys(base.porAsesor).filter(n => n !== POR\_DEFINIR).forEach(n => sumarAcum(equipo, base.porAsesor\[n]));
-
-&#x20;   }
-
-&#x20;   const total = filtro.asesor ? (base.porAsesor\[filtro.asesor] || nuevoAcum()) : base.total;
-
-&#x20;   VISTA = { total, base, equipo };
-
-
-
-&#x20;   pintarTarjetas();
-
-&#x20;   pintarAvisos();
-
-&#x20;   pintarTabla();
-
-&#x20; }
-
-
-
-&#x20; // ================= Mis indicadores =================
-
-&#x20; function cargarSeleccion() {
-
-&#x20;   try {
-
-&#x20;     const g = JSON.parse(localStorage.getItem(LLAVE\_GUARDADO));
-
-&#x20;     if (Array.isArray(g)) {
-
-&#x20;       const validos = g.filter(id => CATALOGO.some(x => x.id === id)).slice(0, MAX\_INDICADORES);
-
-&#x20;       if (validos.length) return validos;
-
-&#x20;     }
-
-&#x20;   } catch (e) { /\* sin almacenamiento: se usan los iniciales \*/ }
-
-&#x20;   return INDICADORES\_INICIALES.slice();
-
-&#x20; }
-
-&#x20; function guardarSeleccion() {
-
-&#x20;   try { localStorage.setItem(LLAVE\_GUARDADO, JSON.stringify(seleccion)); } catch (e) { /\* se ignora \*/ }
-
-&#x20; }
-
-&#x20; function cambiarSeleccion(nueva) { seleccion = nueva; guardarSeleccion(); pintarTarjetas(); pintarSelector(); }
-
-
-
-&#x20; function pintarTarjetas() {
-
-&#x20;   const t = VISTA.total; if (!t) return;
-
-&#x20;   const caja = $('tarjetas');
-
-&#x20;   caja.innerHTML = '';
-
-&#x20;   seleccion.forEach(id => {
-
-&#x20;     const x = POR\_ID\[id];
-
-&#x20;     const d = document.createElement('div');
-
-&#x20;     d.className = 'kpi';
-
-&#x20;     d.innerHTML =
-
-&#x20;       '<span class="kpi-etq"><i class="cuadrito" style="background:' + x.color + '"></i>' + x.etq + '</span>' +
-
-&#x20;       '<span class="kpi-valor">' + x.valor(t) + '</span>' +
-
-&#x20;       '<span class="kpi-dice">' + x.dice(t) + '</span>';
-
-&#x20;     const abrir = document.createElement('button');
-
-&#x20;     abrir.type = 'button'; abrir.className = 'kpi-abrir';
-
-&#x20;     abrir.setAttribute('aria-label', x.etq + ': ver top 5');
-
-&#x20;     abrir.onclick = () => abrirTop(x);
-
-&#x20;     const quitar = document.createElement('button');
-
-&#x20;     quitar.type = 'button'; quitar.className = 'kpi-quitar';
-
-&#x20;     quitar.setAttribute('aria-label', 'Quitar ' + x.etq);
-
-&#x20;     quitar.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
-
-&#x20;     quitar.onclick = () => cambiarSeleccion(seleccion.filter(y => y !== id));
-
-&#x20;     if (!esAsesor()) d.prepend(abrir);
-
-&#x20;     d.appendChild(quitar);
-
-&#x20;     caja.appendChild(d);
-
-&#x20;   });
-
-&#x20;   if (seleccion.length < MAX\_INDICADORES) {
-
-&#x20;     const mas = document.createElement('button');
-
-&#x20;     mas.type = 'button'; mas.className = 'agregar';
-
-&#x20;     mas.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar indicador';
-
-&#x20;     mas.onclick = () => abrirSelector(true);
-
-&#x20;     caja.appendChild(mas);
-
-&#x20;   }
-
-&#x20;   $('ind-cuenta').textContent = seleccion.length + ' de ' + MAX\_INDICADORES + ' · ' + textoPeriodo() + (esAsesor() ? ' · comparados con el promedio del equipo' : ' · clic en uno para ver su top 5');
-
-&#x20; }
-
-
-
-&#x20; function pintarSelector() {
-
-&#x20;   const lleno = seleccion.length >= MAX\_INDICADORES;
-
-&#x20;   const libres = MAX\_INDICADORES - seleccion.length;
-
-&#x20;   const aviso = $('sel-aviso');
-
-&#x20;   aviso.textContent = lleno ? 'Ya tienes 6. Quita uno para poder agregar otro.'
-
-&#x20;     : (libres === 1 ? 'Te queda 1 espacio.' : 'Te quedan ' + libres + ' espacios.') + ' Da clic para agregar o quitar.';
-
-&#x20;   aviso.classList.toggle('lleno', lleno);
-
-&#x20;   const cont = $('sel-grupos');
-
-&#x20;   cont.innerHTML = '';
-
-&#x20;   GRUPOS.forEach((gl, gi) => {
-
-&#x20;     const g = document.createElement('div'); g.className = 'sel-grupo';
-
-&#x20;     g.innerHTML = '<div class="sel-grupo-etq">' + gl + '</div>';
-
-&#x20;     const chips = document.createElement('div'); chips.className = 'chips';
-
-&#x20;     CATALOGO.filter(x => x.g === gi).forEach(x => {
-
-&#x20;       const on = seleccion.includes(x.id);
-
-&#x20;       const b = document.createElement('button');
-
-&#x20;       b.type = 'button'; b.className = 'chip-sel';
-
-&#x20;       b.setAttribute('aria-pressed', on);
-
-&#x20;       b.disabled = !on \&\& lleno;
-
-&#x20;       b.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg>' + x.etq;
-
-&#x20;       b.onclick = () => cambiarSeleccion(on ? seleccion.filter(y => y !== x.id) : seleccion.concat(\[x.id]));
-
-&#x20;       chips.appendChild(b);
-
-&#x20;     });
-
-&#x20;     g.appendChild(chips); cont.appendChild(g);
-
-&#x20;   });
-
-&#x20; }
-
-
-
-&#x20; const selector = $('selector');
-
-&#x20; const btnPers = $('btn-personalizar');
-
-&#x20; function abrirSelector(abrir) {
-
-&#x20;   selector.hidden = !abrir;
-
-&#x20;   btnPers.setAttribute('aria-expanded', abrir);
-
-&#x20;   btnPers.classList.toggle('oscuro', abrir);
-
-&#x20;   btnPers.querySelector('span').textContent = abrir ? 'Cerrar' : 'Personalizar';
-
-&#x20; }
-
-&#x20; btnPers.onclick = () => abrirSelector(selector.hidden);
-
-&#x20; $('sel-listo').onclick = () => abrirSelector(false);
-
-&#x20; document.addEventListener('click', e => {
-
-&#x20;   // Cierra al dar clic fuera. isConnected evita cerrarlo cuando el botón clicado se acaba de redibujar.
-
-&#x20;   if (!selector.hidden \&\& e.target.isConnected \&\& !$('ind-zona').contains(e.target)) abrirSelector(false);
-
-&#x20; });
-
-&#x20; document.addEventListener('keydown', e => { if (e.key === 'Escape' \&\& !selector.hidden) abrirSelector(false); });
-
-
-
-&#x20; // ================= Qué atender / Qué va bien =================
-
-&#x20; function pintarAvisos() {
-
-&#x20;   const { base, equipo } = VISTA;
-
-&#x20;   const E = r => ({ pA: rate(r.a, r.total), pEnv: rate(r.env, r.c), pSinR: rate(r.sinR, r.env), csat: prom(r.csat), ht: prom(r.ht), pC: rate(r.c, r.total) });
-
-&#x20;   const eq = E(equipo);
-
-&#x20;   let nombres = Object.keys(base.porAsesor).filter(n => n !== POR\_DEFINIR \&\& base.porAsesor\[n].total >= MIN\_LLAMADAS\_ALERTA);
-
-&#x20;   if (filtro.asesor) nombres = nombres.filter(n => n === filtro.asesor);
-
-&#x20;   const lista = nombres.map(n => Object.assign({ n }, E(base.porAsesor\[n])));
-
-&#x20;   const extremo = (k, alto) => lista.filter(x => x\[k] !== null).sort((x, y) => alto ? y\[k] - x\[k] : x\[k] - y\[k])\[0];
-
-&#x20;   const P = v => Math.round(v \* 100) + '%';
-
-
-
-&#x20;   const atender = \[];
-
-&#x20;   let x = extremo('pA', true);
-
-&#x20;   if (x \&\& eq.pA !== null \&\& x.pA > eq.pA \* 1.2 \&\& x.pA - eq.pA >= 0.03)
-
-&#x20;     atender.push(\[x.n + ': abandono alto', P(x.pA) + ' de sus llamadas se abandonan; el equipo promedia ' + P(eq.pA) + '.']);
-
-&#x20;   x = extremo('pEnv', false);
-
-&#x20;   if (x \&\& eq.pEnv !== null \&\& x.pEnv < eq.pEnv \* 0.85)
-
-&#x20;     atender.push(\[x.n + ': pocas encuestas', 'Envió encuesta en ' + P(x.pEnv) + ' de sus completadas; el equipo lo hace en ' + P(eq.pEnv) + '.']);
-
-&#x20;   x = extremo('pSinR', true);
-
-&#x20;   if (x \&\& eq.pSinR !== null \&\& x.pSinR > eq.pSinR \* 1.2)
-
-&#x20;     atender.push(\[x.n + ': encuestas sin respuesta', P(x.pSinR) + ' de sus encuestas no recibe respuesta; en el equipo es ' + P(eq.pSinR) + '.']);
-
-&#x20;   x = extremo('ht', true);
-
-&#x20;   if (x \&\& eq.ht !== null \&\& x.ht > eq.ht \* 1.15)
-
-&#x20;     atender.push(\[x.n + ': atención más larga', 'Tarda en promedio ' + tiempo(x.ht) + ' por llamada, ' + tiempo(x.ht - eq.ht) + ' más que el equipo.']);
-
-&#x20;   x = extremo('csat', false);
-
-&#x20;   if (x \&\& eq.csat !== null \&\& x.csat < eq.csat - 0.3)
-
-&#x20;     atender.push(\[x.n + ': CSAT bajo', 'Sus clientes lo califican con ' + x.csat.toFixed(1) + '; el promedio del equipo es ' + eq.csat.toFixed(1) + '.']);
-
-&#x20;   const pd = base.porAsesor\[POR\_DEFINIR];
-
-&#x20;   if (!esAsesor() \&\& pd \&\& pd.total \&\& (!filtro.asesor || filtro.asesor === POR\_DEFINIR))
-
-&#x20;     atender.push(\[miles(pd.total) + ' llamadas sin asesor', 'Aparecen como "Por definir" porque la columna Agent Name está vacía.']);
-
-
-
-&#x20;   const bien = \[];
-
-&#x20;   x = extremo('csat', true);
-
-&#x20;   const yo = esAsesor();
-
-&#x20;   if (x \&\& eq.csat !== null \&\& x.csat >= eq.csat) bien.push(\[yo ? 'CSAT arriba del equipo' : x.n + ': mejor CSAT',
-
-&#x20;     (yo ? 'Tus clientes te califican con ' : 'Sus clientes lo califican con ') + x.csat.toFixed(1) + '; el equipo promedia ' + eq.csat.toFixed(1) + '.']);
-
-&#x20;   // CAMBIO 4: se quitó el aviso de "más llamadas completadas"
-
-&#x20;   x = extremo('pEnv', true);
-
-&#x20;   if (x \&\& eq.pEnv !== null \&\& x.pEnv >= eq.pEnv) bien.push(\[yo ? 'Envías más encuestas que el equipo' : x.n + ': más encuestas enviadas',
-
-&#x20;     (yo ? 'Envías' : 'Envió') + ' encuesta en ' + P(x.pEnv) + (yo ? ' de tus' : ' de sus') + ' completadas; el equipo, ' + P(eq.pEnv) + '.']);
-
-
-
-&#x20;   const html = (items, clase, color, vacio) => items.length
-
-&#x20;     ? items.map(i => '<div class="aviso ' + clase + '"><i class="aviso-punto" style="background:' + color + '"></i><div><b>' + esc(i\[0]) + '</b><span>' + esc(i\[1]) + '</span></div></div>').join('')
-
-&#x20;     : '<div class="aviso neutro"><i class="aviso-punto" style="background:var(--medio)"></i><div><span>' + vacio + '</span></div></div>';
-
-&#x20;   $('atender').innerHTML = html(atender, 'mal', 'var(--mal)', 'Nada fuera de lo normal en este periodo: todos están cerca del promedio del equipo.');
-
-&#x20;   $('bien').innerHTML = html(bien, 'bien', 'var(--bien)', 'No hay suficientes datos en este periodo.');
-
-&#x20; }
-
-
-
-&#x20; // ================= Tabla =================
-
-&#x20; function pintarTabla() {
-
-&#x20;   const pa = VISTA.base.porAsesor;
-
-&#x20;   let nombres = ordenar(Object.keys(pa), pa);
-
-&#x20;   if (filtro.asesor) nombres = nombres.filter(n => n === filtro.asesor);
-
-&#x20;   if (filtro.tablaAsesor) nombres = nombres.filter(n => n === filtro.tablaAsesor);
-
-&#x20;   $('titulo-tabla').textContent = textoPeriodo() + (filtro.tablaAsesor ? ' · Solo ' + filtro.tablaAsesor : '');
-
-&#x20;   const caja = $('tabla');
-
-&#x20;   if (!nombres.length) {
-
-&#x20;     caja.innerHTML = '<div class="mensaje">' + (filtro.tablaAsesor
-
-&#x20;       ? esc(filtro.tablaAsesor) + ' no tiene llamadas en este periodo. Prueba con otro periodo o elige "Todos los asesores".'
-
-&#x20;       : 'No hay llamadas en este periodo. Prueba con otro periodo u horario.') + '</div>';
-
-&#x20;     return;
-
-&#x20;   }
-
-&#x20;   let h = '<table><thead>' +
-
-&#x20;     '<tr class="grupo"><th></th><th colspan="3" class="sep">Llamadas</th><th colspan="4" class="sep">Encuestas de satisfacción</th><th class="sep">Tiempo</th></tr>' +
-
-&#x20;     '<tr class="cols"><th scope="col">Asesor</th>' +
-
-&#x20;     '<th scope="col" class="sep">Total</th><th scope="col">Completadas</th><th scope="col">Abandonadas</th>' +
-
-&#x20;     '<th scope="col" class="sep">Enviadas</th><th scope="col">No enviadas</th><th scope="col">Sin respuesta</th><th scope="col">Promedio</th>' +
-
-&#x20;     '<th scope="col" class="sep">Handle time</th></tr></thead><tbody>';
-
-&#x20;   nombres.forEach(n => {
-
-&#x20;     const r = Object.assign({ esPendiente: n === POR\_DEFINIR }, pa\[n]);
-
-&#x20;     const csat = prom(r.csat);
-
-&#x20;     h += '<tr' + (r.esPendiente ? ' class="pendiente"' : '') + '>' +
-
-&#x20;       '<td class="asesor">' + esc(n) + '</td>' +
-
-&#x20;       '<td class="sep"><span class="valor">' + miles(r.total) + '</span></td>' +
-
-&#x20;       celda(pct(r.c, r.total), miles(r.c) + ' llamadas', tono(r, 'pC')) +
-
-&#x20;       celda(pct(r.a, r.total), miles(r.a) + ' llamadas', tono(r, 'pA')) +
-
-&#x20;       celda(pct(r.env, r.c), miles(r.env) + ' encuestas', tono(r, 'pEnv'), true) +
-
-&#x20;       celda(pct(r.noEnv, r.c), miles(r.noEnv) + ' encuestas', tono(r, 'pNoEnv')) +
-
-&#x20;       celda(pct(r.sinR, r.env), miles(r.sinR) + ' encuestas', tono(r, 'pSinR')) +
-
-&#x20;       celda(csatTxt(csat), r.csat\[1] + ' calificadas', csat === null ? 'var(--medio)' : tono(r, 'csat')) +
-
-&#x20;       celda(tiempo(prom(r.ht)), '', tono(r, 'ht'), true) + '</tr>';
-
-&#x20;   });
-
-&#x20;   caja.innerHTML = h + '</tbody></table>';
-
-&#x20; }
-
-&#x20; function celda(valor, cuenta, color, sep) {
-
-&#x20;   return '<td' + (sep ? ' class="sep"' : '') + '><span class="valor"><i class="punto" style="background:' + color + '"></i>' + valor + '</span>' +
-
-&#x20;     (cuenta ? '<div class="cuenta">' + cuenta + '</div>' : '') + '</td>';
-
-&#x20; }
-
-
-
-&#x20; // ================= Top 5 =================
-
-&#x20; const dlg = $('top');
-
-&#x20; $('top-cerrar').onclick = () => dlg.close();
-
-&#x20; dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
-
-&#x20; function abrirTop(x) {
-
-&#x20;   const pa = VISTA.base.porAsesor;
-
-&#x20;   const lista = Object.keys(pa).filter(n => n !== POR\_DEFINIR)
-
-&#x20;     .map(n => ({ n, v: x.rank(pa\[n]), extra: x.rankExtra(pa\[n]) }))
-
-&#x20;     .filter(i => i.v !== null \&\& i.v > 0)
-
-&#x20;     .sort((a, b) => b.v - a.v).slice(0, 5);
-
-&#x20;   const max = lista.length ? lista\[0].v : 1;
-
-&#x20;   const barra = x.color === 'var(--gris-claro)' ? 'var(--gris)' : x.color;
-
-&#x20;   $('top-titulo').textContent = 'Top 5 · ' + x.etq;
-
-&#x20;   $('top-sub').textContent = 'Asesores con ' + x.top + ' · ' + textoPeriodo();
-
-&#x20;   $('top-lista').innerHTML = lista.length
-
-&#x20;     ? lista.map((i, k) => '<li class="top-item"><span class="top-pos">' + (k + 1) + '</span>' +
-
-&#x20;         '<div><div class="top-nombre">' + esc(i.n) + '</div><div class="top-barra"><div style="width:' + (i.v / max \* 100) + '%;background:' + barra + '"></div></div></div>' +
-
-&#x20;         '<span class="top-valor">' + x.rankFmt(i.v) + (i.extra ? '<small>' + i.extra + '</small>' : '') + '</span></li>').join('')
-
-&#x20;     : '<li class="nota">No hay datos de este indicador en el periodo elegido.</li>';
-
-&#x20;   dlg.showModal();
-
-&#x20; }
-
-
-
-&#x20; // Sombra de la zona fija al bajar
-
-&#x20; const fijo = $('fijo');
-
-&#x20; window.addEventListener('scroll', () => fijo.classList.toggle('sombra', window.scrollY > 120), { passive: true });
-
-
-
-&#x20; // ================= Fechas (texto 'AAAA-MM-DD', sin problemas de zona horaria) =================
-
-&#x20; function aFecha(s) { return new Date(s + 'T00:00:00Z'); }
-
-&#x20; function sumarDias(s, n) { const d = aFecha(s); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
-
-&#x20; function lunes(s) { const dow = aFecha(s).getUTCDay(); return sumarDias(s, -((dow + 6) % 7)); }
-
-&#x20; function corta(s) { return Number(s.slice(8, 10)) + ' ' + CORTOS\_MES\[Number(s.slice(5, 7)) - 1]; }
-
-&#x20; function larga(s) { return Number(s.slice(8, 10)) + ' de ' + NOMBRES\_MES\[Number(s.slice(5, 7)) - 1] + ' de ' + s.slice(0, 4); }
-
-&#x20; function capital(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
-
-
-
-&#x20; // ================= Utilidades =================
-
-&#x20; function csatTxt(v) { return v === null ? '—' : v.toFixed(1); }
-
-&#x20; function tiempo(seg) {
-
-&#x20;   if (seg === null || seg === undefined) return '—';
-
-&#x20;   const s = Math.round(seg), m = Math.floor(s / 60), r = s % 60;
-
-&#x20;   return m + ' min ' + (r < 10 ? '0' : '') + r + ' s';
-
-&#x20; }
-
-&#x20; function pct(x, total) { return total ? Math.round(x / total \* 100) + '%' : '—'; }
-
-&#x20; function miles(n) { return Number(n).toLocaleString('es-MX'); }
-
-&#x20; function esc(t) {
-
-&#x20;   return String(t).replace(/\[\&<>"']/g, c => ({ '\&': '\&amp;', '<': '\&lt;', '>': '\&gt;', '"': '\&quot;', "'": '\&#39;' }\[c]));
-
-&#x20; }
-
+// =========================================
+// LÓGICA DEL CHATBOT WIDGET
+// =========================================
+function toggleChatWidget() {
+  const chatWidget = document.getElementById('chatWidgetContainer');
+  chatWidget.classList.toggle('active');
+  
+  // Si el menú del asistente está desplegado, colapsarlo para mejorar visión
+  if (widget && !widget.classList.contains('collapsed')) {
+    collapseWidget();
+  }
+}
+// =========================================
+// LÓGICA DEL WIDGET (Menú)
+// =========================================
+const widget = document.getElementById('menuWidget');
+const closeWidget = document.getElementById('closeWidget');
+const mainFrame = document.getElementById('mainFrame');
+widget.addEventListener('click', function(e){
+  if(widget.classList.contains('collapsed')){ expandWidget(); return; }
+});
+closeWidget.addEventListener('click', function(e){
+  e.stopPropagation();
+  if(widget.classList.contains('collapsed')){ expandWidget(); } 
+  else { collapseWidget(); }
+});
+function collapseWidget(){ widget.classList.add('collapsed'); }
+function expandWidget(){ widget.classList.remove('collapsed'); }
+function loadPage(el){
+  document.querySelectorAll('.menu-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  const url = el.getAttribute('data-url');
+  if(url) mainFrame.src = url;
+}
+// =========================================
+// LÓGICA DEL SEGMENTADOR RÁPIDO NATIVO
+// =========================================
+let bbddAgencias = [];
+let cargandoAgencias = false;
+async function inicializarBaseAgencias() {
+  if (bbddAgencias.length > 0 || cargandoAgencias) return;
+  cargandoAgencias = true;
+  const urlCSV = `https://docs.google.com/spreadsheets/d/1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY/gviz/tq?tqx=out:csv&sheet=Agencias`;
+  try {
+    const res = await fetch(urlCSV);
+    const texto = await res.text();
+    const lineas = texto.split(/\r?\n/);
+    for(let i = 1; i < lineas.length; i++) {
+      if(!lineas[i]) continue;
+      let col = []; let celda = ''; let comillas = false;
+      for(let char of lineas[i]) {
+        if(char === '"') { comillas = !comillas; }
+        else if(char === ',' && !comillas) { col.push(celda.trim()); celda = ''; }
+        else { celda += char; }
+      }
+      col.push(celda.trim());
+      if(col.length > 1 && col[1]) {
+        bbddAgencias.push({
+          nombre: col[1].replace(/"/g, '').trim(),
+          puede: (col[14] || '').replace(/"/g, '').trim().toUpperCase()
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error cargando base de agencias:", error);
+  } finally {
+    cargandoAgencias = false;
+  }
+}
+function abrirModalSegmentador() {
+  document.getElementById('segmentadorModalOverlay').style.display = 'flex';
+  collapseWidget();
+  inicializarBaseAgencias(); 
+  setTimeout(() => document.getElementById('inputAgenciaModal').focus(), 100);
+}
+function cerrarModalSegmentador() {
+  document.getElementById('segmentadorModalOverlay').style.display = 'none';
+  document.getElementById('inputAgenciaModal').value = '';
+  document.getElementById('resultadosAgenciaRapida').style.display = 'none';
+  document.getElementById('areaDictamenRapido').style.display = 'none';
+}
+document.getElementById('segmentadorModalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) cerrarModalSegmentador();
+});
+function buscarAgenciaRapida() {
+  const input = document.getElementById('inputAgenciaModal').value.trim().toLowerCase();
+  const contenedorResultados = document.getElementById('resultadosAgenciaRapida');
+  const areaDictamen = document.getElementById('areaDictamenRapido');
+  areaDictamen.style.display = 'none'; 
+  
+  if (!input) return;
+  if (bbddAgencias.length === 0) {
+    contenedorResultados.innerHTML = `<div style="font-size:13px; color:var(--vento-gray-dark); text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> Sincronizando directorio, intenta en un segundo...</div>`;
+    contenedorResultados.style.display = 'flex';
+    return;
+  }
+  
+  const coincidencias = bbddAgencias.filter(a => a.nombre.toLowerCase().includes(input)).slice(0, 4);
+  contenedorResultados.innerHTML = '';
+  
+  if (coincidencias.length === 0) {
+    contenedorResultados.innerHTML = `
+      <div class="db-item" style="border-color: red; flex-direction: column; align-items: flex-start;">
+        <div class="db-name" style="color: red;"><i class="fa-solid fa-store-slash"></i> Agencia no localizada</div>
+        <p style="margin: 8px 0; font-size: 13px; color: var(--vento-black);">Si no está registrada, evalúala asumiendo que <strong>NO</strong> cuenta con herramientas.</p>
+        <button onclick="seleccionarAgenciaParaDictamen('AGENCIA NO REGISTRADA', 'SI')" class="btn-search" style="padding: 10px; font-size: 13px; width: auto;">
+          <i class="fa-solid fa-clipboard-list"></i> Evaluar Manualmente
+        </button>
+      </div>
+    `;
+  } else {
+    coincidencias.forEach(agencia => {
+      const claseBadge = (agencia.puede === 'SI') ? 'badge-orange' : 'badge-black';
+      const textoBadge = (agencia.puede === 'SI') ? '<i class="fa-solid fa-ban"></i> SIN HERRAMIENTAS' : '<i class="fa-solid fa-check"></i> CON HERRAMIENTAS';
+      const nombreEscapado = agencia.nombre.replace(/'/g, "\\'");
+      
+      contenedorResultados.innerHTML += `
+        <div class="db-item" style="cursor: pointer; transition: all 0.2s;" 
+             onclick="seleccionarAgenciaParaDictamen('${nombreEscapado}', '${agencia.puede}')" 
+             onmouseover="this.style.borderColor='var(--vento-orange)'" 
+             onmouseout="this.style.borderColor='var(--vento-gray-light)'">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="db-name">${agencia.nombre}</div>
+            <span class="badge ${claseBadge}">${textoBadge}</span>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color: var(--vento-gray-light);"></i>
+        </div>
+      `;
+    });
+  }
+  contenedorResultados.style.display = 'flex';
+}
+function seleccionarAgenciaParaDictamen(nombre, puede) {
+  document.getElementById('resultadosAgenciaRapida').style.display = 'none'; 
+  const claseBadge = (puede === 'SI') ? 'badge-orange' : 'badge-black';
+  const textoBadge = (puede === 'SI') ? '<i class="fa-solid fa-ban"></i> NO CUENTA CON KIT DE HERRAMIENTAS' : '<i class="fa-solid fa-check"></i> SÍ CUENTA CON KIT DE HERRAMIENTAS';
+  
+  document.getElementById('nombreAgenciaSeleccionada').innerText = nombre;
+  document.getElementById('badgeAgenciaSeleccionada').innerHTML = `<span class="badge ${claseBadge}">${textoBadge}</span>`;
+  document.getElementById('select-armado-rapido').value = '';
+  document.getElementById('flujoPreguntas').innerHTML = ''; // Limpiar el flujo anterior
+  document.getElementById('boxDictamenFinal').style.display = 'none';
+  document.getElementById('areaDictamenRapido').style.display = 'block';
+}
+
+function renderizarFlujoAgencia() {
+  const armado = document.getElementById('select-armado-rapido').value;
+  const flujo = document.getElementById('flujoPreguntas');
+  const caja = document.getElementById('boxDictamenFinal');
+  caja.style.display = 'none'; 
+  
+  let html = '';
+
+  if (armado === 'CEDIS') {
+    html = `
+      <div style="margin-bottom: 10px; padding: 12px; background: var(--vento-black); color: var(--vento-white); border-left: 4px solid var(--vento-orange); border-radius: 4px; font-size: 13px;">
+        <strong>1. Solicitar Check List de cómo llegó la unidad.</strong>
+      </div>
+      <select id="cedisCheckList" class="input-vin" style="margin-bottom: 10px;" onchange="evaluarOpcionesCEDIS()">
+        <option value="" disabled selected>Elige la situación del reporte...</option>
+        <option value="NO_SIN_LEYENDA">Sin Check List y TO NO tiene leyenda "llegó sin check list"</option>
+        <option value="NO_CON_LEYENDA">Sin Check List y TO SÍ tiene leyenda "llegó sin check list"</option>
+        <option value="SI_FALLA_MECANICA">Con Check List: Falla mecánica, fugas de gasolina o falla eléctrica</option>
+        <option value="SI_DANO_ESTETICO">Con Check List: Daño estético, faltantes o intervención ajena</option>
+      </select>
+    `;
+  } else if (armado === 'CESVE') {
+    html = `
+      <div style="margin-bottom: 10px; padding: 12px; background: var(--vento-black); color: var(--vento-white); border-left: 4px solid var(--vento-orange); border-radius: 4px; font-size: 13px;">
+        <strong>1. Validar el tiempo transcurrido desde el AYA.</strong>
+      </div>
+      <select id="cesveTiempo" class="input-vin" style="margin-bottom: 10px;" onchange="evaluarOpcionesCESVE()">
+        <option value="" disabled selected>¿Cuánto tiempo pasó desde el AYA?</option>
+        <option value="MENOS_48">Pasaron menos de 48 horas</option>
+        <option value="MAS_48">Pasaron más de 48 horas</option>
+      </select>
+    `;
+  } else if (armado === 'SIN_REGISTRO') {
+    html = `
+      <div style="margin-bottom: 10px; padding: 12px; background: var(--vento-black); color: var(--vento-white); border-left: 4px solid var(--vento-orange); border-radius: 4px; font-size: 13px;">
+        <strong>1. Pedir Check List obligatoriamente.</strong><br>
+        <span style="font-weight: 500; font-size: 11px;">(Revisar siempre si hay registro en VentoNet o existe un ticket)</span>
+      </div>
+      <select id="sinRegistroCheckList" class="input-vin" style="margin-bottom: 10px;" onchange="evaluarOpcionesSinRegistro()">
+        <option value="" disabled selected>¿Qué evidencia mandan?</option>
+        <option value="MANDA_CHECKLIST">Mandan Check List (Proceso CEDIS)</option>
+        <option value="LLEGO_SIN_ARMAR">Comentan que llegó sin armar ni activar (Pedir evidencia de huacal)</option>
+      </select>
+    `;
+  }
+  
+  // Anuncio general sobre Revisiones Generales
+  html += `
+    <div style="margin-top: 15px; font-size: 12px; color: var(--vento-black); border: 2px dashed var(--vento-orange); padding: 12px; border-radius: 6px; background: var(--vento-bg);">
+      <strong style="color: var(--vento-orange); display: block; margin-bottom: 4px;">
+        <i class="fa-solid fa-circle-exclamation"></i> NOTA REVISIONES GENERALES:
+      </strong> 
+      Hasta nuevo aviso <strong>no se harán revisiones generales</strong> para activaciones. Solo si reportan terminados de armar o colocación de activados se canalizará como garantía. Quienes tienen kit de herramientas no pueden solicitar revisión general.
+    </div>
+  `;
+
+  flujo.innerHTML = html;
+}
+
+function mostrarDictamenFlujo(resolucion, tipo) {
+  const caja = document.getElementById('boxDictamenFinal');
+  let estiloCaja = tipo === 'GARANTIA' 
+    ? 'border-left: 6px solid var(--vento-black); background: var(--vento-white); color: var(--vento-black); border-top: 2px solid var(--vento-black); border-right: 2px solid var(--vento-black); border-bottom: 2px solid var(--vento-black);' 
+    : 'border-left: 6px solid var(--vento-orange); background: var(--vento-black); color: var(--vento-white); border-top: 2px solid var(--vento-black); border-right: 2px solid var(--vento-black); border-bottom: 2px solid var(--vento-black);';
+  
+  caja.style.display = 'block';
+  caja.innerHTML = `
+    <div style="font-size: 13px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--vento-black); margin-top: 20px;">
+      <i class="fa-solid fa-gavel"></i> Dictamen Final
+    </div>
+    <div style="padding: 16px; border-radius: 8px; ${estiloCaja}">
+      <span style="display:block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; font-weight: 800; opacity: 0.9;">Resolución Oficial</span>
+      <span style="font-size: 16px; font-weight: 800;">${resolucion}</span>
+    </div>
+  `;
+}
+
+function evaluarOpcionesCEDIS() {
+  const val = document.getElementById('cedisCheckList').value;
+  if (val === 'NO_SIN_LEYENDA') mostrarDictamenFlujo('COTIZACIÓN DIRECTA A LA AGENCIA (Sin importar el reporte)', 'COTIZACION');
+  else if (val === 'NO_CON_LEYENDA') mostrarDictamenFlujo('PROCEDER SEGÚN REPORTE (Requiere evaluación detallada)', 'GARANTIA');
+  else if (val === 'SI_FALLA_MECANICA') mostrarDictamenFlujo('PROCESAR COMO GARANTÍA', 'GARANTIA');
+  else if (val === 'SI_DANO_ESTETICO') mostrarDictamenFlujo('COTIZACIÓN (Manipulación externa o daño estético)', 'COTIZACION');
+}
+
+function evaluarOpcionesCESVE() {
+  const val = document.getElementById('cesveTiempo').value;
+  if (val === 'MENOS_48') mostrarDictamenFlujo('GARANTÍA (Para cualquier falla reportada)', 'GARANTIA');
+  else if (val === 'MAS_48') mostrarDictamenFlujo('COTIZACIÓN (Para cualquier falla reportada)', 'COTIZACION');
+}
+
+function evaluarOpcionesSinRegistro() {
+  const val = document.getElementById('sinRegistroCheckList').value;
+  if (val === 'MANDA_CHECKLIST') {
+    document.getElementById('select-armado-rapido').value = 'CEDIS';
+    renderizarFlujoAgencia();
+  } else if (val === 'LLEGO_SIN_ARMAR') {
+    document.getElementById('select-armado-rapido').value = 'CESVE';
+    renderizarFlujoAgencia();
+  }
+}
+
+// =========================================
+// LÓGICA DE BÚSQUEDA UNIVERSAL
+// =========================================
+const modalOverlay = document.getElementById('vinModalOverlay');
+const vinInput = document.getElementById('vinInput');
+const dbResults = document.getElementById('dbResults');
+function abrirModalVIN() {
+  modalOverlay.style.display = 'flex';
+  collapseWidget(); 
+  vinInput.focus(); 
+}
+function cerrarModalVIN() {
+  modalOverlay.style.display = 'none';
+  vinInput.value = ''; 
+  dbResults.style.display = 'none'; 
+}
+modalOverlay.addEventListener('click', function(e) {
+  if (e.target === this) cerrarModalVIN();
+});
+async function ejecutarBusquedaUniversal(e) {
+  e.preventDefault();
+  
+  const btnSubmit = document.getElementById('vinSubmitBtn');
+  const vinBuscado = vinInput.value.trim().toUpperCase();
+  if (!vinBuscado) return;
+  
+  btnSubmit.disabled = true;
+  btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Consultando...';
+  dbResults.style.display = 'none';
+  
+  const BAT_SHEET_ID = '1qxnp3r976gbgxO_ws0XymcMkH0XRklldWp5HEf-gaU4';
+  const BAT_GID = '1280448484';
+  const urlBaterias = `https://docs.google.com/spreadsheets/d/${BAT_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select * where upper(C) contains '${vinBuscado}' limit 1`)}&gid=${BAT_GID}`;
+  
+  const MULTI_SHEET_ID = '1ZV84x-E4d_iJz7An7aKQ5qjyK6p0vil81GGqrJbmLJY';
+  const urlProyectoS = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select * where upper(F) contains '${vinBuscado}' limit 1`)}&sheet=Proyecto+S`;
+  
+  const pestañaMotos = encodeURIComponent('Motos entregadas en Agencia antes del Check List');
+  const urlMotosEntregadas = `https://docs.google.com/spreadsheets/d/${MULTI_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select * where upper(F) contains '${vinBuscado}' limit 1`)}&sheet=${pestañaMotos}`;
+  
+  const EXT_GARANTIA_SHEET_ID = '1vSGWWNPZ6DTK5Cq4Gke6P4WCp_kZoKCSkQ1n2-SJo74';
+  const urlExtensionGarantia = `https://docs.google.com/spreadsheets/d/${EXT_GARANTIA_SHEET_ID}/gviz/tq?tq=${encodeURIComponent(`select * where upper(I) contains '${vinBuscado}'`)}`;
+  
+  try {
+    const [resBaterias, resProyectoS, resMotosEntregadas, resExtensionGarantia] = await Promise.all([
+      fetch(urlBaterias).then(r => r.text()),
+      fetch(urlProyectoS).then(r => r.text()),
+      fetch(urlMotosEntregadas).then(r => r.text()),
+      fetch(urlExtensionGarantia).then(r => r.text())
+    ]);
+    
+    const extraerJSON = (texto) => {
+      try { return JSON.parse(texto.substring(texto.indexOf('{'), texto.lastIndexOf('}') + 1)); } 
+      catch (err) { return null; }
+    };
+    
+    const dataBaterias = extraerJSON(resBaterias);
+    const dataProyectoS = extraerJSON(resProyectoS);
+    const dataMotos = extraerJSON(resMotosEntregadas);
+    const dataExtensionGarantia = extraerJSON(resExtensionGarantia);
+    
+    const getCell = (row, idx) => {
+      if (!row || !row.c || idx >= row.c.length || !row.c[idx]) return 'N/A';
+      const cell = row.c[idx];
+      if (cell.f !== undefined && cell.f !== null) return cell.f; 
+      if (cell.v !== undefined && cell.v !== null) return cell.v;
+      return 'N/A';
+    };
+    
+    const generarTarjetaGenerica = (titulo, icono, data, colorNaranja) => {
+      const hallado = data && data.table && data.table.rows.length > 0;
+      const badgeClass = hallado ? (colorNaranja ? 'badge-orange' : 'badge-black') : 'badge-white';
+      const borderColor = hallado ? (colorNaranja ? 'var(--vento-orange)' : 'var(--vento-black)') : 'var(--vento-gray-light)';
+      const iconActiveColor = hallado ? 'var(--vento-orange)' : 'var(--vento-gray-dark)';
+      
+      let detallesHTML = '';
+      if (hallado) {
+        const cols = data.table.cols;
+        detallesHTML = `<div class="vin-details" style="display: none; padding: 12px 16px; background: var(--vento-white); border-top: 1px solid var(--vento-gray-light); font-size: 13px; color: var(--vento-gray-dark);">`;
+        let hayDatos = false;
+        for (let i = 0; i < cols.length; i++) {
+          const header = cols[i].label || `Columna ${i + 1}`;
+          let val = getCell(data.table.rows[0], i);
+          if (val !== 'N/A' && val.toString().trim() !== '') {
+            detallesHTML += `<div style="margin-bottom: 6px; border-bottom: 1px dashed var(--vento-gray-light); padding-bottom: 4px;"><strong style="color: var(--vento-black);">${header}:</strong> ${val}</div>`;
+            hayDatos = true;
+          }
+        }
+        if (!hayDatos) detallesHTML += `<div>No hay datos adicionales legibles.</div>`;
+        detallesHTML += `</div>`;
+      }
+      return `
+        <div style="border: 2px solid ${borderColor}; border-radius: 8px; margin-bottom: 0px; background: var(--vento-bg); overflow: hidden; transition: all 0.2s;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: ${hallado ? 'pointer' : 'default'};" 
+               ${hallado ? `onclick="const det = this.nextElementSibling; det.style.display = det.style.display === 'none' ? 'block' : 'none';"` : ''}>
+            <div style="font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+              <i class="${icono}" style="color: ${iconActiveColor}"></i> ${titulo}
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="badge ${badgeClass}">
+                ${hallado ? '<i class="fa-solid fa-check"></i> Localizado' : '<i class="fa-solid fa-xmark"></i> No Registro'}
+              </span>
+              ${hallado ? `<i class="fa-solid fa-chevron-down" style="color: var(--vento-gray-dark); font-size: 14px;"></i>` : ''}
+            </div>
+          </div>
+          ${detallesHTML}
+        </div>
+      `;
+    };
+    
+    const generarTarjetaExtensiones = (titulo, icono, data) => {
+      const rows = data && data.table && data.table.rows ? data.table.rows : [];
+      const hallado = rows.length > 0;
+      const badgeClass = hallado ? 'badge-orange' : 'badge-white';
+      const borderColor = hallado ? 'var(--vento-orange)' : 'var(--vento-gray-light)';
+      const iconActiveColor = hallado ? 'var(--vento-orange)' : 'var(--vento-gray-dark)';
+      let detallesHTML = '';
+      if (hallado) {
+        detallesHTML = `<div class="vin-details" style="display: none; padding: 12px; background: var(--vento-white); border-top: 1px solid var(--vento-gray-light); font-size: 13px; color: var(--vento-gray-dark);">`;
+        
+        rows.forEach((r) => {
+          const fechaSol     = getCell(r, 0);  
+          const solicitante  = getCell(r, 1);  
+          const tipoSol      = getCell(r, 2);  
+          const cliente      = getCell(r, 4);  
+          const modelo       = getCell(r, 7);  
+          const serie        = getCell(r, 8);  
+          const folio        = getCell(r, 17); 
+          const estatus      = getCell(r, 19); 
+          const comentarios  = getCell(r, 22); 
+          const liga         = getCell(r, 23); 
+          
+          const estatusLimpio = estatus.toString().trim().toUpperCase();
+          const mostrarBoton = estatusLimpio === 'AUTORIZADO' || estatusLimpio === 'MANUAL';
+          
+          detallesHTML += `
+            <div style="margin-bottom: 8px; border: 1px solid var(--vento-gray-light); border-radius: 6px; overflow: hidden;">
+              <div style="padding: 10px 12px; background: var(--vento-bg); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: var(--vento-black);"
+                   onclick="const det = this.nextElementSibling; det.style.display = det.style.display === 'none' ? 'block' : 'none';">
+                <span>Folio: <span style="color:var(--vento-orange)">${folio}</span> &nbsp;|&nbsp; Estatus: ${estatus}</span>
+                <i class="fa-solid fa-chevron-down" style="color: var(--vento-gray-dark); font-size: 12px;"></i>
+              </div>
+              <div style="display: none; padding: 12px; background: var(--vento-white); border-top: 1px solid var(--vento-gray-light);">
+                <div style="margin-bottom: 6px;"><strong>Tipo de solicitud:</strong> ${tipoSol}</div>
+                <div style="margin-bottom: 6px;"><strong>Serie de la moto:</strong> ${serie}</div>
+                <div style="margin-bottom: 6px;"><strong>Modelo de la unidad:</strong> ${modelo}</div>
+                <div style="margin-bottom: 6px;"><strong>Nombre de cliente:</strong> ${cliente}</div>
+                <div style="margin-bottom: 6px;"><strong>Quien solicita:</strong> ${solicitante}</div>
+                <div style="margin-bottom: 6px;"><strong>Cuando la solicita:</strong> ${fechaSol}</div>
+                <div style="margin-bottom: 6px;"><strong>Estatus:</strong> <span style="font-weight:bold; color:${mostrarBoton ? 'green' : 'var(--vento-gray-dark)'};">${estatus}</span></div>
+                <div style="margin-bottom: 6px;"><strong>Comentarios:</strong> ${comentarios}</div>
+                
+                ${mostrarBoton && liga !== 'N/A' && liga !== '' ? `
+                  <a href="${liga}" target="_blank" class="btn-search" style="padding: 8px 12px; margin-top: 12px; font-size: 12px; text-decoration: none; display: inline-flex; width: auto; background: var(--vento-black);">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Documento
+                  </a>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        });
+        detallesHTML += `</div>`;
+      }
+      return `
+        <div style="border: 2px solid ${borderColor}; border-radius: 8px; margin-bottom: 0px; background: var(--vento-bg); overflow: hidden; transition: all 0.2s;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: ${hallado ? 'pointer' : 'default'};" 
+               ${hallado ? `onclick="const det = this.nextElementSibling; det.style.display = det.style.display === 'none' ? 'block' : 'none';"` : ''}>
+            <div style="font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+              <i class="${icono}" style="color: ${iconActiveColor}"></i> ${titulo}
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="badge ${badgeClass}">
+                ${hallado ? `<i class="fa-solid fa-check"></i> Localizado (${rows.length})` : '<i class="fa-solid fa-xmark"></i> No Registro'}
+              </span>
+              ${hallado ? `<i class="fa-solid fa-chevron-down" style="color: var(--vento-gray-dark); font-size: 14px;"></i>` : ''}
+            </div>
+          </div>
+          ${detallesHTML}
+        </div>
+      `;
+    };
+    
+    dbResults.innerHTML = `
+      <div style="font-size: 13px; font-weight: 800; color: var(--vento-gray-dark); margin-bottom: -4px;">RESULTADOS DEL ESCANEO:</div>
+      ${generarTarjetaGenerica('Baterías Activadas', 'fa-solid fa-car-battery', dataBaterias, false)}
+      ${generarTarjetaGenerica('Proyecto S', 'fa-solid fa-clipboard-list', dataProyectoS, true)}
+      ${generarTarjetaGenerica('Entregadas antes C.L.', 'fa-solid fa-motorcycle', dataMotos, true)}
+      ${generarTarjetaExtensiones('Extensión de Garantía', 'fa-solid fa-file-shield', dataExtensionGarantia)}
+    `;
+    
+    dbResults.style.display = 'flex';
+  } catch (err) {
+    dbResults.innerHTML = `<div style="padding: 14px; border: 2px solid red; border-radius: 8px; color: red; background: var(--vento-bg);"><i class="fa-solid fa-triangle-exclamation"></i> Error al conectar con las bases de datos.</div>`;
+    dbResults.style.display = 'flex';
+  } finally {
+    btnSubmit.disabled = false;
+    btnSubmit.innerHTML = '<i class="fa-solid fa-database"></i> Consultar Bases';
+  }
+}
+// =========================================
+// LÓGICA DEL BANNER DE AVISOS DINÁMICO POR FILA (GOOGLE SHEETS - SOLO ESTATUS "ACTIVO")
+// =========================================
+let avisosLista = [];
+let avisoActualIndex = 0;
+let avisoTimeout = null;
+async function cargarAvisosDinamicos() {
+  const sheetId = '1GBcoYjw-mziCA30F2CgqGM9kKWjJjeSiTGfHN6XM8rE';
+  const sheetName = 'Avisos';
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+  
+  try {
+    const res = await fetch(url);
+    const texto = await res.text();
+    
+    const jsonString = texto.substring(texto.indexOf('{'), texto.lastIndexOf('}') + 1);
+    const data = JSON.parse(jsonString);
+    const rows = data.table.rows;
+    
+    avisosLista = [];
+    
+    if (rows && rows.length > 0) {
+      rows.forEach(row => {
+        if (!row || !row.c) return;
+        const tipoVal = (row.c[0] && row.c[0].v !== null) ? row.c[0].v : 'AVISO ATC';
+        const avisoVal = (row.c[1] && row.c[1].v !== null) ? row.c[1].v : '';
+        const estatusVal = (row.c[2] && row.c[2].v !== null) ? row.c[2].v.toString().trim() : '';
+        
+        if (avisoVal && estatusVal.toLowerCase() === 'activo') {
+          avisosLista.push({
+            tipo: tipoVal,
+            aviso: avisoVal
+          });
+        }
+      });
+    }
+    
+    if (avisosLista.length > 0) {
+      avisoActualIndex = 0;
+      reproducirSiguienteAviso();
+    } else {
+      document.getElementById('tickerContent').innerHTML = `
+        <span style="color: var(--vento-white); font-weight: 500; padding-left: 20px;">
+          No hay avisos activos en este momento.
+        </span>`;
+    }
+  } catch (error) {
+    console.error("Error al cargar los avisos de Sheets:", error);
+    document.getElementById('tickerContent').innerHTML = `
+      <span style="color: var(--vento-orange); font-weight: 500; padding-left: 20px;">
+        <i class="fa-solid fa-triangle-exclamation"></i> Error de conexión con el tablero de avisos.
+      </span>`;
+  }
+}
+function reproducirSiguienteAviso() {
+  if (avisosLista.length === 0) return;
+  
+  const item = avisosLista[avisoActualIndex];
+  const badgeText = document.getElementById('badgeText');
+  const badgeIcon = document.getElementById('badgeIcon');
+  const tickerContainer = document.getElementById('tickerContent');
+  
+  badgeText.innerText = item.tipo.toUpperCase();
+  
+  let icono = 'fa-bullhorn';
+  const tipoLower = item.tipo.toString().toLowerCase();
+  if (tipoLower.includes('teléfono') || tipoLower.includes('cobranza') || tipoLower.includes('contacto')) icono = 'fa-phone';
+  else if (tipoLower.includes('horario') || tipoLower.includes('tiempo')) icono = 'fa-clock';
+  else if (tipoLower.includes('urgente') || tipoLower.includes('alerta') || tipoLower.includes('importante')) icono = 'fa-triangle-exclamation';
+  else if (tipoLower.includes('sistema') || tipoLower.includes('falla')) icono = 'fa-desktop';
+  else if (tipoLower.includes('calendario') || tipoLower.includes('fecha')) icono = 'fa-calendar-days';
+  
+  badgeIcon.className = `fa-solid ${icono}`;
+  
+  tickerContainer.innerHTML = `
+    <div class="ticker-item">
+      <span>${item.aviso}</span>
+    </div>
+  `;
+  
+  const duracionSegundos = Math.max(16, Math.ceil(item.aviso.length * 0.22));
+  
+  tickerContainer.style.animation = 'none';
+  tickerContainer.offsetHeight; // Forzar reflow
+  tickerContainer.style.animation = `marquee ${duracionSegundos}s linear 1`;
+  
+  if (avisoTimeout) clearTimeout(avisoTimeout);
+  avisoTimeout = setTimeout(() => {
+    avanzarIndiceO_Recargar();
+  }, duracionSegundos * 1000);
+}
+function avanzarIndiceO_Recargar() {
+  avisoActualIndex++;
+  
+  if (avisoActualIndex >= avisosLista.length) {
+    document.getElementById('tickerContent').innerHTML = `
+      <span style="color: var(--vento-white); font-weight: 600; padding-left: 20px;">
+        <i class="fa-solid fa-rotate fa-spin" style="color: var(--vento-orange); margin-right: 8px;"></i> Actualizando ciclo de avisos...
+      </span>`;
+    document.getElementById('tickerContent').style.animation = 'none';
+    
+    cargarAvisosDinamicos();
+  } else {
+    reproducirSiguienteAviso();
+  }
+}
+function saltarAviso() {
+  if (avisoTimeout) clearTimeout(avisoTimeout);
+  avanzarIndiceO_Recargar();
+}
+// =========================================
+// LÓGICA DE ACTUALIZACIÓN SILENCIOSA POR INACTIVIDAD (15 MINUTOS)
+// =========================================
+const TIEMPO_INACTIVIDAD_MS = 15 * 60 * 1000; // 15 minutos en milisegundos
+let timerInactividad;
+function reiniciarTimerInactividad() {
+  clearTimeout(timerInactividad);
+  timerInactividad = setTimeout(() => {
+    window.location.reload();
+  }, TIEMPO_INACTIVIDAD_MS);
+}
+['mousemove', 'mousedown', 'keydown', 'keypress', 'scroll', 'touchstart', 'click'].forEach(evento => {
+  window.addEventListener(evento, reiniciarTimerInactividad, { passive: true });
+});
+window.addEventListener('DOMContentLoaded', () => {
+  cargarAvisosDinamicos();
+  reiniciarTimerInactividad();
+});
+</script>
 </body>
 </html>
