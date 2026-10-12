@@ -684,11 +684,19 @@ function renderWizardStep(stepId) {
   
   let html = '';
   
-  // Mensaje adicional cuando es flujo CEDIS en el apartado de Check List
+  // Nota adicional cuando es flujo CEDIS en el apartado de Check List
   if (stepId === 'checklist') {
     html += `<div style="background: rgba(242, 143, 23, 0.15); border: 2px solid var(--vento-orange); border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 13px; font-weight: 600; color: var(--vento-black); display: flex; gap: 10px; align-items: flex-start;">
                <i class="fa-solid fa-triangle-exclamation" style="color: var(--vento-orange); font-size: 16px; margin-top: 2px;"></i>
                <div>Las unidades AYA en CEDIS siempre deben solicitar el Check List, si no lo tienes, solicítalo y ya que tengas respuesta por parte de la agencia continuas con la elexion</div>
+             </div>`;
+  }
+
+  // Nota adicional cuando es flujo CESVE en el apartado de tiempo de armado / validación
+  if (stepId === 'tiempo_armado') {
+    html += `<div style="background: rgba(242, 143, 23, 0.15); border: 2px solid var(--vento-orange); border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 13px; font-weight: 600; color: var(--vento-black); display: flex; gap: 10px; align-items: flex-start;">
+               <i class="fa-solid fa-triangle-exclamation" style="color: var(--vento-orange); font-size: 16px; margin-top: 2px;"></i>
+               <div>Si el AYA lo hizo un CESVE, no pueden reportar ninguna "Revisión General" y se tiene que cerrar el ticket.</div>
              </div>`;
   }
   
